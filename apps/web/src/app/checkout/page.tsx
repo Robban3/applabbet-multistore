@@ -44,7 +44,7 @@ export default async function CheckoutPage() {
     : [];
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <KassaClient
         heading={getCmsBlockField(cms.blocks, "checkoutHeader", "title", "Kassa")}
         subtitle={getCmsBlockField(cms.blocks, "checkoutHeader", "subtitle", "Snabb, säkert och smidigt.")}

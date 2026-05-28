@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
+import { CatalogResultsGrid } from "@/components/catalog-blocks";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { PriceRangeFilter } from "@/components/price-range-filter";
 import { StorefrontHeader } from "@/components/storefront-header";
@@ -10,6 +11,7 @@ import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { formatMinorPrice } from "@/lib/format";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
 const colorSwatchMap: Record<string, string> = {
   svart: "#111111",
@@ -87,6 +89,31 @@ export default async function SokPage({ searchParams }: SokPageProps) {
   const cmsSearchTerm = getCmsBlockField(cms.blocks, "search", "searchTerm", "träningsväska");
   const resultCountTemplate = getCmsBlockField(cms.blocks, "search", "resultCountLabel", "Vi hittade {count} resultat");
   const headingTemplate = getCmsBlockField(cms.blocks, "search", "headingTemplate", 'Sökresultat för "{term}"');
+  const settings = await getTenantSettings(tenant);
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isSport = themeKey === "sport";
+  const isFashion = themeKey === "fashion";
+  const isBeauty = themeKey === "beauty";
+  const isElectronics = themeKey === "electronics";
+  const filterShellClass = isSport
+    ? "border-[#afcf90] bg-[#eef7e4]"
+    : isFashion
+      ? "border-[#d7c5ad] bg-[#f7f1ea]"
+      : isBeauty
+        ? "border-[#eac4d1] bg-[#fff1f6]"
+        : isElectronics
+          ? "border-[#bed2f4] bg-[#edf4ff]"
+          : "border-[color:var(--store-card-border)] bg-white";
+  const cardVariant =
+    themeKey === "fashion"
+      ? "fashion"
+      : themeKey === "sport"
+        ? "sport"
+        : themeKey === "beauty"
+          ? "beauty"
+          : themeKey === "electronics"
+            ? "electronics"
+            : "default";
 
   const parsed = parseCatalogQuery(await searchParams);
   const query = {
@@ -118,14 +145,17 @@ export default async function SokPage({ searchParams }: SokPageProps) {
   const currentPage = Math.min(query.page, totalPages);
 
   return (
-    <main className="bg-white">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[8px] border border-[#ece7de] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
+        <div
+          className="overflow-hidden rounded-[8px] border bg-[color:var(--store-shell-surface)] shadow-[0_2px_10px_rgba(0,0,0,0.04)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
           <StorefrontHeader activeNav="Kategorier" cartCount={2} showAccountLabel searchActive />
 
-          <section className="bg-[#faf8f4] p-4">
-            <div className="overflow-hidden rounded-lg border border-[#e9dfd1] bg-white">
-              <form method="GET" action="/sok" className="flex items-center border-b border-[#ece3d7] px-4 py-2">
+          <section className="p-4" style={{ background: "var(--store-soft-surface)" }}>
+            <div className="overflow-hidden rounded-lg border bg-[color:var(--store-shell-surface)]" style={{ borderColor: "var(--store-footer-border)" }}>
+              <form method="GET" action="/sok" className="flex items-center border-b px-4 py-2" style={{ borderColor: "var(--store-footer-border)" }}>
                 <input
                   name="q"
                   defaultValue={query.q}
@@ -147,12 +177,12 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                 {typeof query.maxPrice === "number" ? <input type="hidden" name="maxPrice" value={query.maxPrice} /> : null}
                 {query.sort !== "relevance" ? <input type="hidden" name="sort" value={query.sort} /> : null}
                 <button type="button" className="px-2 text-slate-400">×</button>
-                <button type="submit" className="rounded border border-[#dbcdb8] p-2 text-[#b88f50]"><SearchIcon /></button>
+                <button type="submit" className="rounded border p-2 text-[color:var(--store-accent)]" style={{ borderColor: "var(--store-footer-border)" }}><SearchIcon /></button>
                 <button type="button" className="ml-3 text-[12px] font-semibold text-slate-700">Stäng <span className="rounded bg-slate-100 px-1 py-0.5 text-[11px]">ESC</span></button>
               </form>
 
               <div className="grid md:grid-cols-[0.8fr_2fr]">
-                <div className="border-r border-[#ece3d7] px-4 py-3">
+                <div className="border-r px-4 py-3" style={{ borderColor: "var(--store-footer-border)" }}>
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Populära sökningar</p>
                   <div className="mt-2 space-y-1">
                     {quickSuggestions.map((item) => (
@@ -168,7 +198,7 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                   <div className="mt-2 grid gap-3 sm:grid-cols-4">
                     {featuredProducts.map((item) => (
                       <Link key={item.id} href={`/products/${item.slug}`} className="group">
-                        <div className="relative h-24 rounded-md border border-slate-200 bg-gradient-to-br from-[#272727] to-[#101010]">
+                        <div className="relative h-24 rounded-md border border-slate-200 bg-[image:var(--store-media-gradient)]">
                           <FavoriteToggle
                             productId={item.id}
                             initialFavorited={favoriteIds.has(item.id)}
@@ -191,9 +221,9 @@ export default async function SokPage({ searchParams }: SokPageProps) {
             </div>
           </section>
 
-          <section className="bg-white px-4 pb-5 pt-4">
+          <section className="bg-[color:var(--store-shell-surface)] px-4 pb-5 pt-4">
             <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
-              <aside className="rounded-md border border-[#ece3d7] bg-white p-3">
+              <aside className={`rounded-md border p-3 ${filterShellClass}`}>
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-[13px] font-semibold">FILTRERA</p>
                   <Link href="/sok" className="text-[12px] text-slate-500">Rensa alla</Link>
@@ -204,7 +234,7 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                     <p className="mb-1 flex items-center justify-between font-semibold">KATEGORI <ChevronDownIcon /></p>
                     {categoryOptions.map((category) => (
                       <label key={category} className="flex items-center gap-2">
-                        <input type="checkbox" name="category" value={category} defaultChecked={query.categories.includes(category)} />
+                        <input type="checkbox" name="category" value={category} defaultChecked={query.categories.includes(category)} className="accent-[color:var(--store-accent)]" />
                         {category}
                       </label>
                     ))}
@@ -214,7 +244,7 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                     <p className="mb-1 flex items-center justify-between font-semibold">VARUMÄRKE <ChevronDownIcon /></p>
                     {brandOptions.map((brand) => (
                       <label key={brand} className="flex items-center gap-2">
-                        <input type="checkbox" name="brand" value={brand} defaultChecked={query.brands.includes(brand)} />
+                        <input type="checkbox" name="brand" value={brand} defaultChecked={query.brands.includes(brand)} className="accent-[color:var(--store-accent)]" />
                         {brand}
                       </label>
                     ))}
@@ -228,7 +258,7 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                         const swatch = colorSwatchMap[normalized] || "#b7b7b7";
                         return (
                           <label key={color} className="flex items-center gap-2">
-                            <input type="checkbox" name="color" value={color} defaultChecked={query.colors.includes(color)} />
+                            <input type="checkbox" name="color" value={color} defaultChecked={query.colors.includes(color)} className="accent-[color:var(--store-accent)]" />
                             <span className="h-4 w-4 rounded-full border border-slate-300" style={{ backgroundColor: swatch }} />
                             {color}
                           </label>
@@ -249,7 +279,7 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                     <p className="mb-1 flex items-center justify-between font-semibold">EGENSKAPER <ChevronDownIcon /></p>
                     {catalog.availableFeatures.map((feature) => (
                       <label key={feature} className="flex items-center gap-2">
-                        <input type="checkbox" name="feature" value={feature} defaultChecked={query.features.includes(feature)} />
+                        <input type="checkbox" name="feature" value={feature} defaultChecked={query.features.includes(feature)} className="accent-[color:var(--store-accent)]" />
                         {feature}
                       </label>
                     ))}
@@ -296,33 +326,11 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                   </form>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {catalog.items.map((item, index) => (
-                    <article key={item.id} className="overflow-hidden rounded-xl border border-[#e5dbcf] bg-white shadow-sm">
-                      <Link href={`/products/${item.slug}`} className="block">
-                        <div className="relative h-40 bg-gradient-to-br from-[#272727] to-[#101010]">
-                          {index === 0 ? <span className="absolute left-2 top-2 rounded bg-[#f7ece0] px-2 py-0.5 text-[10px] font-bold">BÄSTSÄLJARE</span> : null}
-                          {index === 1 ? <span className="absolute left-2 top-2 rounded bg-[#e9f8f4] px-2 py-0.5 text-[10px] font-bold text-[#0f7f67]">NYHET</span> : null}
-                          <FavoriteToggle
-                            productId={item.id}
-                            initialFavorited={favoriteIds.has(item.id)}
-                            className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
-                          />
-                        </div>
-                      </Link>
-                      <div className="p-3">
-                        <p className="text-[31px] font-semibold leading-tight">{item.title}</p>
-                        <p className="text-[12px] text-slate-500">{item.description?.slice(0, 18) || "Svart"}</p>
-                        <p className="mt-1 text-[13px] text-[#b88f50]">★★★★★ <span className="text-slate-500">({128 - index * 7})</span></p>
-                        <p className="text-[38px] font-semibold leading-tight">{formatMinorPrice(item.price_minor, item.currency)}</p>
-                        <div className="mt-1 flex gap-2">
-                          <span className="h-4 w-4 rounded-full bg-black" />
-                          <span className="h-4 w-4 rounded-full bg-slate-700" />
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
+                <CatalogResultsGrid
+                  products={catalog.items}
+                  favoriteProductIds={favoriteProductIds}
+                  cardVariant={cardVariant}
+                />
 
                 {totalPages > 1 ? (
                   <div className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-700">

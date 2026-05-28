@@ -12,8 +12,21 @@ export interface Product {
   category_id?: string | null;
   brand?: string | null;
   is_new?: boolean;
+  is_best_seller_manual?: boolean;
   product_features?: string[] | null;
   product_colors?: string[] | null;
+  product_materials?: string[] | null;
+  product_sizes?: string[] | null;
+  product_gallery_images?: string[] | null;
+  detail_tab_label_description?: string | null;
+  detail_tab_label_specifications?: string | null;
+  detail_tab_label_shipping?: string | null;
+  detail_tab_label_reviews?: string | null;
+  detail_description_intro?: string | null;
+  detail_description_bullets?: string[] | null;
+  detail_specifications?: string | null;
+  detail_shipping_returns?: string | null;
+  detail_reviews?: string | null;
   slug: string;
   title: string;
   description: string;
@@ -28,6 +41,7 @@ export interface ProductCategory {
   tenant_id: string;
   slug: string;
   name: string;
+  description?: string | null;
 }
 
 export interface Order {

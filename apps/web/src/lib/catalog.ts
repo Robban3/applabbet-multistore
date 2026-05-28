@@ -19,6 +19,58 @@ export type CatalogQueryState = {
 type SearchParamsInput = Record<string, string | string[] | undefined>;
 type SupabaseAdminClient = ReturnType<typeof createSupabaseAdminClient>;
 
+async function getBestSellerRanking(supabase: SupabaseAdminClient, tenantId: string) {
+  const ranking = new Map<string, { soldQuantity: number; manual: boolean }>();
+
+  const { data: manualRows } = await supabase
+    .from("products")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("status", "published")
+    .eq("is_best_seller_manual", true);
+
+  for (const row of manualRows || []) {
+    const productId = String(row.id || "");
+    if (!productId) continue;
+    ranking.set(productId, { soldQuantity: 0, manual: true });
+  }
+
+  const { data: paidOrders } = await supabase
+    .from("orders")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("status", "paid")
+    .order("created_at", { ascending: false })
+    .limit(1000);
+
+  const paidOrderIds = (paidOrders || [])
+    .map((row) => String(row.id || ""))
+    .filter(Boolean);
+
+  if (paidOrderIds.length > 0) {
+    const { data: orderItems } = await supabase
+      .from("order_items")
+      .select("product_id, quantity")
+      .eq("tenant_id", tenantId)
+      .in("order_id", paidOrderIds);
+
+    for (const row of orderItems || []) {
+      const productId = String(row.product_id || "");
+      if (!productId) continue;
+      const quantity = Number(row.quantity || 0);
+      if (!Number.isFinite(quantity) || quantity <= 0) continue;
+
+      const current = ranking.get(productId) || { soldQuantity: 0, manual: false };
+      ranking.set(productId, {
+        soldQuantity: current.soldQuantity + quantity,
+        manual: current.manual,
+      });
+    }
+  }
+
+  return ranking;
+}
+
 export function parseCatalogQuery(searchParams: SearchParamsInput): CatalogQueryState {
   const qRaw = getParam(searchParams.q);
   const categories = getParams(searchParams.category);
@@ -64,7 +116,7 @@ export async function getCatalogData(
   supabase: SupabaseAdminClient,
   tenantId: string,
   query: CatalogQueryState,
-  options?: { onlyNew?: boolean },
+  options?: { onlyNew?: boolean; onlyBestSellers?: boolean },
 ): Promise<{
   items: Product[];
   total: number;
@@ -76,7 +128,7 @@ export async function getCatalogData(
 }> {
   const { data: categoriesData } = await supabase
     .from("product_categories")
-    .select("id, tenant_id, slug, name")
+    .select("id, tenant_id, slug, name, description")
     .eq("tenant_id", tenantId)
     .order("name", { ascending: true });
   const availableCategories = (categoriesData || []) as ProductCategory[];
@@ -140,6 +192,90 @@ export async function getCatalogData(
         availableColors,
       };
     }
+  }
+
+  if (options?.onlyBestSellers) {
+    const ranking = await getBestSellerRanking(supabase, tenantId);
+    const bestSellerIds = Array.from(ranking.entries())
+      .filter(([, value]) => value.manual || value.soldQuantity > 0)
+      .map(([id]) => id);
+
+    if (bestSellerIds.length === 0) {
+      return {
+        items: [],
+        total: 0,
+        totalPages: 1,
+        availableCategories,
+        availableBrands,
+        availableFeatures,
+        availableColors,
+      };
+    }
+
+    let dataQuery = supabase
+      .from("products")
+      .select("id, tenant_id, category_id, brand, is_new, is_best_seller_manual, product_features, product_colors, slug, title, description, image_url, price_minor, currency, status, created_at")
+      .eq("tenant_id", tenantId)
+      .eq("status", "published")
+      .in("id", bestSellerIds);
+
+    if (query.q) {
+      const cleaned = query.q.replace(/,/g, " ").trim();
+      dataQuery = dataQuery.or(`title.ilike.%${cleaned}%,description.ilike.%${cleaned}%`);
+    }
+    if (selectedCategoryIds.length > 0) {
+      dataQuery = dataQuery.in("category_id", selectedCategoryIds);
+    }
+    if (query.brands.length > 0) {
+      dataQuery = dataQuery.in("brand", query.brands);
+    }
+    if (query.features.length > 0) {
+      dataQuery = dataQuery.overlaps("product_features", query.features);
+    }
+    if (query.colors.length > 0) {
+      dataQuery = dataQuery.overlaps("product_colors", query.colors);
+    }
+    if (typeof query.minPrice === "number") {
+      dataQuery = dataQuery.gte("price_minor", query.minPrice * 100);
+    }
+    if (typeof query.maxPrice === "number") {
+      dataQuery = dataQuery.lte("price_minor", query.maxPrice * 100);
+    }
+
+    const { data } = await dataQuery;
+    const rows = (data || []) as Array<Product & { created_at?: string }>;
+    const sorted = [...rows].sort((a, b) => {
+      if (query.sort === "price_asc") {
+        return a.price_minor - b.price_minor;
+      }
+      if (query.sort === "price_desc") {
+        return b.price_minor - a.price_minor;
+      }
+      if (query.sort === "newest") {
+        return String(b.created_at || "").localeCompare(String(a.created_at || ""));
+      }
+
+      const rankA = ranking.get(a.id) || { soldQuantity: 0, manual: false };
+      const rankB = ranking.get(b.id) || { soldQuantity: 0, manual: false };
+      if (rankA.manual !== rankB.manual) return rankA.manual ? -1 : 1;
+      if (rankA.soldQuantity !== rankB.soldQuantity) return rankB.soldQuantity - rankA.soldQuantity;
+      return String(b.created_at || "").localeCompare(String(a.created_at || ""));
+    });
+
+    const total = sorted.length;
+    const totalPages = Math.max(1, Math.ceil(total / query.pageSize));
+    const from = (query.page - 1) * query.pageSize;
+    const to = from + query.pageSize;
+
+    return {
+      items: sorted.slice(from, to) as Product[],
+      total,
+      totalPages,
+      availableCategories,
+      availableBrands,
+      availableFeatures,
+      availableColors,
+    };
   }
 
   let countQuery = supabase

@@ -17,7 +17,7 @@ type DeliveryInfoItem = {
   text: string;
 };
 
-const shippingOptions = [
+const fallbackShippingOptions = [
   {
     carrier: "postnord",
     brand: "PostNord - Hemleverans",
@@ -44,14 +44,14 @@ const shippingOptions = [
   },
 ];
 
-const deliveryInfo = [
+const fallbackDeliveryInfo = [
   { title: "Order före kl. 14.00", text: "Vi packar och skickar din order samma dag (vardagar)." },
   { title: "1-3 arbetsdagar", text: "Normal leveranstid för alla standardleveranser." },
   { title: "Hela Sverige", text: "Vi levererar till hela Sverige, inkl. öar och glesbygd." },
   { title: "Spåra din order", text: "Du får ett spårningsnummer via mejl så snart din order skickats." },
 ];
 
-const goodToKnow = [
+const fallbackGoodToKnow = [
   { title: "Fraktkostnad", text: "Fri frakt gäller för ordrar över 499 kr.\nUnder 499 kr tillkommer frakt enligt valt fraktmetod." },
   { title: "Utebliven leverans", text: "Om du inte är hemma lämnas paketet hos din närmaste ombud.\nDu får alltid en avisering." },
   { title: "Skadad leverans", text: "Kontrollera paketet vid leverans.\nVid skada, kontakta oss direkt så hjälper vi dig." },
@@ -153,7 +153,7 @@ export default async function LeveransPage() {
   const definition = getCmsPage("leverans");
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
   const cms = await getPublishedPageContent("leverans", { blocks: fallbackBlocks });
-  const shippingOptionsFromCms: ShippingOption[] = shippingOptions.map((fallback, index) => {
+  const shippingOptionsFromCms: ShippingOption[] = fallbackShippingOptions.map((fallback, index) => {
     const prefix = `option${index + 1}`;
     return {
       carrier: getCmsBlockField(cms.blocks, "shippingOptions", `${prefix}Carrier`, fallback.carrier),
@@ -164,13 +164,23 @@ export default async function LeveransPage() {
       freeText: getCmsBlockField(cms.blocks, "shippingOptions", `${prefix}FreeText`, fallback.freeText),
     };
   });
-  const deliveryInfoFromCms: DeliveryInfoItem[] = deliveryInfo.map((fallback, index) => {
+  const deliveryInfoFromCms: DeliveryInfoItem[] = fallbackDeliveryInfo.map((fallback, index) => {
     const prefix = `item${index + 1}`;
     return {
       title: getCmsBlockField(cms.blocks, "deliveryTimes", `${prefix}Title`, fallback.title),
       text: getCmsBlockField(cms.blocks, "deliveryTimes", `${prefix}Text`, fallback.text),
     };
   });
+  const goodToKnowFromCms: DeliveryInfoItem[] = fallbackGoodToKnow.map((fallback, index) => ({
+    title: getCmsBlockField(cms.blocks, "goodToKnow", `item${index + 1}Title`, fallback.title),
+    text: getCmsBlockField(cms.blocks, "goodToKnow", `item${index + 1}Text`, fallback.text),
+  }));
+  const trustBottom = [1, 2, 3, 4]
+    .map((index) => ({
+      title: getCmsBlockField(cms.blocks, "trustBottom", `item${index}Title`, ""),
+      text: getCmsBlockField(cms.blocks, "trustBottom", `item${index}Text`, ""),
+    }))
+    .filter((item) => item.title.trim().length > 0);
   const faqItems = [1, 2, 3, 4, 5, 6]
     .map((index) => ({
       question: getCmsBlockField(cms.blocks, "faq", `q${index}`, ""),
@@ -191,7 +201,9 @@ export default async function LeveransPage() {
           <section className="grid border-b border-[#ebe5da] lg:grid-cols-[1fr_1fr]">
             <div className="space-y-2 px-8 py-8">
               <p className="text-xs text-slate-500">
-                <Link href="/kundservice" className="hover:text-slate-700">Kundservice</Link>
+                <Link href="/kundservice" className="hover:text-slate-700">
+                  {getCmsBlockField(cms.blocks, "sections", "breadcrumbRoot", "Kundservice")}
+                </Link>
                 <span className="mx-1">›</span>
                 <Link href="/leverans" className="hover:text-slate-700">
                   {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Fraktinformation")}
@@ -209,11 +221,22 @@ export default async function LeveransPage() {
                 )}
               </p>
             </div>
-            <div className="relative min-h-[250px] overflow-hidden border-l border-[#ebe5da] bg-gradient-to-br from-[#f5f5f5] via-[#d8d6d2] to-[#aca8a1]">
-              <div className="absolute right-16 top-8 h-36 w-60 -rotate-[8deg] rounded-md bg-[#11100e] shadow-2xl" />
-              <div className="absolute right-2 top-8 h-44 w-36 rounded-md bg-[#11100e]/90" />
-              <div className="absolute right-24 top-24 h-24 w-24 rounded bg-black/20" />
-            </div>
+            {getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim() ? (
+              <div className="relative min-h-[250px] overflow-hidden border-l border-[#ebe5da]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getCmsBlockField(cms.blocks, "hero", "imageUrl", "")}
+                  alt="Leverans hero"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="relative min-h-[250px] overflow-hidden border-l border-[#ebe5da] bg-gradient-to-br from-[#f5f5f5] via-[#d8d6d2] to-[#aca8a1]">
+                <div className="absolute right-16 top-8 h-36 w-60 -rotate-[8deg] rounded-md bg-[#11100e] shadow-2xl" />
+                <div className="absolute right-2 top-8 h-44 w-36 rounded-md bg-[#11100e]/90" />
+                <div className="absolute right-24 top-24 h-24 w-24 rounded bg-black/20" />
+              </div>
+            )}
           </section>
 
           <section className="border-b border-[#ebe5da] px-8 py-7">
@@ -262,7 +285,7 @@ export default async function LeveransPage() {
               {getCmsBlockField(cms.blocks, "sections", "goodToKnowTitle", "Bra att veta")}
             </h2>
             <div className="mt-4 grid gap-3 md:grid-cols-4">
-              {goodToKnow.map((item, index) => (
+              {goodToKnowFromCms.map((item, index) => (
                 <article key={item.title} className="rounded-md border border-[#ebe5da] bg-white px-4 py-3">
                   <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200">
                     <CardIcon index={index} />
@@ -280,7 +303,7 @@ export default async function LeveransPage() {
                 {getCmsBlockField(cms.blocks, "sections", "faqTitle", "Vanliga frågor")}
               </h2>
               <button className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
-                Se alla frågor
+                {getCmsBlockField(cms.blocks, "sections", "faqViewAllLabel", "Se alla frågor")}
                 <ArrowRightIcon />
               </button>
             </div>
@@ -304,12 +327,7 @@ export default async function LeveransPage() {
           </section>
 
           <section className="grid overflow-hidden bg-gradient-to-r from-[#0f0f0f] to-[#171717] sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: "Fri frakt över 499 kr", text: "Snabb & spårbar leverans med PostNord." },
-              { title: "30 dagars öppet köp", text: "Enkelt att returnera om du inte är nöjd." },
-              { title: "Säker betalning", text: "Vi använder krypterad betalning." },
-              { title: "Kundservice", text: "Vi finns här för dig - alla dagar 08-20." },
-            ].map((item, index) => (
+            {trustBottom.map((item, index) => (
               <article key={item.title} className="flex items-center gap-3 border-t border-white/10 px-5 py-3 text-white sm:border-r sm:last:border-r-0 sm:border-t-0">
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/5">
                   <TrustIcon index={Math.min(index, 2)} />

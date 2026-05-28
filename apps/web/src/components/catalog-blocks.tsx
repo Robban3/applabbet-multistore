@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
+import { AddToCartControl } from "@/components/add-to-cart-control";
 import { formatMinorPrice } from "@/lib/format";
 import type { CatalogQueryState, CatalogSort } from "@/lib/catalog";
 import type { Product } from "@/types/commerce";
@@ -26,6 +27,16 @@ function SearchIcon() {
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
       <circle cx="11" cy="11" r="7" />
       <path d="M20 20L16.65 16.65" />
+    </svg>
+  );
+}
+
+function MiniCartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="9" cy="20" r="1.5" />
+      <circle cx="17" cy="20" r="1.5" />
+      <path d="M3 4H5L7.2 15H18.2L20.5 7.5H6.3" />
     </svg>
   );
 }
@@ -85,7 +96,10 @@ export function CatalogSearchForm({ actionPath, query }: CatalogFilterSidebarPro
 
 export function CatalogFilterSidebar({ actionPath, query }: CatalogFilterSidebarProps) {
   return (
-    <aside className="rounded-xl border border-[#e5dbcf] bg-[#fdfbf7] p-4">
+    <aside
+      className="rounded-xl border p-4"
+      style={{ borderColor: "var(--store-card-border)", background: "var(--store-soft-surface)" }}
+    >
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900">Filter</h2>
         <Link className="text-xs text-slate-500 hover:text-slate-700" href={actionPath}>
@@ -169,45 +183,157 @@ export function CatalogSortSelect({ actionPath, query }: CatalogSortSelectProps)
 export function CatalogResultsGrid({
   products,
   favoriteProductIds = [],
+  badgeLabel,
+  cardVariant = "default",
 }: {
   products: Product[];
   favoriteProductIds?: string[];
+  badgeLabel?: string;
+  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport";
 }) {
   const favoriteIds = new Set(favoriteProductIds);
+  const isFashion = cardVariant === "fashion";
+  const isBeauty = cardVariant === "beauty";
+  const isElectronics = cardVariant === "electronics";
+  const isSport = cardVariant === "sport";
+  const beautyCardBorder = "border-[#ecd8df]";
+  const beautyImageSurface = "bg-gradient-to-br from-[#fdf3f6] via-[#f8e8ee] to-[#f3dde6]";
+
+  function resolveColorSwatch(colorName: string): string {
+    const normalized = colorName.trim().toLowerCase();
+    const map: Record<string, string> = {
+      svart: "#171717",
+      vit: "#f8fafc",
+      silver: "#9ca3af",
+      gra: "#6b7280",
+      grå: "#6b7280",
+      bla: "#2563eb",
+      blå: "#2563eb",
+      rod: "#dc2626",
+      röd: "#dc2626",
+      gron: "#16a34a",
+      grön: "#16a34a",
+      beige: "#d6c2a1",
+      brun: "#7c4a2d",
+    };
+    return map[normalized] || "#111827";
+  }
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {products.map((product, idx) => (
-        <Link
+        <article
           key={product.id}
-          href={`/products/${product.slug}`}
-          className="group overflow-hidden rounded-xl border border-[#e5dbcf] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          className={`group flex h-full flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+            isFashion
+              ? "border-[#e8e2d8]"
+              : isBeauty
+                ? beautyCardBorder
+                : isElectronics
+                  ? "border-[#d6e4fb]"
+                  : isSport
+                    ? "border-[#d7e7c8]"
+                    : "border-[color:var(--store-card-border)]"
+          }`}
         >
-          <div className="relative h-40 bg-gradient-to-br from-[#30261c] via-[#1a150f] to-[#0f0d0b]">
-            <FavoriteToggle
-              productId={product.id}
-              initialFavorited={favoriteIds.has(product.id)}
-              className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
-            />
-            {idx === 0 ? (
-              <span className="absolute left-2 top-2 rounded bg-[#c8a164] px-2 py-0.5 text-[10px] font-bold text-slate-900">
-                POPULÄR
-              </span>
+          <Link href={`/products/${product.slug}`} className="block">
+            <div
+              className={`relative ${isFashion || isBeauty || isElectronics || isSport ? "h-52" : "h-40"} ${
+                isBeauty
+                  ? beautyImageSurface
+                  : isElectronics
+                    ? "bg-gradient-to-br from-[#0d1b39] via-[#102650] to-[#0a1731]"
+                    : isSport
+                      ? "bg-gradient-to-br from-[#1c2916] via-[#152011] to-[#0f180c]"
+                      : "bg-[image:var(--store-media-gradient)]"
+              }`}
+            >
+              <FavoriteToggle
+                productId={product.id}
+                initialFavorited={favoriteIds.has(product.id)}
+                className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full ${
+                  isBeauty
+                    ? "border-[#f3dbe4] bg-white text-[#8b5c6f]"
+                    : isElectronics
+                      ? "border-white/25 bg-black/25 text-white"
+                      : isSport
+                        ? "border-white/20 bg-black/25 text-white"
+                      : "border-white/20 bg-black/30"
+                }`}
+              />
+              {badgeLabel ? (
+                <span
+                  className={`absolute left-2 top-2 rounded px-2 py-0.5 text-[10px] font-bold ${
+                    isBeauty ? "bg-[#f4c8d7] text-[#5f3245]" : "bg-[color:var(--store-accent)] text-slate-900"
+                  }`}
+                >
+                  {badgeLabel}
+                </span>
+              ) : idx === 0 ? (
+                <span
+                  className={`absolute left-2 top-2 rounded px-2 py-0.5 text-[10px] font-bold ${
+                    isBeauty ? "bg-[#f4c8d7] text-[#5f3245]" : "bg-[color:var(--store-accent)] text-slate-900"
+                  }`}
+                >
+                  POPULÄR
+                </span>
+              ) : null}
+            </div>
+          </Link>
+          <div className={`flex flex-1 flex-col ${isFashion || isBeauty || isElectronics || isSport ? "space-y-1 p-2.5" : "p-3"}`}>
+            {isFashion || isBeauty || isElectronics || isSport ? (
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                {product.brand?.trim() || (isBeauty ? "BEAUTY STUDIO" : isElectronics ? "TECH LAB" : isSport ? "SPORT LAB" : "STOCKHOLM ATELIER")}
+              </p>
             ) : null}
-          </div>
-          <div className="p-3">
-            <p className="line-clamp-1 text-sm font-semibold text-slate-900">{product.title}</p>
+            <Link href={`/products/${product.slug}`} className="block">
+              <p className={`text-sm font-semibold text-slate-900 ${isBeauty ? "line-clamp-2 min-h-[2.6rem]" : "line-clamp-1"}`}>
+                {product.title}
+              </p>
+            </Link>
             <p className="mt-1 line-clamp-1 text-xs text-slate-500">{product.description || "Premiumprodukt"}</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">
+            <p className={`${isFashion || isBeauty || isElectronics || isSport ? "mt-1 text-xl" : "mt-2 text-2xl"} font-semibold text-slate-900`}>
               {formatMinorPrice(product.price_minor, product.currency)}
             </p>
+            {isBeauty ? (
+              <p className="text-[11px] text-slate-400 line-through">
+                {formatMinorPrice(Math.round(product.price_minor * 1.15), product.currency)}
+              </p>
+            ) : null}
+            {isFashion || isBeauty || isElectronics || isSport ? (
+              <div className="mt-0.5 flex items-center gap-1">
+                {(product.product_colors || []).slice(0, 3).map((color) => (
+                  <span
+                    key={`${product.id}-${color}`}
+                    className="inline-flex h-2.5 w-2.5 rounded-full border border-slate-300"
+                    style={{ backgroundColor: resolveColorSwatch(String(color)) }}
+                  />
+                ))}
+              </div>
+            ) : null}
             <div className="mt-1 flex items-center justify-between">
-              <p className="text-xs text-[#b88f50]">
+              <p className={`text-xs ${isBeauty ? "text-[#f59f0b]" : "text-[color:var(--store-accent)]"}`}>
                 ★★★★★ <span className="text-slate-500">(120)</span>
               </p>
+              <AddToCartControl
+                productId={product.id}
+                title={product.title}
+                priceMinor={product.price_minor}
+                currency={product.currency}
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition ${
+                  isBeauty
+                    ? "bg-[#f4c8d7] text-[#5f3245] hover:bg-[#efb6ca]"
+                    : isElectronics
+                      ? "bg-[color:var(--store-accent)] text-white hover:brightness-95"
+                    : "bg-black text-white hover:bg-slate-800"
+                }`}
+                ariaLabel={`Lägg ${product.title} i varukorgen`}
+              >
+                <MiniCartIcon />
+              </AddToCartControl>
             </div>
           </div>
-        </Link>
+        </article>
       ))}
     </div>
   );

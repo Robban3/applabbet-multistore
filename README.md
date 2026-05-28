@@ -67,7 +67,11 @@ Kör SQL-filerna i `supabase/migrations` i ordning i Supabase SQL Editor:
 - `/admin/orders` - orderlista + fulfillment/payment-info
 - `/admin/pages` - CMS för standardsidor
 - `/admin/pages/custom` - skapa/redigera egna sidor (`/sidor/[slug]`)
-- `/admin/settings` - logo, företagsuppgifter, betalmetoder
+- `/admin/settings/site` - sidinställningar (logo, site name, kontakt, footer-visning)
+- `/admin/settings/menu` - menyinställningar (visning, länkar, slug, ordning)
+- `/admin/settings/company` - företagsinställningar (företagsuppgifter/adress)
+- `/admin/settings/payments` - betalmetoder och betal-konfiguration
+- `/admin/users` - koppla e-post till adminroll och behörighet
 - `/admin/logistics` - lagerställen, fraktkedjor, leveransmetoder, lagersaldo
 
 ## Viktigt för admin-access
@@ -76,7 +80,7 @@ Admin är tenant-bundet. För att en användare ska kunna logga in i admin kräv
 
 - en verifierad domän i `tenant_domains` för aktuell host
 - användaren kopplad till tenant i `tenant_users`
-- roll `admin` eller `editor` för att skriva data
+- roll `admin`, `editor` (redigerare) eller `product_manager` (produktansvarig) för att skriva data
 
 ## CMS / funktioner
 

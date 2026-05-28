@@ -89,6 +89,34 @@ function getParam(value: string | string[] | undefined) {
 }
 
 export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterPageProps) {
+  async function saveCommunicationSettings(values: {
+    newsletterOptIn: boolean;
+    orderUpdatesOptIn: boolean;
+  }) {
+    "use server";
+    const context = await getProfileContext();
+    if (!context) redirect("/konto/login?next=/mina-sidor/profil");
+
+    const admin = createSupabaseAdminClient();
+    const { error } = await admin.from("customer_profiles").upsert(
+      {
+        tenant_id: context.tenantId,
+        user_id: context.user.id,
+        email: context.user.email,
+        newsletter_opt_in: values.newsletterOptIn,
+        order_updates_opt_in: values.orderUpdatesOptIn,
+      },
+      { onConflict: "tenant_id,user_id" },
+    );
+
+    if (error) {
+      redirect("/mina-sidor/profil?status=error&section=communication");
+    }
+
+    revalidatePath("/mina-sidor/profil");
+    redirect("/mina-sidor/profil?status=saved&section=communication");
+  }
+
   async function updateProfileAction(formData: FormData) {
     "use server";
     const context = await getProfileContext();
@@ -121,28 +149,54 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
 
   async function updateCommunicationAction(formData: FormData) {
     "use server";
+    const newsletter = formData.get("newsletter_opt_in") === "on";
+    const orderUpdates = formData.get("order_updates_opt_in") === "on";
+    await saveCommunicationSettings({
+      newsletterOptIn: newsletter,
+      orderUpdatesOptIn: orderUpdates,
+    });
+  }
+
+  async function toggleNewsletterAction() {
+    "use server";
     const context = await getProfileContext();
     if (!context) redirect("/konto/login?next=/mina-sidor/profil");
 
-    const newsletter = formData.get("newsletter_opt_in") === "on";
-    const orderUpdates = formData.get("order_updates_opt_in") === "on";
+    const { data } = await context.supabase
+      .from("customer_profiles")
+      .select("newsletter_opt_in, order_updates_opt_in")
+      .eq("tenant_id", context.tenantId)
+      .eq("user_id", context.user.id)
+      .maybeSingle();
 
-    const admin = createSupabaseAdminClient();
-    const { error } = await admin.from("customer_profiles").upsert(
-      {
-        tenant_id: context.tenantId,
-        user_id: context.user.id,
-        email: context.user.email,
-        newsletter_opt_in: newsletter,
-        order_updates_opt_in: orderUpdates,
-      },
-      { onConflict: "tenant_id,user_id" },
-    );
-    if (error) {
-      redirect("/mina-sidor/profil?status=error&section=communication");
-    }
-    revalidatePath("/mina-sidor/profil");
-    redirect("/mina-sidor/profil?status=saved&section=communication");
+    const currentNewsletterOptIn = data?.newsletter_opt_in ?? true;
+    const currentOrderUpdatesOptIn = data?.order_updates_opt_in ?? true;
+
+    await saveCommunicationSettings({
+      newsletterOptIn: !currentNewsletterOptIn,
+      orderUpdatesOptIn: currentOrderUpdatesOptIn,
+    });
+  }
+
+  async function toggleOrderUpdatesAction() {
+    "use server";
+    const context = await getProfileContext();
+    if (!context) redirect("/konto/login?next=/mina-sidor/profil");
+
+    const { data } = await context.supabase
+      .from("customer_profiles")
+      .select("newsletter_opt_in, order_updates_opt_in")
+      .eq("tenant_id", context.tenantId)
+      .eq("user_id", context.user.id)
+      .maybeSingle();
+
+    const currentNewsletterOptIn = data?.newsletter_opt_in ?? true;
+    const currentOrderUpdatesOptIn = data?.order_updates_opt_in ?? true;
+
+    await saveCommunicationSettings({
+      newsletterOptIn: currentNewsletterOptIn,
+      orderUpdatesOptIn: !currentOrderUpdatesOptIn,
+    });
   }
 
   async function updatePasswordAction(formData: FormData) {
@@ -152,13 +206,19 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
 
     const password = String(formData.get("password") || "");
     const confirm = String(formData.get("password_confirm") || "");
-    if (!password || password.length < 8 || password !== confirm) {
-      redirect("/mina-sidor/profil?status=error&section=password");
+    if (!password) {
+      redirect("/mina-sidor/profil?status=error&section=password&password_error=empty");
+    }
+    if (password.length < 8) {
+      redirect("/mina-sidor/profil?status=error&section=password&password_error=length");
+    }
+    if (password !== confirm) {
+      redirect("/mina-sidor/profil?status=error&section=password&password_error=mismatch");
     }
 
     const { error } = await context.supabase.auth.updateUser({ password });
     if (error) {
-      redirect("/mina-sidor/profil?status=error&section=password");
+      redirect("/mina-sidor/profil?status=error&section=password&password_error=save");
     }
     revalidatePath("/mina-sidor/profil");
     redirect("/mina-sidor/profil?status=saved&section=password");
@@ -167,6 +227,7 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
   const params = await searchParams;
   const status = getParam(params.status);
   const section = getParam(params.section);
+  const passwordError = getParam(params.password_error);
   const context = await getProfileContext();
   if (!context) redirect("/konto/login?next=/mina-sidor/profil");
   const definition = getCmsPage("mina-sidor-profil");
@@ -196,9 +257,12 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
   const passwordUpdatedLabel = formatShortDate(context.user.updated_at || "");
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
           <StorefrontHeader cartCount={2} trustStripSize="large" />
 
           <div className="px-6 py-5">
@@ -233,36 +297,41 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
           ) : null}
           {status === "error" ? (
             <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              Kunde inte spara ändringarna. Kontrollera fälten och försök igen.
+              {section === "password"
+                ? passwordError === "empty"
+                  ? "Ange ett nytt lösenord."
+                  : passwordError === "length"
+                    ? "Lösenordet måste vara minst 8 tecken."
+                    : passwordError === "mismatch"
+                      ? "Lösenorden matchar inte."
+                      : "Kunde inte uppdatera lösenordet. Försök igen."
+                : "Kunde inte spara ändringarna. Kontrollera fälten och försök igen."}
             </p>
           ) : null}
-
-          <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_340px]">
-            <div />
-            <article className="rounded-xl border border-[#e6ddd1] bg-white px-5 py-4">
-              <div className="flex items-start gap-3">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700">
-                  <ShieldIcon />
-                </span>
-                <div>
-                  <p className="text-lg font-semibold text-slate-900">Dina uppgifter är skyddade</p>
-                  <p className="mt-1 text-sm text-slate-600">
-                    Vi behandlar dina uppgifter i enlighet med vår integritetspolicy.
-                  </p>
-                  <Link href="/integritetspolicy" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-slate-800 hover:underline">
-                    Läs mer om vår integritetspolicy
-                    <ChevronRightIcon />
-                  </Link>
-                </div>
-              </div>
-            </article>
-          </div>
 
           <div className="mt-4 grid gap-5 lg:grid-cols-[230px_1fr]">
             <AccountSidebar activeHref="/mina-sidor/profil" withIcons />
 
             <section className="space-y-3">
-              <article className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+              <article className="w-full rounded-xl border bg-white px-5 py-4" style={{ borderColor: "var(--store-card-border)" }}>
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700">
+                    <ShieldIcon />
+                  </span>
+                  <div>
+                    <p className="text-lg font-semibold text-slate-900">Dina uppgifter är skyddade</p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Vi behandlar dina uppgifter i enlighet med vår integritetspolicy.
+                    </p>
+                    <Link href="/integritetspolicy" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-slate-800 hover:underline">
+                      Läs mer om vår integritetspolicy
+                      <ChevronRightIcon />
+                    </Link>
+                  </div>
+                </div>
+              </article>
+
+              <article className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-card-border)" }}>
                 <details className="group">
                   <summary className="list-none">
                     <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3">
@@ -273,7 +342,7 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
                       </span>
                     </div>
                   </summary>
-                  <form action={updateProfileAction} className="mb-3 grid gap-3 rounded-xl border border-[#ece5d9] bg-[#fcfaf7] p-3 sm:grid-cols-2">
+                  <form action={updateProfileAction} className="mb-3 grid gap-3 rounded-xl border p-3 sm:grid-cols-2" style={{ borderColor: "var(--store-footer-border)", background: "var(--store-soft-surface)" }}>
                     <label>
                       <span className={labelClass}>Förnamn</span>
                       <input name="first_name" defaultValue={firstName} placeholder="Förnamn" className={fieldClass} />
@@ -313,7 +382,7 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
                 </dl>
               </article>
 
-              <article className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+              <article className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-card-border)" }}>
                 <details className="group">
                   <summary className="list-none">
                     <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3">
@@ -324,7 +393,7 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
                       </span>
                     </div>
                   </summary>
-                  <form action={updatePasswordAction} className="mb-3 grid gap-3 rounded-xl border border-[#ece5d9] bg-[#fcfaf7] p-3 sm:grid-cols-2">
+                  <form action={updatePasswordAction} className="mb-3 grid gap-3 rounded-xl border p-3 sm:grid-cols-2" style={{ borderColor: "var(--store-footer-border)", background: "var(--store-soft-surface)" }}>
                     <label>
                       <span className={labelClass}>Nytt lösenord</span>
                       <input name="password" type="password" minLength={8} required placeholder="Minst 8 tecken" className={fieldClass} />
@@ -345,7 +414,7 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
                 </div>
               </article>
 
-              <article className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+              <article className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-card-border)" }}>
                 <details className="group">
                   <summary className="list-none">
                     <div className="mb-3 flex items-center justify-between border-b border-slate-200 pb-3">
@@ -356,7 +425,7 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
                       </span>
                     </div>
                   </summary>
-                  <form action={updateCommunicationAction} className="mb-3 space-y-2 rounded-xl border border-[#ece5d9] bg-[#fcfaf7] p-3">
+                  <form action={updateCommunicationAction} className="mb-3 space-y-2 rounded-xl border p-3" style={{ borderColor: "var(--store-footer-border)", background: "var(--store-soft-surface)" }}>
                     <label className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm">
                       <span className="font-medium text-slate-800">Nyhetsbrev</span>
                       <input type="checkbox" name="newsletter_opt_in" defaultChecked={newsletterOptIn} />
@@ -374,23 +443,35 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
                       <p className="font-semibold text-slate-900">Nyhetsbrev</p>
                       <p className="text-sm text-slate-600">Få inspiration, erbjudanden och nyheter direkt i din inkorg.</p>
                     </div>
-                    <span className={`inline-flex h-6 w-11 items-center rounded-full p-0.5 ${newsletterOptIn ? "bg-black" : "bg-slate-300"}`}>
-                      <span className={`h-5 w-5 rounded-full bg-white transition ${newsletterOptIn ? "translate-x-5" : ""}`} />
-                    </span>
+                    <form action={toggleNewsletterAction}>
+                      <button
+                        type="submit"
+                        aria-label={newsletterOptIn ? "Stäng av nyhetsbrev" : "Aktivera nyhetsbrev"}
+                        className={`inline-flex h-6 w-11 items-center rounded-full p-0.5 transition ${newsletterOptIn ? "bg-black" : "bg-slate-300"}`}
+                      >
+                        <span className={`h-5 w-5 rounded-full bg-white transition ${newsletterOptIn ? "translate-x-5" : ""}`} />
+                      </button>
+                    </form>
                   </div>
                   <div className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2">
                     <div>
                       <p className="font-semibold text-slate-900">Orderuppdateringar</p>
                       <p className="text-sm text-slate-600">Få viktiga uppdateringar om dina ordrar och leveranser.</p>
                     </div>
-                    <span className={`inline-flex h-6 w-11 items-center rounded-full p-0.5 ${orderUpdatesOptIn ? "bg-black" : "bg-slate-300"}`}>
-                      <span className={`h-5 w-5 rounded-full bg-white transition ${orderUpdatesOptIn ? "translate-x-5" : ""}`} />
-                    </span>
+                    <form action={toggleOrderUpdatesAction}>
+                      <button
+                        type="submit"
+                        aria-label={orderUpdatesOptIn ? "Stäng av orderuppdateringar" : "Aktivera orderuppdateringar"}
+                        className={`inline-flex h-6 w-11 items-center rounded-full p-0.5 transition ${orderUpdatesOptIn ? "bg-black" : "bg-slate-300"}`}
+                      >
+                        <span className={`h-5 w-5 rounded-full bg-white transition ${orderUpdatesOptIn ? "translate-x-5" : ""}`} />
+                      </button>
+                    </form>
                   </div>
                 </div>
               </article>
 
-              <article className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+              <article className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-card-border)" }}>
                 <h2 className="text-[33px] font-semibold text-slate-900">Konto och samtycken</h2>
                 <div className="mt-2 divide-y divide-slate-200 rounded-lg border border-slate-200">
                   <Link href="/integritetspolicy" className="flex items-center justify-between px-4 py-3 hover:bg-slate-50">

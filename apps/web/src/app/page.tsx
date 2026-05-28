@@ -8,25 +8,121 @@ import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import type { Product } from "@/types/commerce";
 
-const navItems = [
+const fallbackNavItems = [
   { label: "Hem", href: "/" },
   { label: "Kategorier", href: "/products" },
   { label: "Nyheter", href: "/nyheter" },
-  { label: "Bästsäljare", href: "/products?sort=bestsellers" },
+  { label: "Bästsäljare", href: "/bastsaljare" },
   { label: "Om oss", href: "/om-oss" },
   { label: "Kundservice", href: "/kundservice" },
 ];
 
-const categoryCards = [
+const minimalNavItems = [
+  { label: "Hem", href: "/" },
+  { label: "Produkter", href: "/products" },
+  { label: "Nyheter", href: "/nyheter" },
+  { label: "Populart", href: "/bastsaljare" },
+  { label: "Om oss", href: "/om-oss" },
+  { label: "Support", href: "/kundservice" },
+];
+
+const sportNavItems = [
+  { label: "Hem", href: "/" },
+  { label: "Herr", href: "/products?category=herr" },
+  { label: "Dam", href: "/products?category=dam" },
+  { label: "Barn", href: "/products?category=barn" },
+  { label: "Skor", href: "/products?category=skor" },
+  { label: "Utvalda", href: "/bastsaljare" },
+  { label: "Nyheter", href: "/nyheter" },
+  { label: "Varumärken", href: "/products?sort=relevance" },
+];
+
+const fashionNavItems = [
+  { label: "Hem", href: "/" },
+  { label: "Herr", href: "/products?category=herr" },
+  { label: "Dam", href: "/products?category=dam" },
+  { label: "Ytterkläder", href: "/products?category=ytterklader" },
+  { label: "Nyheter", href: "/nyheter" },
+  { label: "Varumärken", href: "/products?sort=relevance" },
+];
+
+const beautyNavItems = [
+  { label: "Hudvård", href: "/products?category=hudvard" },
+  { label: "Smink", href: "/products?category=smink" },
+  { label: "Hårvård", href: "/products?category=harvard" },
+  { label: "Parfym", href: "/products?category=parfym" },
+  { label: "Kropp & Bad", href: "/products?category=kropp-bad" },
+  { label: "Nyheter", href: "/nyheter" },
+  { label: "Varumärken", href: "/products?sort=relevance" },
+];
+
+const electronicsNavItems = [
+  { label: "Alla kategorier", href: "/products" },
+  { label: "Datorer & tillbehör", href: "/products?category=datorer-tillbehor" },
+  { label: "Mobil & surfplattor", href: "/products?category=mobil-surfplattor" },
+  { label: "Ljud & bild", href: "/products?category=ljud-bild" },
+  { label: "Spel & gaming", href: "/products?category=spel-gaming" },
+  { label: "Smarta hem", href: "/products?category=smarta-hem" },
+  { label: "Erbjudanden", href: "/products?sort=price_desc" },
+  { label: "Nyheter", href: "/nyheter" },
+];
+
+const fallbackCategoryCards = [
   { title: "Ljud & Hörlurar", accent: "from-[#2f251b]" },
   { title: "Klockor", accent: "from-[#332820]" },
   { title: "Hem & Inredning", accent: "from-[#3b2f24]" },
   { title: "Väskor", accent: "from-[#2b2118]" },
   { title: "Parfymer", accent: "from-[#241d18]" },
   { title: "Accessoarer", accent: "from-[#3a2e22]" },
+];
+
+const minimalCategoryCards = [
+  { title: "Basprodukter", accent: "from-[#293545]" },
+  { title: "Hem", accent: "from-[#243243]" },
+  { title: "Kontor", accent: "from-[#233041]" },
+  { title: "Teknik", accent: "from-[#202b39]" },
+  { title: "Accessoarer", accent: "from-[#1f2935]" },
+  { title: "Nyheter", accent: "from-[#2b3748]" },
+];
+
+const sportCategoryCards = [
+  { title: "Löparskor", accent: "from-[#1f2a28]" },
+  { title: "Träningskläder", accent: "from-[#24312f]" },
+  { title: "Träning", accent: "from-[#212826]" },
+  { title: "Lagsport", accent: "from-[#27302c]" },
+  { title: "Outdoor", accent: "from-[#212724]" },
+  { title: "Accessoarer", accent: "from-[#222a27]" },
+];
+
+const fashionCategoryCards = [
+  { title: "Herr", accent: "from-[#2f2922]" },
+  { title: "Dam", accent: "from-[#3a332b]" },
+  { title: "Ytterkläder", accent: "from-[#2a241f]" },
+  { title: "Tröjor", accent: "from-[#383027]" },
+  { title: "Byxor & Jeans", accent: "from-[#2f2922]" },
+  { title: "Accessoarer", accent: "from-[#2b2520]" },
+];
+
+const beautyCategoryCards = [
+  { title: "Hudvård", accent: "from-[#3b2e33]" },
+  { title: "Smink", accent: "from-[#44353a]" },
+  { title: "Hårvård", accent: "from-[#3c3137]" },
+  { title: "Parfym", accent: "from-[#4a3c42]" },
+  { title: "Kropp & Bad", accent: "from-[#3f3339]" },
+  { title: "Beauty Tools", accent: "from-[#3a2f35]" },
+];
+
+const electronicsCategoryCards = [
+  { title: "Datorer & tillbehör", accent: "from-[#0b1f45]" },
+  { title: "Mobil & surfplattor", accent: "from-[#122a57]" },
+  { title: "Ljud & bild", accent: "from-[#0e244e]" },
+  { title: "Spel & gaming", accent: "from-[#112b5a]" },
+  { title: "Smarta hem", accent: "from-[#102750]" },
+  { title: "Hemelektronik", accent: "from-[#0f2248]" },
 ];
 
 type HomeTrustCard = {
@@ -42,9 +138,49 @@ const trustCards: HomeTrustCard[] = [
   { title: "Kundtjänst", text: "Vi finns här för dig", icon: "headset" },
 ];
 
-const brandLogos = ["SONY", "BOSE", "dyson", "GARMIN", "SAMSUNG", "APPLE", "PHILIPS"];
+const minimalTrustCards: HomeTrustCard[] = [
+  { title: "Fri frakt", text: "Over 499 kr", icon: "truck" },
+  { title: "30 dagars oppet kop", text: "Enkelt & smidigt", icon: "shield" },
+  { title: "Snabb leverans", text: "1-2 arbetsdagar", icon: "star" },
+  { title: "Trygg support", text: "Vi hjalper dig snabbt", icon: "headset" },
+];
 
-const valueCards = [
+const sportTrustCards: HomeTrustCard[] = [
+  { title: "Fri frakt", text: "På beställningar över 499 kr", icon: "truck" },
+  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
+  { title: "Äkta produkter", text: "100% original", icon: "star" },
+  { title: "Säkra betalningar", text: "Klarna, Swish & kort", icon: "headset" },
+];
+
+const fashionTrustCards: HomeTrustCard[] = [
+  { title: "Fri frakt", text: "Vid köp över 499 kr", icon: "truck" },
+  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
+  { title: "Premium kvalitet", text: "Noggrant utvalt sortiment", icon: "star" },
+  { title: "Säkra betalningar", text: "Tryggt & säkert", icon: "headset" },
+];
+
+const beautyTrustCards: HomeTrustCard[] = [
+  { title: "Fri frakt", text: "På beställningar över 499 kr", icon: "truck" },
+  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
+  { title: "Clean beauty", text: "Utvalda hållbara produkter", icon: "star" },
+  { title: "Säkra betalningar", text: "Klarna, Swish & kort", icon: "headset" },
+];
+
+const electronicsTrustCards: HomeTrustCard[] = [
+  { title: "Fri frakt", text: "Över 499 kr", icon: "truck" },
+  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
+  { title: "Snabba leveranser", text: "1-2 arbetsdagar", icon: "star" },
+  { title: "Säkra betalningar", text: "Klarna, Swish & kort", icon: "headset" },
+];
+
+const fallbackBrandLogos = ["SONY", "BOSE", "dyson", "GARMIN", "SAMSUNG", "APPLE", "PHILIPS"];
+const minimalBrandLogos = ["MUJI", "UNIQLO", "NORDIC", "Aarke", "BOSE", "SONOS", "IKEA"];
+const sportBrandLogos = ["NIKE", "adidas", "UNDER ARMOUR", "PUMA", "THE NORTH FACE", "GARMIN", "SALOMON"];
+const fashionBrandLogos = ["BOSS", "ZARA", "LEVI'S", "J.LINDEBERG", "CALVIN KLEIN", "NIKE", "ARKET"];
+const beautyBrandLogos = ["CHANEL", "ESTÉE LAUDER", "The Ordinary.", "L'ORÉAL", "KÉRASTASE", "CLINIQUE", "OLAPLEX"];
+const electronicsBrandLogos = ["SAMSUNG", "APPLE", "ASUS", "SONY", "logitech", "PHILIPS", "Lenovo"];
+
+const fallbackValueCards = [
   {
     title: "Hållbarhet i fokus",
     text: "Vi väljer produkter och leverantörer med omtanke om miljön.",
@@ -59,6 +195,99 @@ const valueCards = [
   },
 ];
 
+const minimalValueCards = [
+  {
+    title: "Mindre brus",
+    text: "Vi fokuserar pa produkter som gor vardagen enklare.",
+  },
+  {
+    title: "Kvalitet forst",
+    text: "Noggrant utvalda produkter med hog kvalitet.",
+  },
+  {
+    title: "Snabb support",
+    text: "Personlig hjalp nar du behover den.",
+  },
+];
+
+const sportValueCards = [
+  {
+    title: "Hållbarhet i fokus",
+    text: "Vi väljer produkter och leverantörer med omtanke.",
+  },
+  {
+    title: "Kundservice i världsklass",
+    text: "Vi finns här för dig - snabbt, personligt och engagerat.",
+  },
+  {
+    title: "Enkla returer",
+    text: "30 dagars öppet köp och smidig retur.",
+  },
+];
+
+const fashionValueCards = [
+  {
+    title: "Hållbart i fokus",
+    text: "Vi väljer material och samarbeten med omtanke om miljön.",
+  },
+  {
+    title: "Kundservice i världsklass",
+    text: "Vi finns här för dig - snabbt, personligt och engagerat.",
+  },
+  {
+    title: "Enkla returer",
+    text: "30 dagars öppet köp och smidiga returer.",
+  },
+];
+
+const beautyValueCards = [
+  {
+    title: "Expertkunskap",
+    text: "Noggrant utvalda produkter av skönhetsexperter.",
+  },
+  {
+    title: "100% äkta produkter",
+    text: "Garanterad äkthet - alltid original.",
+  },
+  {
+    title: "Personliga rekommendationer",
+    text: "Hitta produkterna som passar just dig.",
+  },
+];
+
+const beautyPromoCards = [
+  {
+    title: "Nya dofter",
+    text: "Upptäck säsongens senaste tillskott",
+    cta: "Shoppa nu",
+  },
+  {
+    title: "Medlem & spara",
+    text: "Bli medlem i vår kundklubb",
+    cta: "Bli medlem",
+  },
+  {
+    title: "Beauty guides",
+    text: "Tips, guider och inspiration",
+    cta: "Läs mer",
+  },
+];
+
+const electronicsValueCards = [
+  {
+    title: "Expertkunskap",
+    text: "Våra specialister hjälper dig välja rätt teknik.",
+  },
+  {
+    title: "100% äkta produkter",
+    text: "Originalprodukter från officiella varumärken.",
+  },
+  {
+    title: "Personliga rekommendationer",
+    text: "Hitta rätt produkt för dina behov.",
+  },
+];
+
 const fallbackProducts = [
   { title: "Premium Hörlurar Pro", priceMinor: 199900, currency: "SEK" },
   { title: "Chrono Elite Klocka", priceMinor: 249900, currency: "SEK" },
@@ -66,6 +295,51 @@ const fallbackProducts = [
   { title: "Noir Intense Eau de Parfum", priceMinor: 74900, currency: "SEK" },
   { title: "Aviator Solglasögon", priceMinor: 59900, currency: "SEK" },
   { title: "Urban Läderväska", priceMinor: 159900, currency: "SEK" },
+];
+
+const minimalFallbackProducts = [
+  { title: "Minimal Desk Lamp", priceMinor: 69900, currency: "SEK" },
+  { title: "Essential Wireless Speaker", priceMinor: 129900, currency: "SEK" },
+  { title: "Nordic Coffee Brewer", priceMinor: 89900, currency: "SEK" },
+  { title: "Slate Storage Box", priceMinor: 29900, currency: "SEK" },
+  { title: "Core Backpack", priceMinor: 79900, currency: "SEK" },
+  { title: "Everyday Notebook Set", priceMinor: 14900, currency: "SEK" },
+];
+
+const sportFallbackProducts = [
+  { title: "Nike Pegasus 41", priceMinor: 159900, currency: "SEK" },
+  { title: "Adidas Ultraboost 5", priceMinor: 179900, currency: "SEK" },
+  { title: "Nike Dri-FIT Hoodie", priceMinor: 69900, currency: "SEK" },
+  { title: "FAST Shaker 700ml", priceMinor: 12900, currency: "SEK" },
+  { title: "Nike Swoosh Medium Support", priceMinor: 39900, currency: "SEK" },
+  { title: "Garmin Forerunner 265", priceMinor: 429900, currency: "SEK" },
+];
+
+const fashionFallbackProducts = [
+  { title: "Iconic Bomber Jacket", priceMinor: 149700, currency: "SEK" },
+  { title: "Luxe Merino Sweater", priceMinor: 69900, currency: "SEK" },
+  { title: "Slim Fit Jeans", priceMinor: 79900, currency: "SEK" },
+  { title: "Essential Hoodie", priceMinor: 59900, currency: "SEK" },
+  { title: "Wool Blend Coat", priceMinor: 229900, currency: "SEK" },
+  { title: "Classic Sunglasses", priceMinor: 39900, currency: "SEK" },
+];
+
+const beautyFallbackProducts = [
+  { title: "The Ordinary Hyaluronic Acid 2% + B5", priceMinor: 13900, currency: "SEK" },
+  { title: "Estée Lauder Advanced Night Repair Serum", priceMinor: 71900, currency: "SEK" },
+  { title: "Paula's Choice 2% BHA Liquid Exfoliant", priceMinor: 34900, currency: "SEK" },
+  { title: "Chanel Coco Mademoiselle EdP", priceMinor: 124900, currency: "SEK" },
+  { title: "Kérastase Elixir Ultime Hair Oil", priceMinor: 42400, currency: "SEK" },
+  { title: "Clinique Moisture Surge 100H", priceMinor: 39900, currency: "SEK" },
+];
+
+const electronicsFallbackProducts = [
+  { title: "Samsung Galaxy S24", priceMinor: 109900, currency: "SEK" },
+  { title: "MacBook Air M3", priceMinor: 149900, currency: "SEK" },
+  { title: "PlayStation 5", priceMinor: 649900, currency: "SEK" },
+  { title: "Sony WH-1000XM5", priceMinor: 399900, currency: "SEK" },
+  { title: "Logitech MX Master 3S", priceMinor: 129900, currency: "SEK" },
+  { title: "Philips Hue Starter Kit", priceMinor: 169900, currency: "SEK" },
 ];
 
 function ArrowRightIcon() {
@@ -80,14 +354,14 @@ function ArrowRightIcon() {
 function TrustCardIcon({ icon }: { icon: HomeTrustCard["icon"] }) {
   if (icon === "star") {
     return (
-      <svg viewBox="0 0 24 24" className="h-8 w-8 text-[#b88f50]" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <svg viewBox="0 0 24 24" className="h-8 w-8 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.9">
         <path d="M12 3.8 14.8 9l5.7.9-4 4.2.9 5.7L12 17.1l-5.4 2.7.9-5.7-4-4.2L9.2 9 12 3.8Z" />
       </svg>
     );
   }
   if (icon === "shield") {
     return (
-      <svg viewBox="0 0 24 24" className="h-8 w-8 text-[#b88f50]" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <svg viewBox="0 0 24 24" className="h-8 w-8 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.9">
         <path d="M12 3l7 3v6c0 4.2-2.4 7.2-7 9-4.6-1.8-7-4.8-7-9V6l7-3Z" />
         <path d="m9.5 12.5 1.7 1.7 3.5-3.8" />
       </svg>
@@ -95,7 +369,7 @@ function TrustCardIcon({ icon }: { icon: HomeTrustCard["icon"] }) {
   }
   if (icon === "truck") {
     return (
-      <svg viewBox="0 0 24 24" className="h-8 w-8 text-[#b88f50]" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <svg viewBox="0 0 24 24" className="h-8 w-8 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.9">
         <path d="M2 6h11v9H2z" />
         <path d="M13 9h4l3 3v3h-7z" />
         <circle cx="7" cy="18" r="1.7" />
@@ -104,7 +378,7 @@ function TrustCardIcon({ icon }: { icon: HomeTrustCard["icon"] }) {
     );
   }
   return (
-    <svg viewBox="0 0 24 24" className="h-8 w-8 text-[#b88f50]" fill="none" stroke="currentColor" strokeWidth="1.9">
+    <svg viewBox="0 0 24 24" className="h-8 w-8 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.9">
       <path d="M4 13a8 8 0 0 1 16 0" />
       <rect x="4" y="12" width="4" height="7" rx="1.5" />
       <rect x="16" y="12" width="4" height="7" rx="1.5" />
@@ -112,8 +386,8 @@ function TrustCardIcon({ icon }: { icon: HomeTrustCard["icon"] }) {
   );
 }
 
-function ValueCardIcon({ title }: { title: string }) {
-  if (title === "Hållbarhet i fokus") {
+function ValueCardIcon({ index }: { index: number }) {
+  if (index === 0) {
     return (
       <svg viewBox="0 0 24 24" className="h-4 w-4 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.9">
         <path d="M12 3v18" />
@@ -121,7 +395,7 @@ function ValueCardIcon({ title }: { title: string }) {
       </svg>
     );
   }
-  if (title === "Kundservice i världsklass") {
+  if (index === 1) {
     return (
       <svg viewBox="0 0 24 24" className="h-4 w-4 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.9">
         <path d="M4 12a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-2v-5h4" />
@@ -150,23 +424,210 @@ export default async function Home() {
   const definition = getCmsPage("home");
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
   const cms = await getPublishedPageContent("home", { blocks: fallbackBlocks });
-  const homeTrustCards: HomeTrustCard[] = trustCards.map((fallback, index) => {
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const brandName = await getStoreBrandName();
+  const settings = tenant ? await getTenantSettings(tenant) : null;
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isSport = themeKey === "sport";
+  const isFashion = themeKey === "fashion";
+  const isBeauty = themeKey === "beauty";
+  const isElectronics = themeKey === "electronics";
+  const isMinimal = themeKey === "minimal";
+  const enforceThemePreset = themeKey !== "classic";
+  const readHomeField = (blockKey: string, fieldKey: string, fallback: string) =>
+    enforceThemePreset ? fallback : getCmsBlockField(cms.blocks, blockKey, fieldKey, fallback);
+  const navFallback = isSport
+    ? sportNavItems
+    : isFashion
+      ? fashionNavItems
+      : isBeauty
+        ? beautyNavItems
+      : isElectronics
+        ? electronicsNavItems
+      : isMinimal
+        ? minimalNavItems
+      : fallbackNavItems;
+  const categoryFallback = isSport
+    ? sportCategoryCards
+    : isFashion
+      ? fashionCategoryCards
+      : isBeauty
+        ? beautyCategoryCards
+      : isElectronics
+        ? electronicsCategoryCards
+      : isMinimal
+        ? minimalCategoryCards
+      : fallbackCategoryCards;
+  const trustFallback = isSport
+    ? sportTrustCards
+    : isFashion
+      ? fashionTrustCards
+      : isBeauty
+        ? beautyTrustCards
+      : isElectronics
+        ? electronicsTrustCards
+      : isMinimal
+        ? minimalTrustCards
+      : trustCards;
+  const brandLogosFallback = isSport
+    ? sportBrandLogos
+    : isFashion
+      ? fashionBrandLogos
+      : isBeauty
+        ? beautyBrandLogos
+      : isElectronics
+        ? electronicsBrandLogos
+      : isMinimal
+        ? minimalBrandLogos
+      : fallbackBrandLogos;
+  const valueCardsFallback = isSport
+    ? sportValueCards
+    : isFashion
+      ? fashionValueCards
+      : isBeauty
+        ? beautyValueCards
+      : isElectronics
+        ? electronicsValueCards
+      : isMinimal
+        ? minimalValueCards
+      : fallbackValueCards;
+  const productsFallback = isSport
+    ? sportFallbackProducts
+    : isFashion
+      ? fashionFallbackProducts
+      : isBeauty
+        ? beautyFallbackProducts
+      : isElectronics
+        ? electronicsFallbackProducts
+      : isMinimal
+        ? minimalFallbackProducts
+      : fallbackProducts;
+
+  const navItems = navFallback.map((item, index) => {
+    const itemNumber = index + 1;
+    const label = readHomeField("navigation", `item${itemNumber}Label`, item.label).trim() || item.label;
+    const href = readHomeField("navigation", `item${itemNumber}Href`, item.href).trim() || item.href;
+    return { label, href };
+  });
+  const categoryCards = categoryFallback.map((item, index) => {
+    const itemNumber = index + 1;
+    return {
+      ...item,
+      title: readHomeField("categories", `item${itemNumber}Title`, item.title),
+    };
+  });
+  const homeTrustCards: HomeTrustCard[] = trustFallback.map((fallback, index) => {
     const cardNumber = index + 1;
-    const iconValue = getCmsBlockField(cms.blocks, "trustCards", `card${cardNumber}Icon`, fallback.icon);
+    const iconValue = readHomeField("trustCards", `card${cardNumber}Icon`, fallback.icon);
     const safeIcon: HomeTrustCard["icon"] =
       iconValue === "star" || iconValue === "shield" || iconValue === "truck" || iconValue === "headset"
         ? iconValue
         : fallback.icon;
     return {
-      title: getCmsBlockField(cms.blocks, "trustCards", `card${cardNumber}Title`, fallback.title),
-      text: getCmsBlockField(cms.blocks, "trustCards", `card${cardNumber}Text`, fallback.text),
+      title: readHomeField("trustCards", `card${cardNumber}Title`, fallback.title),
+      text: readHomeField("trustCards", `card${cardNumber}Text`, fallback.text),
       icon: safeIcon,
     };
   });
-
-  const host = await getCurrentHost();
-  const tenant = await resolveTenantByHost(host);
-  const brandName = await getStoreBrandName();
+  const brandLogos = brandLogosFallback
+    .map((brand, index) => readHomeField("brands", `brand${index + 1}`, brand).trim())
+    .filter((brand) => brand.length > 0);
+  const valueCards = valueCardsFallback.map((card, index) => {
+    const cardNumber = index + 1;
+    return {
+      title: readHomeField("valueCards", `card${cardNumber}Title`, card.title),
+      text: readHomeField("valueCards", `card${cardNumber}Text`, card.text),
+    };
+  });
+  const heroEyebrow = readHomeField(
+    "hero",
+    "eyebrow",
+    isSport
+      ? "Prestera. Varje dag."
+      : isFashion
+        ? "Premium mode. Tidlös stil."
+        : isBeauty
+          ? "Skönhet. Självkänsla. Du."
+        : isElectronics
+          ? "Teknik. Kvalitet. Innovation."
+        : isMinimal
+          ? "Enkelt. Rent. Funktionellt."
+        : "Premium kvalitet. Utvalt med omsorg.",
+  );
+  const heroImageUrlCms = getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim();
+  const heroImageUrl = heroImageUrlCms || (isBeauty ? "/images/hero-skonhet.png" : "");
+  const heroContentPositionRaw = readHomeField("hero", "contentPosition", "left").trim().toLowerCase();
+  const heroContentPosition = heroContentPositionRaw === "right" ? "right" : "left";
+  const isHeroContentRight = heroContentPosition === "right";
+  const useHeroImageBackground = heroImageUrl.length > 0;
+  const primaryCtaHref = readHomeField("hero", "primaryCtaHref", "/products").trim();
+  const primaryCtaLabel = readHomeField(
+    "hero",
+    "primaryCtaLabel",
+    "Shoppa nu",
+  ).trim();
+  const showPrimaryCta = primaryCtaHref.length > 0 && primaryCtaLabel.length > 0;
+  const secondaryCtaHref = readHomeField("hero", "secondaryCtaHref", "/products").trim();
+  const secondaryCtaLabel = readHomeField(
+    "hero",
+    "secondaryCtaLabel",
+    isSport
+      ? "Utforska nyheter"
+      : isFashion
+        ? "Utforska kollektioner"
+        : isBeauty
+          ? "Se nyheter"
+          : isElectronics
+            ? "Se alla erbjudanden"
+            : isMinimal
+              ? "Se nyheter"
+            : "Utforska kollektioner",
+  ).trim();
+  const showSecondaryCta = secondaryCtaHref.length > 0 && secondaryCtaLabel.length > 0;
+  const categoriesSectionTitle = readHomeField(
+    "categories",
+    "sectionTitle",
+    isSport
+      ? "KATEGORIER"
+      : isFashion
+        ? "Upptäck våra kollektioner"
+        : isBeauty
+          ? "SHOPPA KATEGORI"
+          : isElectronics
+            ? "Shoppa kategori"
+          : isMinimal
+            ? "Kategorier"
+          : "Upptäck våra kategorier",
+  );
+  const bestSellersTitle = readHomeField(
+    "bestSellers",
+    "sectionTitle",
+    isBeauty ? "VÅRA BÄSTSÄLJARE" : isSport ? "BÄSTSÄLJARE" : "Bästsäljare",
+  );
+  const bestSellersViewAllLabel = readHomeField(
+    "bestSellers",
+    "viewAllLabel",
+    isBeauty ? "VISA ALLA" : "Visa alla",
+  );
+  const bestSellerBadge = readHomeField("bestSellers", "badgeBestSeller", "BÄSTSÄLJARE");
+  const newBadge = readHomeField("bestSellers", "badgeNew", "NYHET");
+  const ratingCount = readHomeField("bestSellers", "ratingCount", "(120)");
+  const brandsTitle = readHomeField(
+    "brands",
+    "title",
+    isSport
+      ? "Vi jobbar med världens ledande varumärken"
+      : isFashion
+        ? "Betrodd av tusentals nöjda kunder"
+        : isBeauty
+          ? "Våra populära varumärken"
+        : isElectronics
+          ? "Våra populära varumärken"
+        : isMinimal
+          ? "Utvalda varumärken"
+        : "Betrodd av tusentals nöjda kunder",
+  );
 
   let featuredProducts: Product[] = [];
   let favoriteIds = new Set<string>();
@@ -182,30 +643,137 @@ export default async function Home() {
     favoriteIds = new Set(await getFavoriteProductIdsForCurrentUser(tenant.id));
   }
 
-  const bestSellers = (featuredProducts.length > 0 ? featuredProducts : fallbackProducts).slice(0, 6);
+  const bestSellers = (featuredProducts.length > 0 ? featuredProducts : productsFallback).slice(0, 6);
+  const electronicsTopUtilityItems = [
+    "Fri frakt över 499 kr",
+    "30 dagars öppet köp",
+    "Snabba leveranser 1-2 arbetsdagar",
+  ];
+  const sportTopUtilityItems = [
+    "FRI FRAKT OVER 499 KR",
+    "30 DAGARS OPPET KOP",
+    "SNABBA LEVERANSER",
+  ];
+  const electronicsTrustStrip = [
+    { title: "Fri frakt", text: "Över 499 kr" },
+    { title: "30 dagars öppet köp", text: "Enkelt & smidigt" },
+    { title: "Snabba leveranser", text: "1-2 arbetsdagar" },
+    { title: "Säkra betalningar", text: "Klarna, Swish & kort" },
+    { title: "Expertkunskap", text: "Vi hjälper dig rätt" },
+  ];
+
+  const displayedCategoryCards = isBeauty || isSport ? categoryCards.slice(0, 5) : categoryCards;
 
   return (
-    <main className="flex-1 bg-[#f6f3ee] py-3 text-slate-900">
-      <div className="mx-auto w-full max-w-[1380px] overflow-hidden rounded-[20px] border border-[#e6ddcf] bg-[#f6f3ee] shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+    <main
+      className="flex-1 py-3 text-slate-900"
+      style={{ background: isBeauty ? "#fff8fb" : "var(--store-footer-bg)" }}
+    >
+      <div
+        className="mx-auto w-full max-w-[1380px] overflow-hidden rounded-[20px] border shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+        style={{ borderColor: "var(--store-footer-border)", background: "var(--store-footer-bg)" }}
+      >
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] bg-gradient-to-b from-[#11100d] via-[#12100e] to-[#0e0d0b] text-white shadow-2xl">
-          <header className="flex items-center justify-between border-b border-white/10 px-5 py-3">
+        <div
+          className="overflow-hidden rounded-[18px] text-white shadow-2xl"
+          style={{
+            background: useHeroImageBackground
+              ? `url('${heroImageUrl}') center/cover no-repeat`
+              : "var(--store-header-gradient)",
+          }}
+        >
+          {isSport ? (
+            <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-[#0b0b0d] px-5 py-2 text-[10px] font-semibold text-white/80">
+              {sportTopUtilityItems.map((item, index) => (
+                <span key={item} className="inline-flex items-center gap-3">
+                  {item}
+                  {index < sportTopUtilityItems.length - 1 ? <span className="text-white/35">|</span> : null}
+                </span>
+              ))}
+            </div>
+          ) : isBeauty ? (
+            <div className="flex flex-wrap items-center gap-3 border-b border-[#efd6e0] bg-[#f7dbe5] px-5 py-2 text-[10px] font-semibold text-slate-700">
+              <span>FRI FRAKT OVER 499 KR</span>
+              <span className="text-slate-400">|</span>
+              <span>30 DAGARS OPPET KOP</span>
+              <span className="text-slate-400">|</span>
+              <span>CLEAN BEAUTY</span>
+              <span className="text-slate-400">|</span>
+              <span>SAKRA BETALNINGAR</span>
+            </div>
+          ) : isElectronics ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-2 text-[11px] text-white/75">
+              <div className="flex flex-wrap items-center gap-4">
+                {electronicsTopUtilityItems.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+              <div className="flex items-center gap-4 text-white/70">
+                <span>Kundservice</span>
+                <span>Butiker</span>
+              </div>
+            </div>
+          ) : null}
+          <header className="relative flex items-center justify-between border-b border-white/10 bg-[#0b0b0d] px-5 py-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs tracking-[0.26em] text-[#c8a164]">{brandName.toUpperCase()}</span>
+              <span className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</span>
               <span className="text-[10px] text-white/60">{tenant?.name || "PREMIUM STORE"}</span>
             </div>
-            <nav className="hidden items-center gap-7 text-[13px] font-medium text-white/90 lg:flex">
+            {isElectronics ? (
+              <form method="GET" action="/sok" className="hidden flex-1 px-6 xl:block">
+                <div
+                  className="flex items-center rounded-md border border-white/20 px-3 py-2"
+                  style={{ background: "var(--store-header-overlay-surface)" }}
+                >
+                  <input
+                    name="q"
+                    placeholder="Sök produkt, kategori eller varumärke..."
+                    className="w-full bg-transparent text-sm text-white/90 placeholder:text-white/45 focus:outline-none"
+                  />
+                  <button type="submit" aria-label="Sök">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/70" fill="none" stroke="currentColor" strokeWidth="1.9">
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M20 20L16.65 16.65" />
+                    </svg>
+                  </button>
+                </div>
+              </form>
+            ) : null}
+            <nav className={`hidden items-center gap-7 text-[13px] font-medium text-white/90 ${isElectronics ? "xl:hidden" : "xl:flex"}`}>
               {navItems.map((item, idx) => (
                 <Link
-                  key={item.label}
+                  key={`${item.href}-${item.label}-${idx}`}
                   href={item.href}
-                  className={`transition hover:text-[#c8a164] ${idx === 0 ? "border-b border-[#c8a164] pb-1 text-white" : ""}`}
+                  className={`transition hover:text-[color:var(--store-accent)] ${idx === 0 ? "border-b border-[color:var(--store-accent)] pb-1 text-white" : ""}`}
                 >
                   {item.label}
                 </Link>
               ))}
             </nav>
             <div className="flex items-center gap-2 text-white/85">
+              <details className="relative xl:hidden">
+                <summary className="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
+                    <path d="M4 7h16M4 12h16M4 17h16" />
+                  </svg>
+                </summary>
+                <div
+                  className="fixed inset-x-3 top-16 z-[120] max-h-[70vh] overflow-auto rounded-lg border border-white/15 p-2 shadow-xl sm:inset-x-auto sm:right-4 sm:min-w-[260px]"
+                  style={{ background: "var(--store-header-overlay-surface)" }}
+                >
+                  {navItems.map((item, idx) => (
+                    <Link
+                      key={`mobile-${item.href}-${item.label}-${idx}`}
+                      href={item.href}
+                      className={`block rounded-md px-3 py-2 text-sm ${
+                        idx === 0 ? "bg-white/10 text-white" : "text-white/90 hover:bg-white/10"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </details>
               <Link
                 href="/sok"
                 aria-label="Sök"
@@ -240,55 +808,108 @@ export default async function Home() {
               </Link>
             </div>
           </header>
+          {isElectronics ? (
+            <nav className="hidden items-center gap-6 border-b border-white/10 bg-[#0b0b0d] px-5 py-2.5 text-[13px] font-medium text-white/85 xl:flex">
+              {navItems.map((item, idx) => (
+                <Link
+                  key={`electronics-nav-${item.href}-${item.label}-${idx}`}
+                  href={item.href}
+                  className={`transition hover:text-[color:var(--store-accent)] ${
+                    idx === navItems.length - 1 ? "text-[color:var(--store-accent)]" : ""
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
 
-          <div className="grid gap-6 px-6 py-9 lg:grid-cols-[1fr_1.12fr] lg:px-10">
-            <div className="flex flex-col justify-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#c8a164]">
-                Premium kvalitet. Utvalt med omsorg.
+          <div
+            className={`relative z-10 px-6 ${isElectronics ? "py-7 min-h-[460px]" : isBeauty ? "py-10 min-h-[520px]" : "py-8 min-h-[480px]"} lg:px-10`}
+          >
+            <div className={`flex ${isHeroContentRight ? "justify-end" : "justify-start"}`}>
+              <div className="flex max-w-[560px] flex-col justify-center">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--store-accent)]">
+                {heroEyebrow}
               </p>
-              <h1 className="mt-3 text-[62px] font-semibold leading-[0.98]">
-                {getCmsBlockField(cms.blocks, "hero", "title", "Upplev kvalitet. Varje dag.")}
+              <h1 className={`mt-3 text-4xl font-semibold leading-[1.02] sm:text-5xl lg:text-[62px] lg:leading-[0.98] ${isBeauty ? "text-slate-900" : ""}`}>
+                {readHomeField(
+                  "hero",
+                  "title",
+                  isSport
+                    ? "Din träning.\nDin styrka."
+                    : isFashion
+                      ? "Klä dig med\nsjälvförtroende."
+                      : isBeauty
+                        ? "Lyft din naturliga\nskönhet"
+                      : isElectronics
+                        ? "Teknik för\nvarje dag"
+                      : isMinimal
+                        ? "Det viktigaste\nutan brus"
+                      : "Upplev kvalitet. Varje dag.",
+                )}
               </h1>
-              <p className="mt-4 max-w-[430px] text-[22px] text-white/80">
-                {getCmsBlockField(
-                  cms.blocks,
+              <p className={`mt-4 max-w-[430px] text-lg sm:text-xl lg:text-[22px] ${isBeauty ? "text-slate-900" : "text-white/80"}`}>
+                {readHomeField(
                   "hero",
                   "description",
-                  "Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.",
+                  isSport
+                    ? "Utrustning, kläder och skor som hjälper dig att nå dina mål - oavsett nivå."
+                    : isFashion
+                      ? "Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil - för alla tillfällen."
+                      : isBeauty
+                        ? "Upptäck vårt handplockade sortiment av hudvård, smink och dofter - noggrant utvalt för att framhäva det bästa i dig."
+                      : isElectronics
+                        ? "Upptäck de senaste produkterna inom elektronik. Kvalitet, prestanda och design i perfekt kombination."
+                      : isMinimal
+                        ? "Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet."
+                      : "Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.",
                 )}
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href={getCmsBlockField(cms.blocks, "hero", "primaryCtaHref", "/products")}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#c8a164] px-6 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-[#b88f50]"
-                >
-                  {getCmsBlockField(cms.blocks, "hero", "primaryCtaLabel", "Shoppa nu")}
-                  <ArrowRightIcon />
-                </Link>
-                <Link
-                  href="/products"
-                  className="inline-flex items-center justify-center rounded-full border border-white/35 px-6 py-2.5 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
-                >
-                  Utforska kollektioner
-                </Link>
+                {showPrimaryCta ? (
+                  <Link
+                    href={primaryCtaHref}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1a1a1f]"
+                  >
+                    {primaryCtaLabel}
+                    <ArrowRightIcon />
+                  </Link>
+                ) : null}
+                {showSecondaryCta ? (
+                  <Link
+                    href={secondaryCtaHref}
+                    className={`inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold transition ${
+                      isBeauty
+                        ? "border border-white/60 bg-white text-slate-900 hover:bg-[#fff4f8]"
+                        : "border border-white/35 text-white hover:border-white hover:bg-white/10"
+                    }`}
+                  >
+                    {secondaryCtaLabel}
+                  </Link>
+                ) : null}
               </div>
-            </div>
-            <div className="relative min-h-[420px] overflow-hidden rounded-[16px] border border-white/20 bg-[radial-gradient(circle_at_28%_34%,#7b5a37_0%,#362819_35%,#17120e_100%)]">
-              <div className="absolute -right-8 top-6 h-56 w-56 rounded-full border-[24px] border-[#cfaa7a]/90" />
-              <div className="absolute right-24 top-24 h-40 w-40 rounded-full border-[16px] border-[#e3c39a]/85" />
-              <div className="absolute left-12 top-24 h-36 w-36 rounded-full border-[14px] border-[#d4b084]/65 opacity-70" />
-              <div className="absolute -bottom-7 left-12 h-16 w-[420px] rounded-full bg-black/55 blur-md" />
             </div>
           </div>
         </div>
-        <div className="relative z-20 -mt-7 px-4 pb-1 sm:px-6">
-          <div className="grid overflow-hidden rounded-xl border border-[#e6ddcf] bg-[#f6f0e9] shadow-[0_8px_20px_rgba(21,17,12,0.14)] sm:grid-cols-2 lg:grid-cols-4">
-            {homeTrustCards.map((card) => (
+        </div>
+        <div className={`relative z-20 px-4 pb-1 sm:px-6 ${isElectronics ? "-mt-4" : isBeauty ? "-mt-5" : "-mt-7"}`}>
+          <div
+            className={`grid overflow-hidden rounded-xl border shadow-[0_8px_20px_rgba(21,17,12,0.14)] sm:grid-cols-2 ${
+              isElectronics ? "lg:grid-cols-5" : "lg:grid-cols-4"
+            }`}
+            style={{
+              borderColor: isBeauty ? "#efd9e2" : isSport ? "#d7decd" : "var(--store-card-border)",
+              background: isBeauty ? "#ffffff" : isSport ? "#ffffff" : "var(--store-soft-surface)",
+            }}
+          >
+            {(isElectronics ? electronicsTrustStrip : homeTrustCards).map((card) => (
               <article
                 key={card.title}
-                className="flex min-h-[88px] items-center gap-3 border-t border-[#e7ddcf] px-5 py-3 lg:min-h-[96px] lg:border-l lg:border-t-0 lg:first:border-l-0"
+                className="flex min-h-[88px] items-center gap-3 border-t px-5 py-3 lg:min-h-[96px] lg:border-l lg:border-t-0 lg:first:border-l-0"
+                style={{ borderColor: isBeauty ? "#f1e3ea" : isSport ? "#e3e8dc" : "var(--store-footer-border)" }}
               >
-                <TrustCardIcon icon={card.icon} />
+                {"icon" in card ? <TrustCardIcon icon={card.icon} /> : <span className="h-3 w-3 rounded-full bg-[color:var(--store-accent)]" />}
                 <div>
                   <p className="text-[15px] font-semibold">{card.title}</p>
                   <p className="text-[13px] text-slate-600">{card.text}</p>
@@ -300,20 +921,51 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto w-full max-w-[1380px] px-4 py-8 sm:px-5">
-        <h2 className="text-center text-[44px] font-semibold leading-none">Upptäck våra kategorier</h2>
-        <div className="mx-auto mt-4 mb-6 h-[2px] w-24 rounded-full bg-[#c8a164]" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          {categoryCards.map((category) => (
+        <h2 className={`${isElectronics ? "text-left text-2xl lg:text-3xl" : isBeauty ? "text-center text-[46px] sm:text-[52px]" : "text-center text-3xl sm:text-4xl lg:text-[44px]"} font-semibold leading-none`}>
+          {categoriesSectionTitle}
+        </h2>
+        <div className={`${isElectronics ? "mt-3 mb-4" : "mx-auto mt-4 mb-6"} h-[2px] w-24 rounded-full bg-[color:var(--store-accent)]`} />
+        <div className={`grid gap-3 sm:grid-cols-2 ${isElectronics ? "lg:grid-cols-8" : isBeauty ? "lg:grid-cols-5" : isSport ? "lg:grid-cols-5" : "lg:grid-cols-6"}`}>
+          {displayedCategoryCards.map((category) => (
             <Link
               key={category.title}
               href="/products"
-              className={`group relative block overflow-hidden rounded-[14px] border border-[#d8cec2] bg-gradient-to-br ${category.accent} via-[#211912] to-[#130f0b] p-4 text-white shadow-sm`}
+                className={`group relative block overflow-hidden rounded-[14px] border p-4 shadow-sm ${
+                isElectronics
+                  ? "border-[#d6e4fb] bg-white text-slate-900"
+                  : isBeauty
+                    ? "border-[#ecd4dd] bg-[#fff5f8] text-slate-900"
+                  : isSport
+                    ? "border-[#cad7be] bg-gradient-to-br from-[#28382d] via-[#1a251e] to-[#0e1511] text-white"
+                  : `border-[#d8cec2] bg-gradient-to-br ${category.accent} via-[#211912] to-[#130f0b] text-white`
+              }`}
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,194,123,0.35),transparent_45%)] opacity-70" />
-              <p className="relative mt-24 text-lg font-semibold">{category.title}</p>
-              <span className="relative mt-2 inline-flex text-sm text-white/90">
-                <ArrowRightIcon />
-              </span>
+              {isElectronics || isBeauty ? (
+                <>
+                  <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md ${isBeauty ? "bg-[#f8e6ee]" : "bg-[color:var(--store-soft-surface)]"}`}>
+                    <span className="h-4 w-4 rounded-full bg-[color:var(--store-accent)]" />
+                  </div>
+                  <p className="line-clamp-2 text-sm font-semibold">{category.title.toUpperCase()}</p>
+                  {isBeauty ? <p className="mt-1 text-xs text-slate-600">Se alla produkter</p> : null}
+                </>
+              ) : isSport ? (
+                <>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(190,255,41,0.16),transparent_45%)] opacity-85" />
+                  <p className="relative mt-24 text-lg font-semibold">{category.title.toUpperCase()}</p>
+                  <p className="relative mt-1 text-xs text-white/80">Se hela sortimentet</p>
+                  <span className="relative mt-2 inline-flex text-sm text-[#d0ff43]">
+                    <ArrowRightIcon />
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,194,123,0.35),transparent_45%)] opacity-70" />
+                  <p className="relative mt-24 text-lg font-semibold">{category.title}</p>
+                  <span className="relative mt-2 inline-flex text-sm text-white/90">
+                    <ArrowRightIcon />
+                  </span>
+                </>
+              )}
             </Link>
           ))}
         </div>
@@ -321,9 +973,9 @@ export default async function Home() {
 
       <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
         <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-[42px] font-semibold leading-none">Bästsäljare</h2>
+          <h2 className="text-3xl font-semibold leading-none sm:text-4xl lg:text-[42px]">{bestSellersTitle}</h2>
           <Link href="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-slate-900">
-            Visa alla
+            {bestSellersViewAllLabel}
             <ArrowRightIcon />
           </Link>
         </div>
@@ -337,10 +989,11 @@ export default async function Home() {
             return (
               <article
                 key={"id" in product ? product.id : `${title}-${idx}`}
-                className="group flex h-full flex-col overflow-hidden rounded-[14px] border border-[#ddd4c8] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group flex h-full flex-col overflow-hidden rounded-[14px] border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                style={{ borderColor: "var(--store-card-border)" }}
               >
                 <Link href={productHref} className="block">
-                  <div className="relative h-44 bg-gradient-to-br from-[#31271d] via-[#1b1611] to-[#0f0d0b]">
+                  <div className="relative h-44 bg-[image:var(--store-media-gradient)]">
                     {"id" in product ? (
                       <FavoriteToggle
                         productId={product.id}
@@ -349,13 +1002,13 @@ export default async function Home() {
                       />
                     ) : null}
                     {idx === 0 ? (
-                      <span className="absolute left-2 top-2 rounded bg-[#c8a164] px-2 py-0.5 text-[10px] font-bold text-slate-900">
-                        BÄSTSÄLJARE
+                      <span className="absolute left-2 top-2 rounded bg-[color:var(--store-accent)] px-2 py-0.5 text-[10px] font-bold text-slate-900">
+                        {bestSellerBadge}
                       </span>
                     ) : null}
                     {idx === 1 ? (
-                      <span className="absolute left-2 top-2 rounded bg-[#0f1114] px-2 py-0.5 text-[10px] font-bold text-white">
-                        NYHET
+                      <span className="absolute left-2 top-2 rounded bg-[color:var(--store-footer-surface)] px-2 py-0.5 text-[10px] font-bold text-white">
+                        {newBadge}
                       </span>
                     ) : null}
                   </div>
@@ -367,7 +1020,7 @@ export default async function Home() {
                   <p className="text-[22px] font-semibold leading-tight text-slate-900">
                     {formatMinorPrice(priceMinor, currency)}
                   </p>
-                  <p className="text-xs text-[#b88f50]">★★★★★ <span className="text-slate-500">(120)</span></p>
+                  <p className="text-xs text-[color:var(--store-accent)]">★★★★★ <span className="text-slate-500">{ratingCount}</span></p>
                   {"id" in product ? (
                     <AddToCartControl
                       productId={product.id}
@@ -391,12 +1044,41 @@ export default async function Home() {
         </div>
       </section>
 
+      {isBeauty ? (
+        <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
+          <div className="grid gap-3 md:grid-cols-3">
+            {beautyPromoCards.map((card, index) => (
+              <article
+                key={`${card.title}-${index}`}
+                className="rounded-[14px] border border-[#ecd4dd] bg-gradient-to-br from-[#fff5f8] to-[#f8e8ef] p-5"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a16f84]">{card.title}</p>
+                <p className="mt-2 text-sm text-slate-700">{card.text}</p>
+                <button
+                  type="button"
+                  className="mt-4 inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {card.cta}
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
-        <div className="rounded-[14px] bg-[#0f0f0f] px-6 py-6 text-white shadow-lg">
-          <p className="mb-4 text-center text-sm text-white/70">Betrodd av tusentals nöjda kunder</p>
+        <div
+          className="rounded-[14px] border px-6 py-6 shadow-lg"
+          style={{
+            background: isBeauty ? "#fff5f8" : isSport ? "#0b0d0b" : "var(--store-footer-surface)",
+            borderColor: isBeauty ? "#ecd4dd" : isSport ? "#1c251d" : "transparent",
+            color: isBeauty ? "#0f172a" : "white",
+          }}
+        >
+          <p className={`mb-4 text-center text-sm ${isBeauty ? "text-slate-700" : "text-white/70"}`}>{brandsTitle}</p>
           <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-3 lg:grid-cols-7">
             {brandLogos.map((brand) => (
-              <p key={brand} className="text-2xl tracking-[0.12em] text-white/85">
+              <p key={brand} className={`text-2xl tracking-[0.12em] ${isBeauty ? "text-slate-800" : "text-white/85"}`}>
                 {brand}
               </p>
             ))}
@@ -405,11 +1087,21 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto w-full max-w-[1380px] px-4 pb-10 sm:px-5">
-        <div className="grid gap-4 rounded-[14px] bg-[#f5eee4] p-5 sm:grid-cols-3">
-          {valueCards.map((card) => (
-            <article key={card.title} className="flex items-start gap-3 rounded-xl bg-white px-4 py-3 shadow-sm">
-              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-300 text-sm text-slate-600">
-                <ValueCardIcon title={card.title} />
+        <div
+          className="grid gap-4 rounded-[14px] p-5 sm:grid-cols-3"
+          style={{ background: isSport ? "#d8ef77" : "var(--store-soft-surface)" }}
+        >
+          {valueCards.map((card, index) => (
+            <article
+              key={`${card.title}-${index}`}
+              className={`flex items-start gap-3 rounded-xl px-4 py-3 shadow-sm ${isSport ? "bg-[#e5f59a]" : "bg-white"}`}
+            >
+              <span
+                className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm ${
+                  isSport ? "border-[#9db92d] text-slate-900" : "border-slate-300 text-slate-600"
+                }`}
+              >
+                <ValueCardIcon index={index} />
               </span>
               <div>
                 <p className="text-sm font-semibold text-slate-900">{card.title}</p>

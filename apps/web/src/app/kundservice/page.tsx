@@ -4,7 +4,7 @@ import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getStoreBrandName } from "@/lib/store-brand";
 
-const trustBottom = [
+const fallbackTrustBottom = [
   { title: "Snabb hjälp", text: "Vi svarar snabbt och löser ditt ärende effektivt." },
   { title: "Människor, inte robotar", text: "Riktig support från vårt team som bryr sig." },
   { title: "Tryggt & enkelt", text: "Starka lösningar och smidiga processer." },
@@ -64,7 +64,7 @@ export default async function KundservicePage() {
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
   const cms = await getPublishedPageContent("kundservice", { blocks: fallbackBlocks });
   const brandName = await getStoreBrandName();
-  const contactCards = [
+  const fallbackContactCards = [
     {
       title: "Livechat",
       text: "Chatta med oss direkt så hjälper vi dig så snabbt vi kan.",
@@ -90,6 +90,19 @@ export default async function KundservicePage() {
       footer: "",
     },
   ];
+  const contactCards = fallbackContactCards.map((card, index) => {
+    const item = index + 1;
+    return {
+      title: getCmsBlockField(cms.blocks, "contact", `card${item}Title`, card.title),
+      text: getCmsBlockField(cms.blocks, "contact", `card${item}Text`, card.text),
+      action: getCmsBlockField(cms.blocks, "contact", `card${item}Action`, card.action),
+      footer: getCmsBlockField(cms.blocks, "contact", `card${item}Footer`, card.footer),
+    };
+  });
+  const trustBottom = fallbackTrustBottom.map((item, index) => ({
+    title: getCmsBlockField(cms.blocks, "trustBottom", `item${index + 1}Title`, item.title),
+    text: getCmsBlockField(cms.blocks, "trustBottom", `item${index + 1}Text`, item.text),
+  }));
   const faqItems = [1, 2, 3, 4, 5, 6, 7, 8]
     .map((index) => ({
       question: getCmsBlockField(cms.blocks, "faq", `q${index}`, ""),
@@ -126,12 +139,25 @@ export default async function KundservicePage() {
                   data-live-chat-trigger="true"
                   className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white"
                 >
-                  Chatta med oss
+                  {getCmsBlockField(cms.blocks, "hero", "chatButtonLabel", "Chatta med oss")}
                 </button>
-                <button className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900">Skicka e-post</button>
+                <button className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900">
+                  {getCmsBlockField(cms.blocks, "hero", "emailButtonLabel", "Skicka e-post")}
+                </button>
               </div>
             </div>
-            <div className="min-h-[300px] bg-gradient-to-br from-[#d4d0cc] via-[#aaa49e] to-[#6f6962]" />
+            {getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim() ? (
+              <div className="min-h-[300px] overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getCmsBlockField(cms.blocks, "hero", "imageUrl", "")}
+                  alt="Kundservice hero"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="min-h-[300px] bg-gradient-to-br from-[#d4d0cc] via-[#aaa49e] to-[#6f6962]" />
+            )}
           </section>
 
           <section className="border-b border-[#e6ddd1] p-7">
@@ -140,7 +166,7 @@ export default async function KundservicePage() {
                 {getCmsBlockField(cms.blocks, "faq", "title", "Vanliga frågor")}
               </h2>
               <button className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
-                Se alla frågor
+                {getCmsBlockField(cms.blocks, "faq", "viewAllLabel", "Se alla frågor")}
                 <ArrowRightIcon />
               </button>
             </div>
@@ -164,8 +190,12 @@ export default async function KundservicePage() {
           </section>
 
           <section className="border-b border-[#e6ddd1] p-7">
-            <h2 className="text-4xl font-semibold text-slate-900">Kontakta oss</h2>
-            <p className="text-sm text-slate-600">Välj det sätt som passar dig bäst.</p>
+            <h2 className="text-4xl font-semibold text-slate-900">
+              {getCmsBlockField(cms.blocks, "contact", "title", "Kontakta oss")}
+            </h2>
+            <p className="text-sm text-slate-600">
+              {getCmsBlockField(cms.blocks, "contact", "subtitle", "Välj det sätt som passar dig bäst.")}
+            </p>
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               {contactCards.map((card) => (
                 <article key={card.title} className="rounded-xl border border-[#e6ddd1] bg-white p-4">
@@ -192,11 +222,18 @@ export default async function KundservicePage() {
           <section className="border-b border-[#e6ddd1] p-7">
             <div className="grid gap-3 md:grid-cols-[1fr_auto]">
               <article className="rounded-xl border border-[#e6ddd1] bg-white px-4 py-3">
-                <p className="text-2xl font-semibold">30 dagars öppet köp</p>
-                <p className="text-sm text-slate-600">Inte nöjd? Inga problem. Du har alltid 30 dagars öppet köp och enkel retur.</p>
+                <p className="text-2xl font-semibold">
+                  {getCmsBlockField(cms.blocks, "returnsCta", "title", "30 dagars öppet köp")}
+                </p>
+                <p className="text-sm text-slate-600">
+                  {getCmsBlockField(cms.blocks, "returnsCta", "text", "Inte nöjd? Inga problem. Du har alltid 30 dagars öppet köp och enkel retur.")}
+                </p>
               </article>
-              <Link href="/returer-aterbetalningar" className="inline-flex items-center gap-2 rounded-md bg-black px-6 py-3 text-sm font-semibold text-white">
-                Till returer & återbetalningar
+              <Link
+                href={getCmsBlockField(cms.blocks, "returnsCta", "buttonHref", "/returer-aterbetalningar")}
+                className="inline-flex items-center gap-2 rounded-md bg-black px-6 py-3 text-sm font-semibold text-white"
+              >
+                {getCmsBlockField(cms.blocks, "returnsCta", "buttonLabel", "Till returer & återbetalningar")}
                 <ArrowRightIcon />
               </Link>
             </div>

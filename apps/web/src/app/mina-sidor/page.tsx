@@ -81,14 +81,17 @@ export default async function MinaSidorPage() {
   }
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
           <StorefrontHeader cartCount={0} />
 
           <div className="px-6 py-5">
             <div className="grid gap-5 lg:grid-cols-[270px_1fr]">
-              <aside className="space-y-3 rounded-xl border border-[#e6ddd1] bg-white p-4">
+              <aside className="space-y-3 rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
                 <div className="border-b border-slate-200 pb-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Mina sidor</p>
                   <p className="mt-1 text-3xl font-semibold">{`Hej, ${greetingName} 👋`}</p>
@@ -96,11 +99,11 @@ export default async function MinaSidorPage() {
                 </div>
                 <AccountSidebar activeHref="/mina-sidor" items={sidebarItems} />
                 {loyaltyProgramEnabled ? (
-                  <div className="rounded-xl bg-gradient-to-r from-[#11100d] to-[#1f1811] p-4 text-white">
-                    <p className="text-xs uppercase tracking-wide text-[#c8a164]">Medlem</p>
+                  <div className="rounded-xl p-4 text-white" style={{ background: "var(--store-header-gradient)" }}>
+                    <p className="text-xs uppercase tracking-wide text-[color:var(--store-accent)]">Medlem</p>
                     <p className="text-2xl font-semibold">{brandName} Club</p>
                     <p className="mt-1 text-sm">Du har 120 poäng</p>
-                    <Link href="/mina-sidor/poang" className="mt-3 inline-flex rounded-md bg-[#c8a164] px-3 py-2 text-sm font-semibold text-slate-900">Se dina förmåner</Link>
+                    <Link href="/mina-sidor/poang" className="mt-3 inline-flex rounded-md bg-[color:var(--store-accent)] px-3 py-2 text-sm font-semibold text-slate-900">Se dina förmåner</Link>
                   </div>
                 ) : null}
               </aside>
@@ -117,7 +120,7 @@ export default async function MinaSidorPage() {
 
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {topCards.map((card) => (
-                    <article key={card.title} className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+                    <article key={card.title} className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
                       <p className="text-sm text-slate-600">{card.title}</p>
                       <p className="text-4xl font-semibold text-slate-900">{card.value}</p>
                       <Link href={card.href} className="mt-1 inline-flex items-center gap-1 text-sm text-slate-700">{card.action}<ArrowRightIcon /></Link>
@@ -126,7 +129,7 @@ export default async function MinaSidorPage() {
                 </div>
 
                 <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
-                  <article className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+                  <article className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
                     <div className="mb-3 flex items-center justify-between">
                       <h2 className="text-xl font-semibold">Senaste ordrar</h2>
                       <Link href="/mina-sidor/ordrar" className="inline-flex items-center gap-1 text-sm text-slate-700">Visa alla ordrar <ArrowRightIcon /></Link>
@@ -144,7 +147,7 @@ export default async function MinaSidorPage() {
                   </article>
 
                   <div className="space-y-3">
-                    <article className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+                    <article className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
                       <div className="mb-2 flex items-center justify-between"><h3 className="text-xl font-semibold">Leverans på väg</h3><Link href="/mina-sidor/leveranser" className="inline-flex items-center gap-1 text-sm text-slate-700">Spåra paket <ArrowRightIcon /></Link></div>
                       <div className="grid grid-cols-[90px_1fr] gap-3">
                         <div className="h-16 rounded bg-gradient-to-br from-[#30261c] via-[#1b1611] to-[#0f0d0b]" />
@@ -152,7 +155,7 @@ export default async function MinaSidorPage() {
                       </div>
                     </article>
 
-                    <article className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+                    <article className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
                       <div className="mb-2 flex items-center justify-between"><h3 className="text-xl font-semibold">Mina favoriter</h3><Link href="/mina-sidor/favoriter" className="inline-flex items-center gap-1 text-sm text-slate-700">Visa alla <ArrowRightIcon /></Link></div>
                       <div className="grid grid-cols-4 gap-2">
                         {["Nike Dr-FIT Jacket", "SmartShake Reforce", "Under Armour Blitzing", "Nike Everyday Plus"].map((name) => (
@@ -165,7 +168,7 @@ export default async function MinaSidorPage() {
                       </div>
                     </article>
 
-                    <article className="overflow-hidden rounded-xl border border-[#e6ddd1] bg-white">
+                    <article className="overflow-hidden rounded-xl border bg-white" style={{ borderColor: "var(--store-footer-border)" }}>
                       <div className="grid grid-cols-[1fr_170px] items-stretch">
                         <div className="p-4">
                           <h3 className="text-2xl font-semibold text-slate-900">Behöver du hjälp?</h3>
@@ -184,7 +187,10 @@ export default async function MinaSidorPage() {
               </section>
             </div>
 
-            <section className="mt-6 grid overflow-hidden rounded-xl border border-[#e6ddd1] bg-[#faf6ef] sm:grid-cols-2 lg:grid-cols-4">
+            <section
+              className="mt-6 grid overflow-hidden rounded-xl border sm:grid-cols-2 lg:grid-cols-4"
+              style={{ borderColor: "var(--store-footer-border)", background: "var(--store-trust-gradient)" }}
+            >
               {trustCards.map((item) => (
                 <article key={item.title} className="flex min-h-[74px] flex-col justify-center border-t border-[#e7ddcf] px-5 py-3 lg:border-l lg:border-t-0 lg:first:border-l-0">
                   <p className="text-sm font-semibold">{item.title}</p>

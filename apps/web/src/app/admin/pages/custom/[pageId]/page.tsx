@@ -1,15 +1,28 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { CustomPageBlockEditor } from "@/components/custom-page-block-editor";
 import { requireAdminAccess } from "@/lib/admin-access";
+import {
+  getCustomBlockTemplate,
+  normalizeCustomBlocks,
+  type CustomPageBlock,
+} from "@/lib/cms/custom-page-blocks";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type AdminCustomPageEditorProps = {
   params: Promise<{ pageId: string }>;
+  searchParams: Promise<{
+    status?: string;
+    message?: string;
+  }>;
 };
 
-export default async function AdminCustomPageEditor({ params }: AdminCustomPageEditorProps) {
+export default async function AdminCustomPageEditor({ params, searchParams }: AdminCustomPageEditorProps) {
   const { pageId } = await params;
+  const query = await searchParams;
   const access = await requireAdminAccess(`/admin/pages/custom/${pageId}`);
 
   if (access.status === "tenant_missing") {
@@ -23,7 +36,7 @@ export default async function AdminCustomPageEditor({ params }: AdminCustomPageE
   if (access.status === "forbidden") {
     return (
       <p className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-        Ditt konto har inte access till den har adminpanelen.
+        Ditt konto har inte åtkomst till den här adminpanelen.
       </p>
     );
   }
@@ -38,8 +51,48 @@ export default async function AdminCustomPageEditor({ params }: AdminCustomPageE
 
   if (!page) notFound();
   const pageData = page;
+  const currentStatus = pageData.status === "published" ? "published" : "draft";
 
-  const content = typeof pageData.content === "object" && pageData.content ? (pageData.content as Record<string, string>) : {};
+  const content =
+    typeof pageData.content === "object" && pageData.content
+      ? (pageData.content as Record<string, unknown>)
+      : {};
+  const existingBlocks = normalizeCustomBlocks(content.blocks);
+  const legacyHeroTitle = typeof content.heroTitle === "string" ? content.heroTitle : pageData.title;
+  const legacyBody = typeof content.body === "string" ? content.body : "";
+  const legacyCtaLabel = typeof content.ctaLabel === "string" ? content.ctaLabel : "";
+  const legacyCtaHref = typeof content.ctaHref === "string" ? content.ctaHref : "";
+  const initialBlocks: CustomPageBlock[] =
+    existingBlocks.length > 0
+      ? existingBlocks
+      : [
+          {
+            ...getCustomBlockTemplate("hero"),
+            data: {
+              ...getCustomBlockTemplate("hero").data,
+              title: legacyHeroTitle,
+            },
+          },
+          {
+            ...getCustomBlockTemplate("text"),
+            data: {
+              ...getCustomBlockTemplate("text").data,
+              body: legacyBody,
+            },
+          },
+          ...(legacyCtaLabel && legacyCtaHref
+            ? [
+                {
+                  ...getCustomBlockTemplate("cta"),
+                  data: {
+                    ...getCustomBlockTemplate("cta").data,
+                    label: legacyCtaLabel,
+                    href: legacyCtaHref,
+                  },
+                },
+              ]
+            : []),
+        ];
 
   async function saveCustomPage(formData: FormData) {
     "use server";
@@ -49,25 +102,51 @@ export default async function AdminCustomPageEditor({ params }: AdminCustomPageE
 
     const title = (formData.get("title") as string)?.trim() || pageData.title;
     const slugInput = (formData.get("slug") as string)?.trim() || pageData.slug;
-    const status = (formData.get("status") as string) === "published" ? "published" : "draft";
-    const heroTitle = (formData.get("heroTitle") as string)?.trim() || title;
-    const body = (formData.get("body") as string)?.trim() || "";
-    const ctaLabel = (formData.get("ctaLabel") as string)?.trim() || "";
-    const ctaHref = (formData.get("ctaHref") as string)?.trim() || "";
+    const intentValue = formData.get("intent");
+    const intent =
+      intentValue === "publish" || intentValue === "preview" || intentValue === "save_draft"
+        ? intentValue
+        : "save_draft";
+    const status =
+      intent === "publish"
+        ? "published"
+        : intent === "save_draft"
+          ? "draft"
+          : pageData.status;
+    const blocksPayload = String(formData.get("blocksPayload") || "[]");
+    let parsedBlocks = normalizeCustomBlocks([]);
+    try {
+      parsedBlocks = normalizeCustomBlocks(JSON.parse(blocksPayload));
+    } catch {
+      parsedBlocks = normalizeCustomBlocks([]);
+    }
 
     const slug = slugInput
       .toLowerCase()
       .replace(/[^a-z0-9-]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
+    if (!slug) {
+      redirect(`/admin/pages/custom/${pageId}?status=error&message=${encodeURIComponent("Ogiltig slug.")}`);
+    }
+
+    const heroBlock = parsedBlocks.find((block) => block.type === "hero");
+    const textBlock = parsedBlocks.find((block) => block.type === "text");
+    const ctaBlock = parsedBlocks.find((block) => block.type === "cta");
+    const heroTitle = heroBlock?.data.title || title;
+    const body = textBlock?.data.body || "";
+    const ctaLabel = ctaBlock?.data.label || "";
+    const ctaHref = ctaBlock?.data.href || "";
+
     const supabaseAction = await createSupabaseServerClient();
-    await supabaseAction
+    const { error } = await supabaseAction
       .from("custom_pages")
       .update({
         title,
         slug,
         status,
         content: {
+          blocks: parsedBlocks,
           heroTitle,
           body,
           ctaLabel,
@@ -77,9 +156,40 @@ export default async function AdminCustomPageEditor({ params }: AdminCustomPageE
       .eq("tenant_id", actionAccess.tenant.id)
       .eq("id", pageId);
 
+    if (error) {
+      redirect(
+        `/admin/pages/custom/${pageId}?status=error&message=${encodeURIComponent(`Kunde inte spara sidan: ${error.message}`)}`,
+      );
+    }
+
     revalidatePath(`/admin/pages/custom/${pageId}`);
     revalidatePath("/admin/pages/custom");
     revalidatePath(`/sidor/${slug}`);
+    const cookieStore = await cookies();
+    if (intent === "preview") {
+      cookieStore.set("cms_preview_custom_page_id", pageId, {
+        path: "/",
+        sameSite: "lax",
+        httpOnly: true,
+        maxAge: 60 * 60,
+      });
+      redirect(`/sidor/${slug}`);
+    }
+
+    if (intent === "publish") {
+      cookieStore.delete("cms_preview_custom_page_id");
+      redirect(
+        `/admin/pages/custom/${pageId}?status=success&message=${encodeURIComponent(
+          "Sidan publicerades.",
+        )}`,
+      );
+    }
+
+    redirect(
+      `/admin/pages/custom/${pageId}?status=success&message=${encodeURIComponent(
+        "Sidan sparades som utkast.",
+      )}`,
+    );
   }
 
   return (
@@ -92,6 +202,18 @@ export default async function AdminCustomPageEditor({ params }: AdminCustomPageE
       </div>
 
       <form action={saveCustomPage} className="space-y-3">
+        {query.message ? (
+          <p
+            className={`rounded-md border px-3 py-2 text-sm ${
+              query.status === "success"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-rose-200 bg-rose-50 text-rose-700"
+            }`}
+          >
+            {query.message}
+          </p>
+        ) : null}
+
         <div className="grid gap-3 md:grid-cols-2">
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-slate-700">Titel</span>
@@ -103,44 +225,45 @@ export default async function AdminCustomPageEditor({ params }: AdminCustomPageE
           </label>
         </div>
 
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Status</span>
-          <select name="status" defaultValue={pageData.status} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Hero-rubrik</span>
-          <input name="heroTitle" defaultValue={content.heroTitle ?? pageData.title} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Sidinnehåll</span>
-          <textarea
-            name="body"
-            defaultValue={content.body ?? ""}
-            rows={10}
-            className="w-full rounded-md border border-slate-300 p-3 text-sm"
-            placeholder="Skriv sidans text här..."
-          />
-        </label>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">CTA knapptext</span>
-            <input name="ctaLabel" defaultValue={content.ctaLabel ?? ""} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">CTA länk</span>
-            <input name="ctaHref" defaultValue={content.ctaHref ?? ""} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          </label>
+        <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+          Live-status:{" "}
+          <span className="font-semibold">
+            {currentStatus === "published" ? "Publicerad" : "Utkast"}
+          </span>
         </div>
 
-        <button type="submit" className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-          Spara sida
-        </button>
+        <fieldset className="rounded-lg border border-slate-200 p-4">
+          <legend className="px-2 text-sm font-semibold text-slate-800">Block & komponenter</legend>
+          <CustomPageBlockEditor initialBlocks={initialBlocks} />
+        </fieldset>
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="submit"
+            name="intent"
+            value="save_draft"
+            className="inline-flex rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Spara utkast
+          </button>
+          <button
+            type="submit"
+            name="intent"
+            value="preview"
+            formTarget="_blank"
+            className="inline-flex rounded-md border border-sky-300 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-100"
+          >
+            Preview
+          </button>
+          <button
+            type="submit"
+            name="intent"
+            value="publish"
+            className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Publicera
+          </button>
+        </div>
       </form>
     </section>
   );

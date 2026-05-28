@@ -144,9 +144,12 @@ export default async function MinaBetalningsmetoderPage({ searchParams }: PagePr
   }
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
           <StorefrontHeader cartCount={0} />
           <div className="px-6 py-5">
           <p className="text-xs text-slate-500">
@@ -198,7 +201,7 @@ export default async function MinaBetalningsmetoderPage({ searchParams }: PagePr
                 {getCmsBlockField(cms.blocks, "payments", "sectionTitle", "Dina sparade betalmetoder")}
               </h2>
               {cards.map((card) => (
-                <article key={card.id} className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+                <article key={card.id} className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-card-border)" }}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-lg font-semibold text-slate-900">
@@ -242,7 +245,7 @@ export default async function MinaBetalningsmetoderPage({ searchParams }: PagePr
                 </p>
               ) : null}
 
-              <article className="rounded-xl border border-[#e6ddd1] bg-[#faf6ef] p-4 text-sm text-slate-700">
+              <article className="rounded-xl border p-4 text-sm text-slate-700" style={{ borderColor: "var(--store-card-border)", background: "var(--store-soft-surface)" }}>
                 Säker betalning: vi lagrar aldrig kortnummer eller bankuppgifter i vår databas. All känslig betaldata hanteras av Stripe.
               </article>
             </section>

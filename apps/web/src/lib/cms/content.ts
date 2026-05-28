@@ -1,6 +1,8 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import type { CmsBlocksContent } from "@/lib/cms/registry";
+import { cookies } from "next/headers";
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -37,11 +39,41 @@ export async function getPublishedPageContent<T extends Record<string, unknown>>
     .select("content, status")
     .eq("tenant_id", tenant.id)
     .eq("page_key", pageKey)
-    .eq("status", "published")
     .maybeSingle();
 
   if (!data || !isObject(data.content)) return fallback;
-  return mergeDeep(fallback, data.content);
+
+  const { published, draft } = getCmsBlocksVariants(data.content);
+  const cookieStore = await cookies();
+  const previewPageKey = cookieStore.get("cms_preview_page_key")?.value;
+  let useDraftPreview = false;
+
+  if (previewPageKey === pageKey) {
+    const supabaseServer = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabaseServer.auth.getUser();
+
+    if (user) {
+      const { data: membership } = await supabaseServer
+        .from("tenant_users")
+        .select("id")
+        .eq("tenant_id", tenant.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      useDraftPreview = Boolean(membership);
+    }
+  }
+
+  if (useDraftPreview) {
+    return mergeDeep(fallback, { blocks: draft });
+  }
+
+  if (data.status === "published") {
+    return mergeDeep(fallback, { blocks: published });
+  }
+
+  return fallback;
 }
 
 export function getCmsBlockField(
@@ -58,17 +90,41 @@ export function getCmsBlockField(
 }
 
 export function getCmsBlocksContent(content: unknown): CmsBlocksContent {
-  if (!isObject(content)) return {};
-  const blocks = content.blocks;
-  if (!isObject(blocks)) return {};
+  const variants = getCmsBlocksVariants(content);
+  return Object.keys(variants.draft).length > 0 ? variants.draft : variants.published;
+}
 
-  const normalized: CmsBlocksContent = {};
-  for (const [blockKey, value] of Object.entries(blocks)) {
-    if (!isObject(value)) continue;
-    normalized[blockKey] = {};
-    for (const [fieldKey, fieldValue] of Object.entries(value)) {
-      normalized[blockKey][fieldKey] = typeof fieldValue === "string" ? fieldValue : JSON.stringify(fieldValue);
+export function getCmsBlocksVariants(content: unknown): {
+  published: CmsBlocksContent;
+  draft: CmsBlocksContent;
+} {
+  if (!isObject(content)) return { published: {}, draft: {} };
+  const contentRecord = content as Record<string, unknown>;
+
+  const publishedSource = isObject(contentRecord.publishedBlocks)
+    ? contentRecord.publishedBlocks
+    : isObject(contentRecord.blocks)
+      ? contentRecord.blocks
+      : {};
+
+  const draftSource = isObject(contentRecord.draftBlocks) ? contentRecord.draftBlocks : publishedSource;
+
+  const normalize = (source: unknown): CmsBlocksContent => {
+    if (!isObject(source)) return {};
+    const normalized: CmsBlocksContent = {};
+    for (const [blockKey, value] of Object.entries(source)) {
+      if (!isObject(value)) continue;
+      normalized[blockKey] = {};
+      for (const [fieldKey, fieldValue] of Object.entries(value)) {
+        normalized[blockKey][fieldKey] =
+          typeof fieldValue === "string" ? fieldValue : JSON.stringify(fieldValue);
+      }
     }
-  }
-  return normalized;
+    return normalized;
+  };
+
+  return {
+    published: normalize(publishedSource),
+    draft: normalize(draftSource),
+  };
 }

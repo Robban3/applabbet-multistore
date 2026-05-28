@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getTenantSettings } from "@/lib/tenant-settings";
 
 type IncomingMessage = {
   role: "assistant" | "user";
@@ -38,8 +40,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ reply: `Hej! Jag är ${agentName}. Hur kan jag hjälpa dig i dag?` });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const tenantSettings = tenant ? await getTenantSettings(tenant) : null;
+  const tenantPaymentConfig = tenantSettings?.payment_config || {};
+  const tenantApiKey = String(tenantPaymentConfig.liveChatApiKey || "").trim();
+  const tenantModel = String(tenantPaymentConfig.liveChatModel || "").trim();
+  const apiKey = tenantApiKey || process.env.OPENAI_API_KEY;
+  const model = tenantModel || process.env.OPENAI_MODEL || "gpt-4o-mini";
 
   if (!apiKey) {
     return NextResponse.json({

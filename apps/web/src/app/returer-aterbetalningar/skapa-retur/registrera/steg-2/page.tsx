@@ -19,15 +19,6 @@ function formatKr(minor: number) {
   return `${Math.round(minor / 100).toLocaleString("sv-SE")} kr`;
 }
 
-function StepIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-900" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M4 8l8-4 8 4-8 4-8-4Z" />
-      <path d="M4 8v8l8 4 8-4V8" />
-    </svg>
-  );
-}
-
 export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoPageProps) {
   const definition = getCmsPage("returer-aterbetalningar");
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
@@ -93,7 +84,7 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
     <main className="bg-white">
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
         <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <StorefrontHeader activeNav="Nyheter" cartCount={0} />
+          <StorefrontHeader cartCount={0} />
 
           <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
             <div className="relative z-10 max-w-[560px]">

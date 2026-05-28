@@ -85,7 +85,7 @@ function BagIcon() {
 
 function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="m5 12 4 4L19 6" />
     </svg>
   );
@@ -220,9 +220,12 @@ export default async function MinaPoangPage() {
   ].filter((item) => item.question.trim().length > 0);
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
           <StorefrontHeader cartCount={0} />
           <div className="px-6 py-5">
             <p className="text-xs text-slate-500">
@@ -243,8 +246,8 @@ export default async function MinaPoangPage() {
               <AccountSidebar activeHref="/mina-sidor/poang" items={sidebarItems} />
 
               <section className="space-y-6">
-                <section className="overflow-hidden rounded-2xl bg-gradient-to-r from-[#0f0d0a] via-[#19140f] to-[#261d14] p-6 text-white">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#c8a164]">Loyalty</p>
+                <section className="overflow-hidden rounded-2xl p-6 text-white" style={{ background: "var(--store-header-gradient)" }}>
+                  <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--store-accent)]">Loyalty</p>
                   <h1 className="mt-2 text-5xl font-semibold tracking-tight">
                     {getCmsBlockField(cms.blocks, "hero", "title", "Loyalty Club")}
                   </h1>
@@ -262,7 +265,7 @@ export default async function MinaPoangPage() {
                       <p className="text-xs uppercase tracking-wide text-white/70">
                         {getCmsBlockField(cms.blocks, "hero", "memberPointsLabel", "Ditt poängsaldo")}
                       </p>
-                      <p className="mt-1 text-3xl font-semibold text-[#f4dfb8]">
+                      <p className="mt-1 text-3xl font-semibold text-[color:var(--store-accent)]">
                         {getCmsBlockField(cms.blocks, "hero", "memberPointsValue", "120 poäng")}
                       </p>
                     </article>
@@ -270,7 +273,7 @@ export default async function MinaPoangPage() {
                       <p className="text-xs uppercase tracking-wide text-white/70">
                         {getCmsBlockField(cms.blocks, "hero", "memberTierLabel", "Nuvarande nivå")}
                       </p>
-                      <p className="mt-1 text-3xl font-semibold text-[#f4dfb8]">
+                      <p className="mt-1 text-3xl font-semibold text-[color:var(--store-accent)]">
                         {getCmsBlockField(cms.blocks, "hero", "memberTierValue", "Bronze")}
                       </p>
                     </article>
@@ -279,8 +282,8 @@ export default async function MinaPoangPage() {
 
                 <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   {benefits.map((item, index) => (
-                    <article key={item.title} className="rounded-xl border border-[#e8dece] bg-[#fdfbf8] p-4">
-                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#e8ddcc] bg-white text-[#20170f]">
+                    <article key={item.title} className="rounded-xl border p-4" style={{ borderColor: "var(--store-card-border)", background: "var(--store-soft-surface)" }}>
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border bg-white text-[#20170f]" style={{ borderColor: "var(--store-footer-border)" }}>
                         {index === 0 ? <MedalIcon /> : null}
                         {index === 1 ? <GiftIcon /> : null}
                         {index === 2 ? <BoltIcon /> : null}
@@ -296,16 +299,16 @@ export default async function MinaPoangPage() {
                   <h2 className="text-center text-4xl font-semibold text-slate-900">
                     {getCmsBlockField(cms.blocks, "howItWorks", "title", "Så fungerar det")}
                   </h2>
-                  <div className="mx-auto mt-2 h-[2px] w-20 rounded-full bg-[#c8a164]" />
+                  <div className="mx-auto mt-2 h-[2px] w-20 rounded-full bg-[color:var(--store-accent)]" />
                   <div className="mt-5 grid gap-3 md:grid-cols-3">
                     {steps.map((step, index) => (
-                      <article key={step.title} className="rounded-xl border border-[#e7dece] bg-white p-4 text-center">
-                        <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#e7ddcc] bg-[#faf6ef] text-slate-900">
+                      <article key={step.title} className="rounded-xl border bg-white p-4 text-center" style={{ borderColor: "var(--store-card-border)" }}>
+                        <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full border text-slate-900" style={{ borderColor: "var(--store-footer-border)", background: "var(--store-soft-surface)" }}>
                           {index === 0 ? <UserPlusIcon /> : null}
                           {index === 1 ? <CoinsIcon /> : null}
                           {index === 2 ? <BagIcon /> : null}
                         </span>
-                        <span className="mx-auto mt-3 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#c8a164] px-2 text-xs font-semibold text-slate-900">
+                        <span className="mx-auto mt-3 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[color:var(--store-accent)] px-2 text-xs font-semibold text-slate-900">
                           {index + 1}
                         </span>
                         <h3 className="mt-2 text-lg font-semibold text-slate-900">{step.title}</h3>
@@ -319,17 +322,18 @@ export default async function MinaPoangPage() {
                   <h2 className="text-center text-4xl font-semibold text-slate-900">
                     {getCmsBlockField(cms.blocks, "tiers", "sectionTitle", "Medlemsnivåer")}
                   </h2>
-                  <div className="mx-auto mt-2 h-[2px] w-20 rounded-full bg-[#c8a164]" />
+                  <div className="mx-auto mt-2 h-[2px] w-20 rounded-full bg-[color:var(--store-accent)]" />
 
                   <div className="mt-5 grid gap-3 lg:grid-cols-3">
                     {tiers.map((tier) => (
                       <article
                         key={tier.title}
-                        className="rounded-xl border border-[#2d241b] bg-gradient-to-b from-[#1a140f] via-[#130f0b] to-[#0e0b08] p-5 text-white"
+                        className="rounded-xl border p-5 text-white"
+                        style={{ borderColor: "var(--store-footer-border)", background: "var(--store-footer-surface)" }}
                       >
                         <h3 className="text-3xl font-semibold">{tier.title}</h3>
                         <p className="mt-1 text-sm text-white/75">{tier.text}</p>
-                        <p className="mt-4 text-base font-semibold text-[#f5deb3]">{tier.rate}</p>
+                        <p className="mt-4 text-base font-semibold text-[color:var(--store-accent)]">{tier.rate}</p>
                         <ul className="mt-3 space-y-2">
                           {tier.benefits.map((benefit) => (
                             <li key={benefit} className="flex items-center gap-2 text-sm text-white/90">
@@ -347,22 +351,22 @@ export default async function MinaPoangPage() {
                   <h2 className="text-center text-4xl font-semibold text-slate-900">
                     {getCmsBlockField(cms.blocks, "faq", "title", "Vanliga frågor")}
                   </h2>
-                  <div className="mx-auto mt-2 h-[2px] w-20 rounded-full bg-[#c8a164]" />
+                  <div className="mx-auto mt-2 h-[2px] w-20 rounded-full bg-[color:var(--store-accent)]" />
 
                   <div className="mt-5 space-y-2">
                     {faqItems.map((item) => (
-                      <details key={item.question} className="group rounded-lg border border-[#e8dece] bg-white">
+                      <details key={item.question} className="group rounded-lg border bg-white" style={{ borderColor: "var(--store-card-border)" }}>
                         <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold text-slate-900">
                           {item.question}
                           <span className="text-slate-400 transition group-open:rotate-180">⌄</span>
                         </summary>
-                        <p className="border-t border-[#f0e8db] px-4 py-3 text-sm text-slate-600">{item.answer}</p>
+                        <p className="border-t px-4 py-3 text-sm text-slate-600" style={{ borderColor: "var(--store-footer-border)" }}>{item.answer}</p>
                       </details>
                     ))}
                   </div>
                 </section>
 
-                <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#11100d] p-5 text-white">
+                <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5 text-white" style={{ background: "var(--store-footer-surface)" }}>
                   <div>
                     <h3 className="text-xl font-semibold">
                       {getCmsBlockField(cms.blocks, "support", "title", "Har du frågor om Loyalty Club?")}
@@ -373,7 +377,7 @@ export default async function MinaPoangPage() {
                   </div>
                   <Link
                     href={getCmsBlockField(cms.blocks, "support", "ctaHref", "/kundservice")}
-                    className="inline-flex items-center rounded-full bg-[#c8a164] px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-[#d6b278]"
+                    className="inline-flex items-center rounded-full bg-[color:var(--store-accent)] px-5 py-2.5 text-sm font-semibold text-slate-900 hover:brightness-105"
                   >
                     {getCmsBlockField(cms.blocks, "support", "ctaLabel", "Kontakta oss")}
                   </Link>

@@ -66,6 +66,25 @@ function SmallTrustIcon({ index }: { index: number }) {
   return <path d="M4 13v-1a8 8 0 0 1 16 0v1" />;
 }
 
+const fallbackFaqItems = [
+  {
+    question: "Hur lång tid har jag på mig att returnera en vara?",
+    answer: "Du kan registrera retur inom 30 dagar från att du mottagit varan.",
+  },
+  {
+    question: "När får jag tillbaka mina pengar?",
+    answer: "När returen är godkänd återbetalas beloppet normalt inom 1-5 arbetsdagar.",
+  },
+  {
+    question: "Vem betalar returfrakten?",
+    answer: "Vid postretur kan returfrakt debiteras enligt aktuella villkor. Exakt kostnad visas i flödet.",
+  },
+  {
+    question: "Kan jag byta vara istället för att returnera den?",
+    answer: "Byten hanteras vanligtvis som retur + ny beställning för snabbast hantering.",
+  },
+];
+
 export default async function SkapaReturPage({ searchParams }: CreateReturnPageProps) {
   const definition = getCmsPage("returer-aterbetalningar");
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
@@ -101,18 +120,28 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
     href: getCmsBlockField(cms.blocks, "flowStep1", `infoCard${index}Href`, "/"),
   }));
 
-  const faqItems = [
-    getCmsBlockField(cms.blocks, "flowStep1", "faq1", "Hur lång tid har jag på mig att returnera en vara?"),
-    getCmsBlockField(cms.blocks, "flowStep1", "faq2", "När får jag tillbaka mina pengar?"),
-    getCmsBlockField(cms.blocks, "flowStep1", "faq3", "Vem betalar returfrakten?"),
-    getCmsBlockField(cms.blocks, "flowStep1", "faq4", "Kan jag byta vara istället för att returnera den?"),
-  ].filter(Boolean);
+  const faqItems = [1, 2, 3, 4]
+    .map((index) => ({
+      question: getCmsBlockField(
+        cms.blocks,
+        "flowStep1",
+        `faq${index}`,
+        fallbackFaqItems[index - 1]?.question || "",
+      ),
+      answer: getCmsBlockField(
+        cms.blocks,
+        "flowStep1",
+        `faqA${index}`,
+        fallbackFaqItems[index - 1]?.answer || "",
+      ),
+    }))
+    .filter((item) => item.question.trim().length > 0);
 
   return (
     <main className="bg-white">
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
         <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <StorefrontHeader activeNav="Nyheter" cartCount={0} />
+          <StorefrontHeader cartCount={0} />
 
           <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
             <div className="relative z-10 max-w-[540px]">
@@ -207,11 +236,16 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
               </h3>
               <div className="mt-3 space-y-2">
                 {faqItems.map((item) => (
-                  <details key={item} className="group rounded-lg border border-[#e8e1d6] bg-white">
+                  <details key={item.question} className="group rounded-lg border border-[#e8e1d6] bg-white">
                     <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-[14px] font-medium text-slate-900">
-                      {item}
+                      {item.question}
                       <span className="text-slate-400 transition group-open:rotate-180">⌄</span>
                     </summary>
+                    {item.answer.trim().length > 0 ? (
+                      <p className="border-t border-[#ece6dc] px-4 py-3 text-[13px] leading-relaxed text-slate-600">
+                        {item.answer}
+                      </p>
+                    ) : null}
                   </details>
                 ))}
               </div>

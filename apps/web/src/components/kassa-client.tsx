@@ -12,6 +12,9 @@ type CartItem = {
   priceMinor: number;
   quantity: number;
   currency: string;
+  selectedColor?: string;
+  selectedMaterial?: string;
+  selectedSize?: string;
 };
 
 const CART_KEY = "applabbet_multistore_cart_v1";
@@ -32,7 +35,7 @@ const navItems = [
   { label: "Hem", href: "/" },
   { label: "Kategorier", href: "/products" },
   { label: "Nyheter", href: "/nyheter" },
-  { label: "Bästsäljare", href: "/products?sort=bestsellers" },
+  { label: "Bästsäljare", href: "/bastsaljare" },
   { label: "Om oss", href: "/om-oss" },
   { label: "Kundservice", href: "/kundservice" },
 ];
@@ -134,17 +137,38 @@ export function KassaClient({
 
   return (
     <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-      <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-        <header className="flex items-center justify-between bg-gradient-to-b from-[#11100d] via-[#12100e] to-[#0e0d0b] px-6 py-3 text-white">
-          <p className="text-xs tracking-[0.26em] text-[#c8a164]">{brandName.toUpperCase()}</p>
-          <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 lg:flex">
+      <div
+        className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+        style={{ borderColor: "var(--store-footer-border)" }}
+      >
+        <header className="relative flex items-center justify-between px-4 py-3 text-white sm:px-6" style={{ background: "var(--store-header-gradient)" }}>
+          <p className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</p>
+          <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 xl:flex">
             {navItems.map((item) => (
-              <Link key={item.label} href={item.href} className="hover:text-[#c8a164]">
+              <Link key={item.label} href={item.href} className="hover:text-[color:var(--store-accent)]">
                 {item.label}
               </Link>
             ))}
           </nav>
           <div className="flex items-center gap-2 text-white/85">
+            <details className="relative xl:hidden">
+              <summary className="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/20 bg-white/5">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+              </summary>
+              <div className="fixed inset-x-3 top-16 z-[120] max-h-[70vh] overflow-auto rounded-lg border border-white/15 bg-[#12100e] p-2 shadow-xl sm:inset-x-auto sm:right-4 sm:min-w-[260px]">
+                {navItems.map((item) => (
+                  <Link
+                    key={`mobile-${item.label}`}
+                    href={item.href}
+                    className="block rounded-md px-3 py-2 text-sm text-white/90 hover:bg-white/10"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </details>
             <Link href="/sok" aria-label="Sök" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5">
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="11" cy="11" r="7" /><path d="M20 20L16.65 16.65" /></svg>
             </Link>
@@ -158,10 +182,10 @@ export function KassaClient({
           </div>
         </header>
 
-        <div className="grid bg-gradient-to-r from-[#0f0f0f] to-[#161616] px-6 py-2 text-white/90 md:grid-cols-4">
+        <div className="grid px-6 py-2 text-white/90 md:grid-cols-4" style={{ background: "var(--store-header-gradient)" }}>
           {["Varukorg", "Leverans", "Betalning", "Bekräftelse"].map((step, idx) => (
             <div key={step} className="flex items-center gap-2 text-sm">
-              <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border text-xs ${idx === 1 ? "border-[#c8a164] bg-[#c8a164] text-black" : "border-white/35 text-white/90"}`}>
+              <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border text-xs ${idx === 1 ? "border-[color:var(--store-accent)] bg-[color:var(--store-accent)] text-black" : "border-white/35 text-white/90"}`}>
                 {idx + 1}
               </span>
               <span>{step}</span>
@@ -174,7 +198,7 @@ export function KassaClient({
           <p className="mt-1 text-slate-600">{subtitle}</p>
 
           <div className="mt-4 grid gap-5 lg:grid-cols-[1.1fr_1fr_0.9fr]">
-            <section className="space-y-3 rounded-xl border border-[#e6ddd1] bg-white p-4">
+            <section className="space-y-3 rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
               <h2 className="text-lg font-semibold">1 Leveransinformation</h2>
               <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-postadress" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               <div className="grid grid-cols-2 gap-2">
@@ -187,7 +211,7 @@ export function KassaClient({
                 <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Stad" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
               </div>
               <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Telefonnummer" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-              <div className="space-y-2 rounded-md border border-[#ece3d7] px-3 py-2 text-sm">
+              <div className="space-y-2 rounded-md border px-3 py-2 text-sm" style={{ borderColor: "var(--store-footer-border)" }}>
                 <p className="font-medium">2 Leveranssätt</p>
                 {availableShippingOptions.map((option) => {
                   const optionShippingMinor =
@@ -220,7 +244,7 @@ export function KassaClient({
                   );
                 })}
               </div>
-              <div className="space-y-2 rounded-md border border-[#ece3d7] px-3 py-2 text-sm">
+              <div className="space-y-2 rounded-md border px-3 py-2 text-sm" style={{ borderColor: "var(--store-footer-border)" }}>
                 <p className="font-medium">3 Betalningssätt</p>
                 <div className="space-y-1">
                   {paymentMethods.stripe ? (
@@ -261,13 +285,16 @@ export function KassaClient({
                   ) : null}
                 </div>
               </div>
-              <div className="rounded-md border border-[#ece3d7] px-3 py-2 text-sm">4 Bekräfta och betala</div>
+              <div className="rounded-md border px-3 py-2 text-sm" style={{ borderColor: "var(--store-footer-border)" }}>4 Bekräfta och betala</div>
             </section>
 
-            <section className="space-y-3 rounded-xl border border-[#e6ddd1] bg-white p-4">
+            <section className="space-y-3 rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
               <h2 className="text-lg font-semibold">Välj leveranssätt</h2>
               {selectedShipping ? (
-                <article className="rounded-md border border-[#c8a164] bg-[#fdf8ef] px-3 py-3 text-sm">
+                <article
+                  className="rounded-md border px-3 py-3 text-sm"
+                  style={{ borderColor: "var(--store-accent)", background: "color-mix(in srgb, var(--store-accent) 10%, white)" }}
+                >
                   <div className="flex items-start justify-between">
                     <p className="font-semibold">
                       {selectedShipping.name}
@@ -283,7 +310,7 @@ export function KassaClient({
                   </p>
                 </article>
               ) : null}
-              <div className="rounded-md border border-slate-200 bg-[#faf6ef] px-3 py-2 text-sm">
+              <div className="rounded-md border border-slate-200 px-3 py-2 text-sm" style={{ background: "var(--store-trust-gradient)" }}>
                 Trygg leverans · Vi levererar säkert och spårbart med vald fraktkedja
               </div>
               <button onClick={handleCheckout} disabled={loading || items.length === 0} className="w-full rounded-md bg-black px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
@@ -292,12 +319,25 @@ export function KassaClient({
               {error ? <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
             </section>
 
-            <aside className="space-y-3 rounded-xl border border-[#e6ddd1] bg-white p-4">
+            <aside className="space-y-3 rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-footer-border)" }}>
               <h2 className="text-xl font-semibold">Din beställning ({cartCount})</h2>
               <div className="space-y-2 border-b border-slate-200 pb-3">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex items-center justify-between text-sm">
-                    <div><p className="font-medium">{item.title}</p><p className="text-slate-500">Antal: {item.quantity}</p></div>
+                  <div
+                    key={`${item.productId}::${item.selectedColor || ""}::${item.selectedMaterial || ""}::${item.selectedSize || ""}`}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <div>
+                      <p className="font-medium">{item.title}</p>
+                      {item.selectedColor || item.selectedMaterial || item.selectedSize ? (
+                        <p className="text-xs text-slate-500">
+                          {[item.selectedColor ? `Färg: ${item.selectedColor}` : null, item.selectedMaterial ? `Material: ${item.selectedMaterial}` : null, item.selectedSize ? `Storlek: ${item.selectedSize}` : null]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      ) : null}
+                      <p className="text-slate-500">Antal: {item.quantity}</p>
+                    </div>
                     <p className="font-semibold">{formatMinorPrice(item.priceMinor * item.quantity, item.currency)}</p>
                   </div>
                 ))}
@@ -307,7 +347,7 @@ export function KassaClient({
                 <div className="flex justify-between"><span>Frakt</span><span className="font-medium">{formatMinorPrice(shippingMinor, currency)}</span></div>
               </div>
               <div className="flex items-end justify-between"><div><p className="text-sm text-slate-500">Totalt</p><p className="text-xs text-slate-500">inkl. moms</p></div><p className="text-4xl font-semibold">{formatMinorPrice(orderTotalMinor, currency)}</p></div>
-              <div className="rounded-md bg-[#faf6ef] px-3 py-2 text-sm">Säker betalning · Vi använder krypterad betalning.</div>
+              <div className="rounded-md px-3 py-2 text-sm" style={{ background: "var(--store-trust-gradient)" }}>Säker betalning · Vi använder krypterad betalning.</div>
               <div className="grid grid-cols-5 gap-1 text-center text-xs">
                 <span className="rounded border border-slate-300 py-1">Klarna</span>
                 <span className="rounded border border-slate-300 py-1">VISA</span>
@@ -318,11 +358,11 @@ export function KassaClient({
             </aside>
           </div>
 
-          <section className="mt-6 grid overflow-hidden rounded-xl border border-[#e6ddd1] bg-gradient-to-r from-[#0f0f0f] to-[#161616] text-white sm:grid-cols-2 lg:grid-cols-4">
-            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0 lg:first:border-l-0"><p className="text-sm font-semibold text-[#c8a164]">Fri frakt över 499 kr</p><p className="text-xs text-white/75">Snabb och spårbar leverans med PostNord.</p></article>
-            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0"><p className="text-sm font-semibold text-[#c8a164]">30 dagars öppet köp</p><p className="text-xs text-white/75">Enkelt att returnera om du inte är nöjd.</p></article>
-            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0"><p className="text-sm font-semibold text-[#c8a164]">Premium kvalitet</p><p className="text-xs text-white/75">Noggrant utvalda produkter.</p></article>
-            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0"><p className="text-sm font-semibold text-[#c8a164]">Säker betalning</p><p className="text-xs text-white/75">Betala tryggt med kort eller Apple Pay.</p></article>
+          <section className="mt-6 grid overflow-hidden rounded-xl border text-white sm:grid-cols-2 lg:grid-cols-4" style={{ borderColor: "var(--store-footer-border)", background: "var(--store-header-gradient)" }}>
+            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0 lg:first:border-l-0"><p className="text-sm font-semibold text-[color:var(--store-accent)]">Fri frakt över 499 kr</p><p className="text-xs text-white/75">Snabb och spårbar leverans med PostNord.</p></article>
+            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0"><p className="text-sm font-semibold text-[color:var(--store-accent)]">30 dagars öppet köp</p><p className="text-xs text-white/75">Enkelt att returnera om du inte är nöjd.</p></article>
+            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0"><p className="text-sm font-semibold text-[color:var(--store-accent)]">Premium kvalitet</p><p className="text-xs text-white/75">Noggrant utvalda produkter.</p></article>
+            <article className="flex min-h-[74px] flex-col justify-center border-t border-white/10 px-5 py-3 lg:border-l lg:border-t-0"><p className="text-sm font-semibold text-[color:var(--store-accent)]">Säker betalning</p><p className="text-xs text-white/75">Betala tryggt med kort eller Apple Pay.</p></article>
           </section>
         </div>
       </div>

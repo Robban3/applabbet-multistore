@@ -8,7 +8,7 @@ type TopTrustStripProps = {
 function TrustIcon({ icon }: { icon: TrustBadge["icon"] }) {
   if (icon === "truck") {
     return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-5 w-5 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M2 6h11v9H2z" />
         <path d="M13 9h4l3 3v3h-7z" />
         <circle cx="7" cy="18" r="1.5" />
@@ -18,7 +18,7 @@ function TrustIcon({ icon }: { icon: TrustBadge["icon"] }) {
   }
   if (icon === "rotate") {
     return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-5 w-5 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M20 5v5h-5" />
         <path d="M4 19v-5h5" />
         <path d="M19 10a7 7 0 0 0-12-3" />
@@ -28,13 +28,13 @@ function TrustIcon({ icon }: { icon: TrustBadge["icon"] }) {
   }
   if (icon === "star") {
     return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-5 w-5 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M12 3.8 14.8 9l5.7.9-4 4.2.9 5.7L12 17.1l-5.4 2.7.9-5.7-4-4.2L9.2 9 12 3.8Z" />
       </svg>
     );
   }
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg viewBox="0 0 24 24" className="h-5 w-5 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M12 3l7 3v6c0 4.2-2.4 7.2-7 9-4.6-1.8-7-4.8-7-9V6l7-3Z" />
       <path d="m9.5 12.5 1.7 1.7 3.5-3.8" />
     </svg>
@@ -55,7 +55,7 @@ export function TopTrustStrip({ items, size = "default" }: TopTrustStripProps) {
           : "sm:grid-cols-1";
 
   return (
-    <div className={`grid bg-gradient-to-r from-[#0f0f0f] to-[#181818] ${gridColumnsClass}`}>
+    <div className={`grid ${gridColumnsClass}`} style={{ background: "var(--store-trust-gradient)" }}>
       {visibleItems.map((item) => (
         <article
           key={`${item.title}-${item.icon}`}

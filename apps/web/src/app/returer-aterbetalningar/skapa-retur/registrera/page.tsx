@@ -103,7 +103,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
 
   const orders: ReturnStepOrder[] =
     (orderRows || []).length > 0
-      ? (orderRows || []).map((order, index) => {
+      ? (orderRows || []).map((order) => {
           const totalMinor = Number(order.total_minor || 0);
           const itemsForOrder = orderItemsMap.get(String(order.id)) || [];
           return {
@@ -115,9 +115,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
             statusLabel:
               String(order.fulfillment_status || "").toLowerCase() === "delivered"
                 ? "Levererad"
-                : index === 0
-                  ? "Levererad"
-                  : "Pågående",
+                : "Pågående",
             items: itemsForOrder,
           };
         })
@@ -151,7 +149,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
     <main className="bg-white">
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
         <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <StorefrontHeader activeNav="Nyheter" cartCount={0} />
+          <StorefrontHeader cartCount={0} />
 
           <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
             <div className="relative z-10 max-w-[560px]">
@@ -220,7 +218,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                 className="mt-2 space-y-3"
               >
                 <input type="hidden" name="account" value="1" />
-                {orders.map((order, index) => (
+                {orders.map((order) => (
                   <article
                     key={order.id}
                     className={`rounded-xl border bg-white px-4 py-3 ${

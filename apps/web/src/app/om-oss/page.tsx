@@ -1,17 +1,17 @@
-import Link from "next/link";
+import { CmsInlineText } from "@/components/cms-inline-text";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getStoreBrandName } from "@/lib/store-brand";
 
-const stats = [
+const fallbackStats = [
   { value: "100 000+", label: "Nöjda kunder" },
   { value: "250+", label: "Premium varumärken" },
   { value: "4,8 / 5", label: "Snitt i betyg" },
   { value: "10+", label: "År av passion" },
 ];
 
-const values = [
+const fallbackValues = [
   {
     title: "Kvalitet utan kompromisser",
     text: "Vi väljer produkter vi själva använder och litar på. Hög kvalitet, alltid.",
@@ -30,7 +30,7 @@ const values = [
   },
 ];
 
-const teamMembers = [
+const fallbackTeamMembers = [
   { name: "Markus Lind", role: "Grundare & CEO" },
   { name: "Sara Eriksson", role: "Produkt & Sortiment" },
   { name: "Daniel Berg", role: "Kundupplevelse" },
@@ -122,6 +122,27 @@ export default async function OmOssPage() {
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
   const cms = await getPublishedPageContent("om-oss", { blocks: fallbackBlocks });
   const brandName = await getStoreBrandName();
+  const stats = fallbackStats.map((item, index) => {
+    const itemNumber = index + 1;
+    return {
+      value: getCmsBlockField(cms.blocks, "stats", `item${itemNumber}Value`, item.value),
+      label: getCmsBlockField(cms.blocks, "stats", `item${itemNumber}Label`, item.label),
+    };
+  });
+  const values = fallbackValues.map((item, index) => {
+    const itemNumber = index + 1;
+    return {
+      title: getCmsBlockField(cms.blocks, "values", `item${itemNumber}Title`, item.title),
+      text: getCmsBlockField(cms.blocks, "values", `item${itemNumber}Text`, item.text),
+    };
+  });
+  const teamMembers = fallbackTeamMembers.map((item, index) => {
+    const itemNumber = index + 1;
+    return {
+      name: getCmsBlockField(cms.blocks, "story", `member${itemNumber}Name`, item.name),
+      role: getCmsBlockField(cms.blocks, "story", `member${itemNumber}Role`, item.role),
+    };
+  });
 
   return (
     <main className="bg-[#f6f3ee]">
@@ -131,29 +152,59 @@ export default async function OmOssPage() {
 
           <section className="grid border-b border-[#e6ddd1] lg:grid-cols-[0.95fr_1.05fr]">
             <div className="space-y-4 p-7 lg:p-8">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#b88f50]">{`Om ${brandName}`}</p>
-              <h1 className="max-w-[680px] text-5xl font-semibold leading-[1.06] text-slate-900 lg:text-[58px]">
-                {getCmsBlockField(cms.blocks, "hero", "title", "Mer än en sportbutik. En drivkraft för bättre prestation.")}
-              </h1>
-              <p className="max-w-[560px] text-[30px] leading-relaxed text-slate-700">
-                {getCmsBlockField(
+              <CmsInlineText
+                as="p"
+                blockKey="hero"
+                fieldKey="eyebrow"
+                className="text-xs font-semibold uppercase tracking-wide text-[#b88f50]"
+                value={getCmsBlockField(cms.blocks, "hero", "eyebrow", `Om ${brandName}`)}
+              />
+              <CmsInlineText
+                as="h1"
+                blockKey="hero"
+                fieldKey="title"
+                className="max-w-[680px] text-5xl font-semibold leading-[1.06] text-slate-900 lg:text-[58px]"
+                value={getCmsBlockField(cms.blocks, "hero", "title", "Mer än en sportbutik. En drivkraft för bättre prestation.")}
+              />
+              <CmsInlineText
+                as="p"
+                blockKey="hero"
+                fieldKey="description"
+                className="max-w-[560px] text-[30px] leading-relaxed text-slate-700"
+                value={getCmsBlockField(
                   cms.blocks,
                   "hero",
                   "description",
                   `${brandName} föddes ur en passion för träning, rörelse och viljan att hjälpa människor att nå sin fulla potential.`,
                 )}
-              </p>
+              />
               <button className="inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white">
-                Vår historia
+                <CmsInlineText
+                  as="span"
+                  blockKey="hero"
+                  fieldKey="ctaLabel"
+                  value={getCmsBlockField(cms.blocks, "hero", "ctaLabel", "Vår historia")}
+                />
                 <ArrowRightIcon />
               </button>
             </div>
-            <div className="relative min-h-[340px] overflow-hidden bg-gradient-to-br from-[#5c5953] via-[#2d2a25] to-[#12110f]">
-              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent opacity-90" />
-              <div className="absolute -left-6 bottom-8 h-44 w-52 rounded-2xl bg-black/35" />
-              <div className="absolute right-20 bottom-8 h-36 w-48 rounded-2xl border border-white/10 bg-[#1a1713]/80" />
-              <div className="absolute right-6 bottom-10 h-44 w-24 rounded-[18px] border border-white/15 bg-black/45" />
-            </div>
+            {getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim() ? (
+              <div className="relative min-h-[340px] overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getCmsBlockField(cms.blocks, "hero", "imageUrl", "")}
+                  alt="Om oss hero"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="relative min-h-[340px] overflow-hidden bg-gradient-to-br from-[#5c5953] via-[#2d2a25] to-[#12110f]">
+                <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent opacity-90" />
+                <div className="absolute -left-6 bottom-8 h-44 w-52 rounded-2xl bg-black/35" />
+                <div className="absolute right-20 bottom-8 h-36 w-48 rounded-2xl border border-white/10 bg-[#1a1713]/80" />
+                <div className="absolute right-6 bottom-10 h-44 w-24 rounded-[18px] border border-white/15 bg-black/45" />
+              </div>
+            )}
           </section>
 
           <section className="grid border-b border-[#e6ddd1] sm:grid-cols-2 lg:grid-cols-4">
@@ -167,8 +218,20 @@ export default async function OmOssPage() {
                     {index === 3 ? <CalendarIcon /> : null}
                   </span>
                   <div>
-                    <p className="text-[44px] font-semibold leading-none text-slate-900">{item.value}</p>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">{item.label}</p>
+                    <CmsInlineText
+                      as="p"
+                      blockKey="stats"
+                      fieldKey={`item${index + 1}Value`}
+                      className="text-[44px] font-semibold leading-none text-slate-900"
+                      value={item.value}
+                    />
+                    <CmsInlineText
+                      as="p"
+                      blockKey="stats"
+                      fieldKey={`item${index + 1}Label`}
+                      className="text-xs font-semibold uppercase tracking-wide text-slate-600"
+                      value={item.label}
+                    />
                   </div>
                 </div>
               </article>
@@ -177,8 +240,20 @@ export default async function OmOssPage() {
 
           <section className="grid gap-6 border-b border-[#e6ddd1] p-7 lg:grid-cols-[1.2fr_1fr]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#b88f50]">Våra värderingar</p>
-              <h2 className="mt-1 text-5xl font-semibold tracking-tight text-slate-900">Det vi står för</h2>
+              <CmsInlineText
+                as="p"
+                blockKey="values"
+                fieldKey="eyebrow"
+                className="text-xs font-semibold uppercase tracking-wide text-[#b88f50]"
+                value={getCmsBlockField(cms.blocks, "values", "eyebrow", "Våra värderingar")}
+              />
+              <CmsInlineText
+                as="h2"
+                blockKey="values"
+                fieldKey="title"
+                className="mt-1 text-5xl font-semibold tracking-tight text-slate-900"
+                value={getCmsBlockField(cms.blocks, "values", "title", "Det vi står för")}
+              />
               <div className="mt-6 grid gap-6 sm:grid-cols-2">
                 {values.map((item, index) => (
                   <article key={item.title}>
@@ -188,49 +263,150 @@ export default async function OmOssPage() {
                       {index === 2 ? <HeartIcon /> : null}
                       {index === 3 ? <BoltIcon /> : null}
                     </span>
-                    <p className="mt-2 text-[31px] font-semibold leading-tight text-slate-900">{item.title}</p>
-                    <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{item.text}</p>
+                    <CmsInlineText
+                      as="p"
+                      blockKey="values"
+                      fieldKey={`item${index + 1}Title`}
+                      className="mt-2 text-[31px] font-semibold leading-tight text-slate-900"
+                      value={item.title}
+                    />
+                    <CmsInlineText
+                      as="p"
+                      blockKey="values"
+                      fieldKey={`item${index + 1}Text`}
+                      className="mt-1 text-[15px] leading-relaxed text-slate-600"
+                      value={item.text}
+                    />
                   </article>
                 ))}
               </div>
             </div>
-            <div className="min-h-[320px] rounded-xl border border-[#e6ddd1] bg-gradient-to-br from-[#7a756e] via-[#57524c] to-[#312d28]" />
+            {getCmsBlockField(cms.blocks, "values", "imageUrl", "").trim() ? (
+              <div className="min-h-[320px] overflow-hidden rounded-xl border border-[#e6ddd1]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getCmsBlockField(cms.blocks, "values", "imageUrl", "")}
+                  alt="Värderingar bild"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="min-h-[320px] rounded-xl border border-[#e6ddd1] bg-gradient-to-br from-[#7a756e] via-[#57524c] to-[#312d28]" />
+            )}
           </section>
 
           <section className="grid gap-5 p-7 lg:grid-cols-[1.1fr_0.85fr_1.05fr]">
             <article className="rounded-xl bg-gradient-to-r from-[#0f0f0f] to-[#1b1713] p-5 text-white">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#c8a164]">Vår historia</p>
-              <h3 className="mt-1 text-5xl font-semibold tracking-tight">Från idé till rörelse</h3>
-              <p className="mt-2 text-sm text-white/75">
-                Allt började 2014 med en enkel idé: att samla de bästa produkterna för träning och aktiv
-                livsstil på ett ställe. Idag är {brandName} en av Nordens snabbast växande sportbutiker.
-              </p>
+              <CmsInlineText
+                as="p"
+                blockKey="story"
+                fieldKey="historyEyebrow"
+                className="text-xs font-semibold uppercase tracking-wide text-[#c8a164]"
+                value={getCmsBlockField(cms.blocks, "story", "historyEyebrow", "Vår historia")}
+              />
+              <CmsInlineText
+                as="h3"
+                blockKey="story"
+                fieldKey="historyTitle"
+                className="mt-1 text-5xl font-semibold tracking-tight"
+                value={getCmsBlockField(cms.blocks, "story", "historyTitle", "Från idé till rörelse")}
+              />
+              <CmsInlineText
+                as="p"
+                blockKey="story"
+                fieldKey="historyText"
+                className="mt-2 text-sm text-white/75"
+                value={getCmsBlockField(
+                  cms.blocks,
+                  "story",
+                  "historyText",
+                  `Allt började 2014 med en enkel idé: att samla de bästa produkterna för träning och aktiv livsstil på ett ställe. Idag är ${brandName} en av Nordens snabbast växande sportbutiker.`,
+                )}
+              />
               <button className="mt-4 inline-flex items-center gap-2 rounded-md border border-[#c8a164] px-4 py-2 text-sm font-semibold text-[#c8a164]">
-                Läs hela vår resa
+                <CmsInlineText
+                  as="span"
+                  blockKey="story"
+                  fieldKey="historyCtaLabel"
+                  value={getCmsBlockField(cms.blocks, "story", "historyCtaLabel", "Läs hela vår resa")}
+                />
                 <ArrowRightIcon />
               </button>
             </article>
 
             <article className="rounded-xl border border-[#e6ddd1] bg-white p-5">
-              <h3 className="text-4xl font-semibold">{`Team ${brandName}`}</h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Vi är ett team av träningsexperter, coacher och problemlösare som brinner för att ge dig
-                den bästa upplevelsen - varje dag.
-              </p>
+              <CmsInlineText
+                as="h3"
+                blockKey="story"
+                fieldKey="teamTitle"
+                className="text-4xl font-semibold"
+                value={getCmsBlockField(cms.blocks, "story", "teamTitle", `Team ${brandName}`)}
+              />
+              <CmsInlineText
+                as="p"
+                blockKey="story"
+                fieldKey="teamText"
+                className="mt-2 text-sm text-slate-600"
+                value={getCmsBlockField(
+                  cms.blocks,
+                  "story",
+                  "teamText",
+                  "Vi är ett team av träningsexperter, coacher och problemlösare som brinner för att ge dig den bästa upplevelsen - varje dag.",
+                )}
+              />
               <button className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#b88f50]">
-                Möt teamet
+                <CmsInlineText
+                  as="span"
+                  blockKey="story"
+                  fieldKey="teamCtaLabel"
+                  value={getCmsBlockField(cms.blocks, "story", "teamCtaLabel", "Möt teamet")}
+                />
                 <ArrowRightIcon />
               </button>
             </article>
 
             <div className="space-y-3">
-              <div className="h-44 rounded-xl border border-[#e6ddd1] bg-gradient-to-br from-[#6d6861] via-[#58534c] to-[#2f2a25]" />
+              {getCmsBlockField(cms.blocks, "story", "historyImageUrl", "").trim() ? (
+                <div className="h-44 overflow-hidden rounded-xl border border-[#e6ddd1]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getCmsBlockField(cms.blocks, "story", "historyImageUrl", "")}
+                    alt="Historia bild"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-44 rounded-xl border border-[#e6ddd1] bg-gradient-to-br from-[#6d6861] via-[#58534c] to-[#2f2a25]" />
+              )}
               <div className="grid grid-cols-3 gap-2">
-                {teamMembers.map((member) => (
+                {teamMembers.map((member, index) => (
                   <article key={member.name} className="space-y-1">
-                    <div className="h-24 rounded-lg border border-[#e6ddd1] bg-gradient-to-br from-[#6b665f] via-[#5b5650] to-[#3a352f]" />
-                    <p className="text-sm font-semibold">{member.name}</p>
-                    <p className="text-xs text-slate-500">{member.role}</p>
+                    {getCmsBlockField(cms.blocks, "story", `member${index + 1}ImageUrl`, "").trim() ? (
+                      <div className="h-24 overflow-hidden rounded-lg border border-[#e6ddd1]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={getCmsBlockField(cms.blocks, "story", `member${index + 1}ImageUrl`, "")}
+                          alt={member.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-24 rounded-lg border border-[#e6ddd1] bg-gradient-to-br from-[#6b665f] via-[#5b5650] to-[#3a352f]" />
+                    )}
+                    <CmsInlineText
+                      as="p"
+                      blockKey="story"
+                      fieldKey={`member${index + 1}Name`}
+                      className="text-sm font-semibold"
+                      value={member.name}
+                    />
+                    <CmsInlineText
+                      as="p"
+                      blockKey="story"
+                      fieldKey={`member${index + 1}Role`}
+                      className="text-xs text-slate-500"
+                      value={member.role}
+                    />
                   </article>
                 ))}
               </div>

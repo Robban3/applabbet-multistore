@@ -17,7 +17,7 @@ export default async function AdminPagesIndex() {
   if (access.status === "forbidden") {
     return (
       <p className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-        Ditt konto har inte access till den har adminpanelen.
+        Ditt konto har inte åtkomst till den här adminpanelen.
       </p>
     );
   }
@@ -65,12 +65,20 @@ export default async function AdminPagesIndex() {
                   <td className="py-2 pr-3">{row?.status || "saknas"}</td>
                   <td className="py-2 pr-3">{row?.updated_at ? new Date(row.updated_at).toLocaleString("sv-SE") : "-"}</td>
                   <td className="py-2 pr-3">
-                    <Link
-                      href={`/admin/pages/${page.key}`}
-                      className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
-                    >
-                      Redigera
-                    </Link>
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/admin/pages/${page.key}`}
+                        className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                      >
+                        Redigera
+                      </Link>
+                      <Link
+                        href={`/admin/pages/${page.key}?view=edit`}
+                        className="inline-flex rounded-md border border-sky-300 bg-sky-50 px-3 py-1.5 text-sm text-sky-700 hover:bg-sky-100"
+                      >
+                        Edit view
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               );

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { env } from "@/lib/env";
+import { finalizeInventoryForOrder } from "@/lib/inventory";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 function getStripeClient() {
@@ -50,12 +51,31 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.order_id;
+    const tenantId = session.metadata?.tenant_id;
 
-    if (orderId) {
+    if (orderId && tenantId) {
+      const inventoryResult = await finalizeInventoryForOrder({
+        tenantId,
+        orderId,
+      });
+
+      if (!inventoryResult.ok) {
+        await supabase
+          .from("orders")
+          .update({
+            status: "failed",
+            fulfillment_status: "cancelled",
+          })
+          .eq("id", orderId);
+
+        return NextResponse.json({ error: inventoryResult.error }, { status: 400 });
+      }
+
       await supabase
         .from("orders")
         .update({
           status: "paid",
+          fulfillment_status: "allocated",
           payment_intent_id:
             typeof session.payment_intent === "string"
               ? session.payment_intent

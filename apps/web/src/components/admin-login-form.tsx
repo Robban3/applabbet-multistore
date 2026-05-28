@@ -61,7 +61,7 @@ export function AdminLoginForm({ nextPath }: AdminLoginFormProps) {
 
       <div>
         <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-          Losenord
+          Lösenord
         </label>
         <input
           id="password"

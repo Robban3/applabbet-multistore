@@ -81,6 +81,11 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
     .eq("order_id", orderId)
     .in("id", selectedItems);
 
+  const fallbackItemsById = new Map([
+    ["f1", { id: "f1", title: "Premium Hörlurar Pro", variant: "Svart", quantity: 1, priceMinor: 119900 }],
+    ["f2", { id: "f2", title: "Chrome Elite Klocka", variant: "Svart / Stål", quantity: 1, priceMinor: 59900 }],
+  ]);
+
   const items =
     (orderItems || []).length > 0
       ? (orderItems || []).map((item) => ({
@@ -90,10 +95,15 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
           quantity: Number(item.quantity || 1),
           priceMinor: Number(item.unit_price_minor || 0),
         }))
-      : [
-          { id: "f1", title: "Premium Hörlurar Pro", variant: "Svart", quantity: 1, priceMinor: 119900 },
-          { id: "f2", title: "Chrome Elite Klocka", variant: "Svart / Stål", quantity: 1, priceMinor: 59900 },
-        ];
+      : selectedItems.map((itemId) =>
+          fallbackItemsById.get(itemId) || {
+            id: itemId,
+            title: "Produkt",
+            variant: "Standard",
+            quantity: 1,
+            priceMinor: 0,
+          },
+        );
 
   const totalMinor = items.reduce((sum, item) => sum + item.priceMinor * item.quantity, 0);
 
@@ -123,7 +133,7 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
     <main className="bg-white">
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
         <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <StorefrontHeader activeNav="Nyheter" cartCount={0} />
+          <StorefrontHeader cartCount={0} />
 
           <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
             <div className="relative z-10 max-w-[560px]">

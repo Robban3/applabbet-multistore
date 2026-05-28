@@ -24,9 +24,19 @@ function formatKr(minor: number) {
   return `${Math.round(minor / 100).toLocaleString("sv-SE")} kr`;
 }
 
-function buildReturnId() {
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("sv-SE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function buildReturnId(orderId: string) {
   const stamp = Date.now().toString().slice(-8);
-  return `RET-${stamp}`;
+  return `RET-${orderId.slice(0, 5).toUpperCase()}-${stamp}`;
 }
 
 function CheckIcon() {
@@ -71,6 +81,7 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
   const selectedItems = getParams(params.itemId);
   const status = getParam(params.status).trim();
   const returnId = getParam(params.returnId).trim();
+  const submittedAt = getParam(params.submittedAt).trim();
   if (!orderId || !returnMethod || !reason || selectedItems.length === 0) {
     redirect("/returer-aterbetalningar/skapa-retur/registrera/steg-4?account=1");
   }
@@ -81,12 +92,25 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
     redirect("/returer-aterbetalningar/skapa-retur/registrera/steg-4?account=1");
   }
 
-  const { data: orderItems } = await supabase
-    .from("order_items")
-    .select("id, product_title, quantity, unit_price_minor")
-    .eq("tenant_id", tenant.id)
-    .eq("order_id", orderId)
-    .in("id", selectedItems);
+  const [{ data: order }, { data: orderItems }] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("id, created_at")
+      .eq("tenant_id", tenant.id)
+      .eq("id", orderId)
+      .maybeSingle(),
+    supabase
+      .from("order_items")
+      .select("id, product_title, quantity, unit_price_minor")
+      .eq("tenant_id", tenant.id)
+      .eq("order_id", orderId)
+      .in("id", selectedItems),
+  ]);
+
+  const fallbackItemsById = new Map([
+    ["f1", { id: "f1", title: "Premium Hörlurar Pro", variant: "Svart", quantity: 1, priceMinor: 119900 }],
+    ["f2", { id: "f2", title: "Chrome Elite Klocka", variant: "Svart / Stål", quantity: 1, priceMinor: 59900 }],
+  ]);
 
   const items =
     (orderItems || []).length > 0
@@ -97,12 +121,46 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
           quantity: Number(item.quantity || 1),
           priceMinor: Number(item.unit_price_minor || 0),
         }))
-      : [
-          { id: "f1", title: "Premium Hörlurar Pro", variant: "Svart", quantity: 1, priceMinor: 119900 },
-          { id: "f2", title: "Chrome Elite Klocka", variant: "Svart / Stål", quantity: 1, priceMinor: 59900 },
-        ];
+      : selectedItems.map((itemId) =>
+          fallbackItemsById.get(itemId) || {
+            id: itemId,
+            title: "Produkt",
+            variant: "Standard",
+            quantity: 1,
+            priceMinor: 0,
+          },
+        );
 
   const totalMinor = items.reduce((sum, item) => sum + item.priceMinor * item.quantity, 0);
+  const isCompleted = status === "sent" && returnId.length > 0;
+  const displayDate =
+    formatDate(submittedAt || "") ||
+    formatDate(String(order?.created_at || "")) ||
+    formatDate(new Date().toISOString());
+
+  const progressSteps = [
+    getCmsBlockField(cms.blocks, "flowNavigation", "step1Label", "Välj order"),
+    getCmsBlockField(cms.blocks, "flowNavigation", "step2Label", "Välj produkter"),
+    getCmsBlockField(cms.blocks, "flowNavigation", "step3Label", "Ange returmetod"),
+    getCmsBlockField(cms.blocks, "flowNavigation", "step4Label", "Returdetaljer"),
+    getCmsBlockField(cms.blocks, "flowNavigation", "step5Label", "Bekräfta & skicka"),
+    getCmsBlockField(cms.blocks, "flowStep6", "title", "Returen mottagen"),
+  ];
+
+  const completionSteps = [
+    {
+      title: getCmsBlockField(cms.blocks, "flowStep6", "nextStep1Title", "Bekräftelse via e-post"),
+      text: getCmsBlockField(cms.blocks, "flowStep6", "nextStep1Text", "Du får strax ett e-postmeddelande med din returinformation och en retursedel."),
+    },
+    {
+      title: getCmsBlockField(cms.blocks, "flowStep6", "nextStep2Title", "Skicka din retur"),
+      text: getCmsBlockField(cms.blocks, "flowStep6", "nextStep2Text", "Packa varorna och fäst retursedeln på paketet. Lämna eller boka upphämtning enligt instruktionerna."),
+    },
+    {
+      title: getCmsBlockField(cms.blocks, "flowStep6", "nextStep3Title", "Vi behandlar din retur"),
+      text: getCmsBlockField(cms.blocks, "flowStep6", "nextStep3Text", "När vi har mottagit och godkänt din retur behandlar vi din återbetalning."),
+    },
+  ];
 
   async function submitReturnAction(formData: FormData) {
     "use server";
@@ -135,7 +193,8 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
     query.set("reason", formReason);
     if (formComment) query.set("comment", formComment);
     query.set("status", "sent");
-    query.set("returnId", buildReturnId());
+    query.set("returnId", buildReturnId(formOrderId));
+    query.set("submittedAt", new Date().toISOString());
     for (const itemId of formItemIds) {
       query.append("itemId", itemId);
     }
@@ -146,7 +205,7 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
     <main className="bg-white">
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
         <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <StorefrontHeader activeNav="Nyheter" cartCount={0} />
+          <StorefrontHeader cartCount={0} />
 
           <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
             <div className="relative z-10 max-w-[560px]">
@@ -177,28 +236,113 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
           </section>
 
           <section className="px-6 py-6">
-            <div className="grid gap-3 md:grid-cols-5">
-              {[
-                getCmsBlockField(cms.blocks, "flowNavigation", "step1Label", "Välj order"),
-                getCmsBlockField(cms.blocks, "flowNavigation", "step2Label", "Välj produkter"),
-                getCmsBlockField(cms.blocks, "flowNavigation", "step3Label", "Ange returmetod"),
-                getCmsBlockField(cms.blocks, "flowNavigation", "step4Label", "Returdetaljer"),
-                getCmsBlockField(cms.blocks, "flowNavigation", "step5Label", "Bekräfta & skicka"),
-              ].map((step, idx) => (
+            <div className="grid gap-3 md:grid-cols-6">
+              {progressSteps.map((step, idx) => (
                 <article key={step} className="text-center">
                   <span
                     className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                      idx < 4 ? "bg-black text-white" : "bg-[#d7ad62] text-slate-900"
+                      idx < (isCompleted ? 5 : 4)
+                        ? "bg-black text-white"
+                        : idx === (isCompleted ? 5 : 4)
+                          ? "bg-[#d7ad62] text-slate-900"
+                          : "bg-[#f2eee7] text-slate-900"
                     }`}
                   >
-                    {idx < 4 ? <CheckIcon /> : idx + 1}
+                    {idx < (isCompleted ? 5 : 4) ? <CheckIcon /> : idx + 1}
                   </span>
-                  <p className={`mt-2 text-sm font-semibold ${idx === 4 ? "text-[#d39d3d]" : "text-slate-700"}`}>{step}</p>
+                  <p className={`mt-2 text-sm font-semibold ${idx === (isCompleted ? 5 : 4) ? "text-[#d39d3d]" : "text-slate-700"}`}>{step}</p>
                 </article>
               ))}
             </div>
 
-            <form action={submitReturnAction} className="mt-5 space-y-3 rounded-xl border border-[#ece5d9] bg-[#fcfaf7] p-4">
+            {isCompleted ? (
+              <section className="mt-5 rounded-xl border border-[#ece5d9] bg-[#fcfaf7] p-4">
+                <p className="text-3xl font-semibold text-slate-900">
+                  {getCmsBlockField(cms.blocks, "flowStep6", "progressLabel", "Steg 6 av 6")}
+                </p>
+                <h2 className="mt-1 text-[42px] font-semibold leading-tight text-slate-900">
+                  {getCmsBlockField(cms.blocks, "flowStep6", "title", "Returen mottagen!")}
+                </h2>
+                <p className="whitespace-pre-line text-sm text-slate-600">
+                  {getCmsBlockField(cms.blocks, "flowStep6", "subtitle", "Tack! Vi har mottagit din returbegäran.\nDu får snart ett e-postmeddelande med en sammanfattning av din retur och vidare instruktioner.")}
+                </p>
+
+                <div className="mt-4 grid gap-4 rounded-xl border border-[#ece5d9] bg-white p-4 lg:grid-cols-2">
+                  <div>
+                    <p className="text-sm">
+                      <span className="font-semibold">{getCmsBlockField(cms.blocks, "flowStep6", "returnNumberLabel", "Returnummer:")}</span>{" "}
+                      {returnId}
+                    </p>
+                    <p className="mt-1 text-sm">
+                      <span className="font-semibold">{getCmsBlockField(cms.blocks, "flowStep6", "dateLabel", "Datum:")}</span>{" "}
+                      {displayDate}
+                    </p>
+                    <p className="mt-1 text-sm">
+                      <span className="font-semibold">{getCmsBlockField(cms.blocks, "flowStep6", "orderLabel", "Order:")}</span>{" "}
+                      {orderId.slice(0, 5).toUpperCase()}
+                    </p>
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+                    >
+                      {getCmsBlockField(cms.blocks, "flowStep6", "printButtonLabel", "Skriv ut sammanfattning")}
+                    </button>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold text-slate-900">
+                      {getCmsBlockField(cms.blocks, "flowStep6", "whatHappensTitle", "Vad händer nu?")}
+                    </p>
+                    <div className="mt-2 space-y-3">
+                      {completionSteps.map((step, index) => (
+                        <div
+                          key={step.title}
+                          className="grid gap-2 rounded-lg border border-[#ece5d9] bg-[#faf7f2] p-3 md:grid-cols-[28px_1fr]"
+                        >
+                          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#f0ede6] text-xs font-semibold text-slate-900">
+                            {index + 1}
+                          </span>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">{step.title}</p>
+                            <p className="text-xs text-slate-600">{step.text}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <article className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                  <p className="font-semibold">
+                    {getCmsBlockField(cms.blocks, "flowStep6", "sustainabilityTitle", "Miljötips")}
+                  </p>
+                  <p>
+                    {getCmsBlockField(cms.blocks, "flowStep6", "sustainabilityText", "Tack för att du returnerar på ett hållbart sätt. Tillsammans minskar vi onödiga transporter och värnar om miljön.")}
+                  </p>
+                </article>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                  <Link
+                    href={getCmsBlockField(cms.blocks, "flowStep6", "backToOrdersHref", "/mina-sidor/ordrar")}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
+                      <path d="M19 12H5" />
+                      <path d="m11 6-6 6 6 6" />
+                    </svg>
+                    {getCmsBlockField(cms.blocks, "flowStep6", "backToOrdersLabel", "Tillbaka till mina ordrar")}
+                  </Link>
+                  <Link
+                    href={getCmsBlockField(cms.blocks, "flowStep6", "doneHref", "/returer-aterbetalningar?account=1")}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]"
+                  >
+                    {getCmsBlockField(cms.blocks, "flowStep6", "doneLabel", "Klart")}
+                    <ArrowRightIcon />
+                  </Link>
+                </div>
+              </section>
+            ) : null}
+
+            <form action={submitReturnAction} className={`${isCompleted ? "hidden" : "mt-5"} space-y-3 rounded-xl border border-[#ece5d9] bg-[#fcfaf7] p-4`}>
               <input type="hidden" name="orderId" value={orderId} />
               <input type="hidden" name="returnMethod" value={returnMethod} />
               <input type="hidden" name="reason" value={reason} />

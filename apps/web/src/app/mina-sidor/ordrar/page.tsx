@@ -170,9 +170,12 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
   });
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
           <StorefrontHeader cartCount={2} />
 
           <div className="px-6 py-5">
@@ -197,28 +200,28 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
 
               <section>
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                  <div className="inline-flex rounded-lg border border-[#e6ddd1] bg-white p-1 text-sm">
+                  <div className="inline-flex rounded-lg border bg-white p-1 text-sm" style={{ borderColor: "var(--store-card-border)" }}>
                     <Link
                       href={createOrdersQuery("/mina-sidor/ordrar", "alla", q)}
-                      className={`rounded-md px-3 py-1.5 ${activeTab === "alla" ? "bg-[#f7efe1] font-semibold text-slate-900" : "text-slate-600"}`}
+                      className={`rounded-md px-3 py-1.5 ${activeTab === "alla" ? "bg-[color:var(--store-soft-surface)] font-semibold text-slate-900" : "text-slate-600"}`}
                     >
                       Alla ordrar
                     </Link>
                     <Link
                       href={createOrdersQuery("/mina-sidor/ordrar", "pagaende", q)}
-                      className={`rounded-md px-3 py-1.5 ${activeTab === "pagaende" ? "bg-[#f7efe1] font-semibold text-slate-900" : "text-slate-600"}`}
+                      className={`rounded-md px-3 py-1.5 ${activeTab === "pagaende" ? "bg-[color:var(--store-soft-surface)] font-semibold text-slate-900" : "text-slate-600"}`}
                     >
                       Pågående
                     </Link>
                     <Link
                       href={createOrdersQuery("/mina-sidor/ordrar", "levererade", q)}
-                      className={`rounded-md px-3 py-1.5 ${activeTab === "levererade" ? "bg-[#f7efe1] font-semibold text-slate-900" : "text-slate-600"}`}
+                      className={`rounded-md px-3 py-1.5 ${activeTab === "levererade" ? "bg-[color:var(--store-soft-surface)] font-semibold text-slate-900" : "text-slate-600"}`}
                     >
                       Levererade
                     </Link>
                     <Link
                       href={createOrdersQuery("/mina-sidor/ordrar", "returnerade", q)}
-                      className={`rounded-md px-3 py-1.5 ${activeTab === "returnerade" ? "bg-[#f7efe1] font-semibold text-slate-900" : "text-slate-600"}`}
+                      className={`rounded-md px-3 py-1.5 ${activeTab === "returnerade" ? "bg-[color:var(--store-soft-surface)] font-semibold text-slate-900" : "text-slate-600"}`}
                     >
                       Returnerade
                     </Link>
@@ -226,7 +229,7 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
 
                   <form method="GET" action="/mina-sidor/ordrar" className="flex items-center gap-2">
                     {activeTab !== "alla" ? <input type="hidden" name="tab" value={activeTab} /> : null}
-                    <label className="inline-flex items-center gap-2 rounded-md border border-[#e6ddd1] px-3 py-2 text-sm text-slate-500">
+                    <label className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm text-slate-500" style={{ borderColor: "var(--store-card-border)" }}>
                       <SearchIcon />
                       <input
                         name="q"
@@ -235,7 +238,7 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
                         className="w-52 outline-none"
                       />
                     </label>
-                    <button type="submit" className="inline-flex items-center gap-2 rounded-md border border-[#e6ddd1] px-3 py-2 text-sm font-semibold text-slate-700">
+                    <button type="submit" className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold text-slate-700" style={{ borderColor: "var(--store-card-border)" }}>
                       Filtrera
                     </button>
                   </form>
@@ -243,7 +246,7 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
 
                 <div className="space-y-3">
                   {filteredOrders.map((order) => (
-                    <article key={order.id} className="grid items-center gap-3 rounded-xl border border-[#e6ddd1] bg-white p-3 md:grid-cols-[1fr_110px_1fr_1fr_auto]">
+                    <article key={order.id} className="grid items-center gap-3 rounded-xl border bg-white p-3 md:grid-cols-[1fr_110px_1fr_1fr_auto]" style={{ borderColor: "var(--store-card-border)" }}>
                       <div>
                         <p className="font-semibold text-slate-900">Order {order.id}</p>
                         <p className="text-xs text-slate-500">Lagd {order.date}</p>

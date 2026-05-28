@@ -94,10 +94,6 @@ export function LiveChatWidget({ config }: { config?: Partial<LiveChatWidgetConf
     [config],
   );
 
-  if (!mergedConfig.enabled) {
-    return null;
-  }
-
   const [isOpen, setIsOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [input, setInput] = useState("");
@@ -112,6 +108,8 @@ export function LiveChatWidget({ config }: { config?: Partial<LiveChatWidgetConf
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!mergedConfig.enabled) return;
+
     const handleDocumentClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
@@ -135,17 +133,7 @@ export function LiveChatWidget({ config }: { config?: Partial<LiveChatWidgetConf
       document.removeEventListener("click", handleDocumentClick, true);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [mergedConfig.triggerPhrases]);
-
-  useEffect(() => {
-    setMessages([
-      {
-        id: "welcome",
-        role: "assistant",
-        text: mergedConfig.welcomeMessage,
-      },
-    ]);
-  }, [mergedConfig.welcomeMessage]);
+  }, [mergedConfig.enabled, mergedConfig.triggerPhrases]);
 
   useEffect(() => {
     if (!listRef.current) return;
@@ -214,6 +202,10 @@ export function LiveChatWidget({ config }: { config?: Partial<LiveChatWidgetConf
       setIsTyping(false);
     }
   };
+
+  if (!mergedConfig.enabled) {
+    return null;
+  }
 
   return (
     <div className="pointer-events-none fixed bottom-4 right-4 z-[120] flex flex-col items-end gap-3">

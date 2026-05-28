@@ -1,7 +1,8 @@
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 import { requireAdminAccess } from "@/lib/admin-access";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { CarrierIntegration, InventoryLevel, Product, ShippingMethod, Warehouse } from "@/types/commerce";
+import type { CarrierIntegration, ShippingMethod, Warehouse } from "@/types/commerce";
 
 export default async function AdminLogisticsPage() {
   const access = await requireAdminAccess("/admin/logistics");
@@ -17,14 +18,14 @@ export default async function AdminLogisticsPage() {
   if (access.status === "forbidden") {
     return (
       <p className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-        Ditt konto har inte access till den har adminpanelen.
+        Ditt konto har inte åtkomst till den här adminpanelen.
       </p>
     );
   }
 
   const supabase = await createSupabaseServerClient();
 
-  const [{ data: warehousesData }, { data: carriersData }, { data: methodsData }, { data: productsData }, { data: inventoryData }] =
+  const [{ data: warehousesData }, { data: carriersData }, { data: methodsData }] =
     await Promise.all([
       supabase
         .from("warehouses")
@@ -41,23 +42,11 @@ export default async function AdminLogisticsPage() {
         .select("id, tenant_id, warehouse_id, carrier_integration_id, name, service_code, handling_days, transit_days_min, transit_days_max, cutoff_time, delivery_weekdays, base_price_minor, free_shipping_over_minor, sort_order, is_active")
         .eq("tenant_id", access.tenant.id)
         .order("sort_order", { ascending: true }),
-      supabase
-        .from("products")
-        .select("id, tenant_id, slug, title, description, image_url, price_minor, currency, status")
-        .eq("tenant_id", access.tenant.id)
-        .order("title", { ascending: true }),
-      supabase
-        .from("inventory_levels")
-        .select("id, tenant_id, product_id, warehouse_id, on_hand_quantity, reserved_quantity, reorder_point")
-        .eq("tenant_id", access.tenant.id),
     ]);
 
   const warehouses = (warehousesData || []) as Warehouse[];
   const carriers = (carriersData || []) as CarrierIntegration[];
   const shippingMethods = (methodsData || []) as ShippingMethod[];
-  const products = (productsData || []) as Product[];
-  const inventoryLevels = (inventoryData || []) as InventoryLevel[];
-  const inventoryByKey = new Map(inventoryLevels.map((row) => [`${row.product_id}:${row.warehouse_id}`, row]));
 
   async function createWarehouseAction(formData: FormData) {
     "use server";
@@ -136,49 +125,45 @@ export default async function AdminLogisticsPage() {
     revalidatePath("/admin/logistics");
   }
 
-  async function upsertInventoryAction(formData: FormData) {
-    "use server";
-    const accessAction = await requireAdminAccess("/admin/logistics");
-    if (accessAction.status !== "allowed") return;
-
-    const productId = String(formData.get("product_id") || "").trim();
-    const warehouseId = String(formData.get("warehouse_id") || "").trim();
-    if (!productId || !warehouseId) return;
-
-    const supabaseAction = await createSupabaseServerClient();
-    await supabaseAction.from("inventory_levels").upsert(
-      {
-        tenant_id: accessAction.tenant.id,
-        product_id: productId,
-        warehouse_id: warehouseId,
-        on_hand_quantity: Number(formData.get("on_hand_quantity") || 0),
-        reserved_quantity: Number(formData.get("reserved_quantity") || 0),
-        reorder_point: Number(formData.get("reorder_point") || 0),
-      },
-      { onConflict: "tenant_id,product_id,warehouse_id" },
-    );
-
-    revalidatePath("/admin/logistics");
-  }
-
   return (
     <div className="space-y-4">
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-slate-900">Logistik & lager · {access.tenant.name}</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Hantera leveransdagar, fraktkedjor, lagerställen och lagernivåer per produkt.
+          Hantera leveransdagar, fraktkedjor och lagerställen.
         </p>
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="text-base font-semibold text-slate-900">Lagerställen</h3>
+        <p className="mt-1 text-sm text-slate-600">
+          Fyll i var lagret finns och markera vilket lager som ska vara standard vid lagerkoppling.
+        </p>
         <form action={createWarehouseAction} className="mt-3 grid gap-3 md:grid-cols-3">
-          <input name="name" placeholder="Namn (t.ex. Centrallager)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="code" placeholder="Kod (t.ex. STO-01)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="address_line1" placeholder="Adress" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="postal_code" placeholder="Postnummer" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="city" placeholder="Stad" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="country" defaultValue="Sverige" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Lagernamn</span>
+            <input name="name" placeholder="t.ex. Centrallager" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Lagerkod</span>
+            <input name="code" placeholder="t.ex. STO-01" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Adress</span>
+            <input name="address_line1" placeholder="Gatuadress" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Postnummer</span>
+            <input name="postal_code" placeholder="t.ex. 11122" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Stad</span>
+            <input name="city" placeholder="t.ex. Stockholm" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Land</span>
+            <input name="country" defaultValue="Sverige" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
           <label className="inline-flex items-center gap-2 text-sm">
             <input type="checkbox" name="is_default" />
             Standardlager
@@ -194,13 +179,34 @@ export default async function AdminLogisticsPage() {
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="text-base font-semibold text-slate-900">Fraktkedjor / carriers</h3>
+        <p className="mt-1 text-sm text-slate-600">
+          Koppla fraktleverantörer och eventuella API-uppgifter. Lämna nyckelfält tomma om du inte använder integration ännu.
+        </p>
         <form action={createCarrierAction} className="mt-3 grid gap-3 md:grid-cols-3">
-          <input name="carrier_code" placeholder="carrier_code (postnord, dhl...)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="display_name" placeholder="Visningsnamn" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="tracking_base_url" placeholder="Tracking URL bas" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="api_key" placeholder="API key (valfri)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="api_secret" placeholder="API secret (valfri)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="webhook_secret" placeholder="Webhook secret (valfri)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Carrier-kod</span>
+            <input name="carrier_code" placeholder="postnord, dhl..." className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Visningsnamn</span>
+            <input name="display_name" placeholder="t.ex. PostNord" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Tracking URL (bas)</span>
+            <input name="tracking_base_url" placeholder="https://..." className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">API key (valfri)</span>
+            <input name="api_key" placeholder="API key" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">API secret (valfri)</span>
+            <input name="api_secret" placeholder="API secret" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Webhook secret (valfri)</span>
+            <input name="webhook_secret" placeholder="Webhook secret" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
           <label className="inline-flex items-center gap-2 text-sm">
             <input type="checkbox" name="is_active" defaultChecked />
             Aktiv integration
@@ -216,33 +222,94 @@ export default async function AdminLogisticsPage() {
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="text-base font-semibold text-slate-900">Leveransdagar & fraktmetoder</h3>
+        <p className="mt-1 text-sm text-slate-600">
+          Skapa tydliga fraktregler genom att fylla i metod, leveranstider, pris och aktivering i sektionerna nedan.
+        </p>
         <form action={createShippingMethodAction} className="mt-3 grid gap-3 md:grid-cols-3">
-          <input name="name" placeholder="Metodnamn (Hemleverans)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="service_code" placeholder="Servicekod" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <select name="warehouse_id" className="rounded-md border border-slate-300 px-3 py-2 text-sm">
-            <option value="">Välj lager</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-          <select name="carrier_integration_id" className="rounded-md border border-slate-300 px-3 py-2 text-sm">
-            <option value="">Välj fraktkedja</option>
-            {carriers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.display_name}
-              </option>
-            ))}
-          </select>
-          <input name="handling_days" type="number" defaultValue={1} min={0} placeholder="Plock/pack dagar" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="transit_days_min" type="number" defaultValue={1} min={0} placeholder="Leverans min dagar" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="transit_days_max" type="number" defaultValue={3} min={0} placeholder="Leverans max dagar" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="cutoff_time" defaultValue="14:00" placeholder="Cutoff tid HH:MM" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="delivery_weekdays" defaultValue="1,2,3,4,5" placeholder="Leveransdagar (1-7, kommaseparerat)" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="base_price_minor" type="number" defaultValue={0} min={0} placeholder="Fraktpris minor" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="free_shipping_over_minor" type="number" defaultValue={0} min={0} placeholder="Fri frakt över minor" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <input name="sort_order" type="number" defaultValue={0} placeholder="Sortering" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <div className="md:col-span-3">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">1. Grundinformation</h4>
+            <p className="mt-1 text-xs text-slate-500">Vad metoden heter och vilken lager/fraktkedja som ska användas.</p>
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Metodnamn</span>
+            <input name="name" placeholder="t.ex. Hemleverans" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Servicekod</span>
+            <input name="service_code" placeholder="t.ex. HOME_STANDARD" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Lager</span>
+            <select name="warehouse_id" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+              <option value="">Välj lager</option>
+              {warehouses.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Fraktkedja</span>
+            <select name="carrier_integration_id" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+              <option value="">Välj fraktkedja</option>
+              {carriers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.display_name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="md:col-span-3 mt-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">2. Leveranstider</h4>
+            <p className="mt-1 text-xs text-slate-500">
+              Ange plock/pack-dagar, leveransintervall och cutoff-tid för order samma dag.
+            </p>
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Plock/pack-dagar</span>
+            <input name="handling_days" type="number" defaultValue={1} min={0} placeholder="t.ex. 1" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Leverans min (dagar)</span>
+            <input name="transit_days_min" type="number" defaultValue={1} min={0} placeholder="t.ex. 1" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Leverans max (dagar)</span>
+            <input name="transit_days_max" type="number" defaultValue={3} min={0} placeholder="t.ex. 3" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Cutoff-tid</span>
+            <input name="cutoff_time" defaultValue="14:00" placeholder="HH:MM" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Leveransdagar</span>
+            <input name="delivery_weekdays" defaultValue="1,2,3,4,5" placeholder="1-7, kommaseparerat" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <div className="md:col-span-3 mt-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">3. Prisregler</h4>
+            <p className="mt-1 text-xs text-slate-500">
+              Fyll i pris i minor-enheter (öre). Exempel: 4900 = 49 kr.
+            </p>
+          </div>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Fraktpris (minor/öre)</span>
+            <input name="base_price_minor" type="number" defaultValue={0} min={0} placeholder="t.ex. 4900" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Fri frakt över (minor/öre)</span>
+            <input name="free_shipping_over_minor" type="number" defaultValue={0} min={0} placeholder="t.ex. 49900" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Sorteringsordning</span>
+            <input name="sort_order" type="number" defaultValue={0} placeholder="t.ex. 1" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+          <div className="md:col-span-3 mt-1">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">4. Aktivering</h4>
+            <p className="mt-1 text-xs text-slate-500">
+              Markera metoden som aktiv när den ska kunna användas i checkout.
+            </p>
+          </div>
           <label className="inline-flex items-center gap-2 text-sm">
             <input type="checkbox" name="is_active" defaultChecked />
             Aktiv fraktmetod
@@ -259,38 +326,16 @@ export default async function AdminLogisticsPage() {
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="text-base font-semibold text-slate-900">Lagerhållning per produkt</h3>
-        {warehouses.length === 0 ? (
-          <p className="mt-2 text-sm text-amber-700">Skapa minst ett lagerställe först.</p>
-        ) : (
-          <div className="mt-3 space-y-2">
-            {products.map((product) => {
-              const defaultWarehouse = warehouses[0];
-              const key = `${product.id}:${defaultWarehouse.id}`;
-              const current = inventoryByKey.get(key);
-              return (
-                <form key={product.id} action={upsertInventoryAction} className="grid items-center gap-2 rounded-md border border-slate-200 p-3 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_auto]">
-                  <input type="hidden" name="product_id" value={product.id} />
-                  <p className="text-sm font-medium text-slate-800">{product.title}</p>
-                  <select name="warehouse_id" defaultValue={defaultWarehouse.id} className="rounded-md border border-slate-300 px-2 py-1.5 text-sm">
-                    {warehouses.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {w.name}
-                      </option>
-                    ))}
-                  </select>
-                  <input name="on_hand_quantity" type="number" min={0} defaultValue={current?.on_hand_quantity ?? 0} placeholder="I lager" className="rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
-                  <input name="reserved_quantity" type="number" min={0} defaultValue={current?.reserved_quantity ?? 0} placeholder="Reserverat" className="rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
-                  <input name="reorder_point" type="number" min={0} defaultValue={current?.reorder_point ?? 0} placeholder="Beställningspunkt" className="rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
-                  <button type="submit" className="inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
-                    Spara
-                  </button>
-                </form>
-              );
-            })}
-            {products.length === 0 ? <p className="text-sm text-slate-500">Inga produkter hittades.</p> : null}
-          </div>
-        )}
+        <h3 className="text-base font-semibold text-slate-900">Produktlager</h3>
+        <p className="mt-1 text-sm text-slate-600">
+          Produktlager hanteras i en egen flik för bättre överblick vid stora sortiment.
+        </p>
+        <Link
+          href="/admin/inventory"
+          className="mt-3 inline-flex rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+        >
+          Öppna produktlager
+        </Link>
       </section>
     </div>
   );

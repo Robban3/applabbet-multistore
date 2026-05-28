@@ -11,7 +11,7 @@ const navItems = [
   { label: "Hem", href: "/" },
   { label: "Kategorier", href: "/products" },
   { label: "Nyheter", href: "/nyheter" },
-  { label: "Bästsäljare", href: "/products?sort=bestsellers" },
+  { label: "Bästsäljare", href: "/bastsaljare" },
   { label: "Om oss", href: "/om-oss" },
   { label: "Kundservice", href: "/kundservice" },
 ];
@@ -69,7 +69,7 @@ function TrustIcon({ type }: { type: (typeof trustCards)[number]["icon"] }) {
 function BottomIcon({ type }: { type: (typeof bottomHighlights)[number]["icon"] }) {
   if (type === "tag") {
     return (
-      <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-4 w-4 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M3 11l8-8h7l3 3v7l-8 8-10-10z" />
         <circle cx="15.5" cy="8.5" r="1" />
       </svg>
@@ -77,14 +77,14 @@ function BottomIcon({ type }: { type: (typeof bottomHighlights)[number]["icon"] 
   }
   if (type === "bell") {
     return (
-      <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-4 w-4 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M6 9a6 6 0 1 1 12 0v5l2 2H4l2-2z" />
         <path d="M10 19a2 2 0 0 0 4 0" />
       </svg>
     );
   }
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M12 3l2.2 4.5 5 .7-3.6 3.5.8 5-4.4-2.3-4.4 2.3.8-5-3.6-3.5 5-.7z" />
     </svg>
   );
@@ -191,19 +191,43 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
   }
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <header className="flex items-center justify-between bg-gradient-to-b from-[#11100d] via-[#12100e] to-[#0e0d0b] px-6 py-3 text-white">
-            <p className="text-xs tracking-[0.26em] text-[#c8a164]">{brandName.toUpperCase()}</p>
-            <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 lg:flex">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
+          <header className="relative flex items-center justify-between px-4 py-3 text-white sm:px-6" style={{ background: "var(--store-header-gradient)" }}>
+            <p className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</p>
+            <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 xl:flex">
               {navItems.map((item) => (
-                <Link key={item.label} href={item.href} className="hover:text-[#c8a164]">
+                <Link key={item.label} href={item.href} className="hover:text-[color:var(--store-accent)]">
                   {item.label}
                 </Link>
               ))}
             </nav>
             <div className="flex items-center gap-2 text-white/85">
+              <details className="relative xl:hidden">
+                <summary className="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/20 bg-white/5">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
+                    <path d="M4 7h16M4 12h16M4 17h16" />
+                  </svg>
+                </summary>
+                <div
+                  className="fixed inset-x-3 top-16 z-[120] max-h-[70vh] overflow-auto rounded-lg border border-white/15 p-2 shadow-xl sm:inset-x-auto sm:right-4 sm:min-w-[260px]"
+                  style={{ background: "var(--store-header-overlay-surface)" }}
+                >
+                  {navItems.map((item) => (
+                    <Link
+                      key={`mobile-${item.label}`}
+                      href={item.href}
+                      className="block rounded-md px-3 py-2 text-sm text-white/90 hover:bg-white/10"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </details>
               <Link href="/sok" aria-label="Sök" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="11" cy="11" r="7" /><path d="M20 20L16.65 16.65" /></svg>
               </Link>
@@ -219,7 +243,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
 
           <div className="px-6 py-5">
             <div className="grid gap-5 lg:grid-cols-[1.55fr_0.85fr]">
-              <section className="space-y-4 rounded-xl border border-[#e6ddd1] bg-white p-5">
+              <section className="space-y-4 rounded-xl border bg-white p-5" style={{ borderColor: "var(--store-card-border)" }}>
                 <div className="flex items-start gap-4">
                   <span className="inline-flex h-20 w-20 items-center justify-center rounded-full border-2 border-emerald-600 text-4xl text-emerald-600">
                     <CheckCircleIcon />
@@ -228,7 +252,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                     <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
                       {getCmsBlockField(cms.blocks, "hero", "subtitle", "Tack för ditt köp!")}
                     </p>
-                    <h1 className="mt-1 text-5xl font-semibold tracking-tight text-slate-900">
+                    <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
                       {getCmsBlockField(cms.blocks, "hero", "title", "Din beställning är bekräftad")}
                     </h1>
                     <p className="mt-2 text-sm text-slate-700">
@@ -243,9 +267,9 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-[#e6ddd1] bg-white p-4">
+                <div className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--store-card-border)" }}>
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ordernummer</p>
-                  <p className="mt-1 text-4xl font-semibold text-slate-900">#{orderNumber}</p>
+                  <p className="mt-1 text-3xl font-semibold text-slate-900 sm:text-4xl">#{orderNumber}</p>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-4">
                     <div><p className="text-xs text-slate-500">Orderdatum</p><p className="text-sm font-semibold">{orderDate}</p></div>
@@ -275,8 +299,8 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 </div>
               </section>
 
-              <aside className="space-y-3 rounded-xl border border-[#e6ddd1] bg-white p-5">
-                <h2 className="text-2xl font-semibold text-slate-900">Din beställning ({itemCount} produkter)</h2>
+              <aside className="space-y-3 rounded-xl border bg-white p-5" style={{ borderColor: "var(--store-card-border)" }}>
+                <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">Din beställning ({itemCount} produkter)</h2>
                 <div className="space-y-2 border-b border-slate-200 pb-3">
                   {orderItems.map((item) => (
                     <div key={item.title} className="flex items-center justify-between text-sm">
@@ -291,14 +315,17 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                   <div className="flex justify-between"><span>Rabattkod</span><span className="font-medium">-</span></div>
                 </div>
                 <div className="flex items-end justify-between"><div><p className="text-sm text-slate-500">Totalt</p><p className="text-xs text-slate-500">inkl. moms</p></div><p className="text-4xl font-semibold">{formatMinorPrice(totalMinor, currency)}</p></div>
-                <div className="rounded-md bg-[#fdf1f3] px-3 py-2 text-sm">Betalt med {paymentProviderLabel} · Betalning kommer att dras när order skickas.</div>
+                <div className="rounded-md px-3 py-2 text-sm" style={{ background: "var(--store-soft-surface)" }}>Betalt med {paymentProviderLabel} · Betalning kommer att dras när order skickas.</div>
               </aside>
             </div>
 
-            <section className="mt-6 grid overflow-hidden rounded-xl border border-[#e6ddd1] bg-[#faf6ef] sm:grid-cols-2 lg:grid-cols-4">
+            <section
+              className="mt-6 grid overflow-hidden rounded-xl border sm:grid-cols-2 lg:grid-cols-4"
+              style={{ borderColor: "var(--store-card-border)", background: "var(--store-trust-gradient)" }}
+            >
               {trustCards.map((item) => (
-                <article key={item.title} className="flex min-h-[86px] items-center gap-4 border-t border-[#e7ddcf] px-5 py-3 lg:border-l lg:border-t-0 lg:first:border-l-0">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#ddd1c1] bg-white">
+                <article key={item.title} className="flex min-h-[86px] items-center gap-4 border-t px-5 py-3 lg:border-l lg:border-t-0 lg:first:border-l-0" style={{ borderColor: "var(--store-footer-border)" }}>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border bg-white" style={{ borderColor: "var(--store-footer-border)" }}>
                     <TrustIcon type={item.icon} />
                   </span>
                   <div>
@@ -309,20 +336,20 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
               ))}
             </section>
 
-            <section className="mt-6 rounded-xl bg-gradient-to-r from-[#0f0f0f] to-[#1a1612] px-5 py-4 text-white">
+            <section className="mt-6 rounded-xl px-5 py-4 text-white" style={{ background: "var(--store-footer-surface)" }}>
               <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
                 <div>
                   <h3 className="text-4xl font-semibold tracking-tight">Tack för att du handlar hos oss!</h3>
                   <p className="mt-1 text-sm text-white/75">Som tack får du 100 bonuspoäng till ditt konto när din order är levererad.</p>
-                  <Link href="/mina-sidor" className="mt-3 inline-flex rounded-md bg-[#c8a164] px-4 py-2 text-sm font-semibold text-slate-900">Till mina sidor</Link>
+                  <Link href="/mina-sidor" className="mt-3 inline-flex rounded-md bg-[color:var(--store-accent)] px-4 py-2 text-sm font-semibold text-slate-900">Till mina sidor</Link>
                 </div>
                 {bottomHighlights.map((item) => (
                   <article key={item.title} className="flex min-h-[78px] items-center gap-3 border-l border-white/15 pl-4">
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#c8a164]/45 bg-white/5">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--store-accent)]/45 bg-white/5">
                       <BottomIcon type={item.icon} />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-[#c8a164]">{item.title}</p>
+                      <p className="text-sm font-semibold text-[color:var(--store-accent)]">{item.title}</p>
                       <p className="text-xs text-white/75">{item.text}</p>
                     </div>
                   </article>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type CookieSettingsPanelProps = {
   openButtonLabel: string;
@@ -55,22 +55,11 @@ function persistPreferences(next: CookiePreferences) {
 
 export function CookieSettingsPanel({ openButtonLabel }: CookieSettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [analytics, setAnalytics] = useState(defaultPreferences.analytics);
-  const [functional, setFunctional] = useState(defaultPreferences.functional);
-  const [marketing, setMarketing] = useState(defaultPreferences.marketing);
-  const [lastSavedAt, setLastSavedAt] = useState("");
-
-  useEffect(() => {
-    const current = readPreferences();
-    setAnalytics(current.analytics);
-    setFunctional(current.functional);
-    setMarketing(current.marketing);
-    setLastSavedAt(current.updatedAt);
-  }, []);
+  const [preferences, setPreferences] = useState<CookiePreferences>(() => readPreferences());
 
   const savedLabel = useMemo(() => {
-    if (!lastSavedAt) return "";
-    const date = new Date(lastSavedAt);
+    if (!preferences.updatedAt) return "";
+    const date = new Date(preferences.updatedAt);
     if (Number.isNaN(date.getTime())) return "";
     return new Intl.DateTimeFormat("sv-SE", {
       year: "numeric",
@@ -79,25 +68,22 @@ export function CookieSettingsPanel({ openButtonLabel }: CookieSettingsPanelProp
       hour: "2-digit",
       minute: "2-digit",
     }).format(date);
-  }, [lastSavedAt]);
+  }, [preferences.updatedAt]);
 
   function saveSelection() {
     const next: CookiePreferences = {
       necessary: true,
-      analytics,
-      functional,
-      marketing,
+      analytics: preferences.analytics,
+      functional: preferences.functional,
+      marketing: preferences.marketing,
       updatedAt: new Date().toISOString(),
     };
     persistPreferences(next);
-    setLastSavedAt(next.updatedAt);
+    setPreferences(next);
     setIsOpen(false);
   }
 
   function allowAll() {
-    setAnalytics(true);
-    setFunctional(true);
-    setMarketing(true);
     const next: CookiePreferences = {
       necessary: true,
       analytics: true,
@@ -106,7 +92,7 @@ export function CookieSettingsPanel({ openButtonLabel }: CookieSettingsPanelProp
       updatedAt: new Date().toISOString(),
     };
     persistPreferences(next);
-    setLastSavedAt(next.updatedAt);
+    setPreferences(next);
     setIsOpen(false);
   }
 
@@ -134,15 +120,33 @@ export function CookieSettingsPanel({ openButtonLabel }: CookieSettingsPanelProp
             </label>
             <label className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm">
               <span>Prestanda och analys</span>
-              <input type="checkbox" checked={analytics} onChange={(event) => setAnalytics(event.target.checked)} />
+              <input
+                type="checkbox"
+                checked={preferences.analytics}
+                onChange={(event) =>
+                  setPreferences((prev) => ({ ...prev, analytics: event.target.checked }))
+                }
+              />
             </label>
             <label className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm">
               <span>Funktionella cookies</span>
-              <input type="checkbox" checked={functional} onChange={(event) => setFunctional(event.target.checked)} />
+              <input
+                type="checkbox"
+                checked={preferences.functional}
+                onChange={(event) =>
+                  setPreferences((prev) => ({ ...prev, functional: event.target.checked }))
+                }
+              />
             </label>
             <label className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm">
               <span>Marknadsföringscookies</span>
-              <input type="checkbox" checked={marketing} onChange={(event) => setMarketing(event.target.checked)} />
+              <input
+                type="checkbox"
+                checked={preferences.marketing}
+                onChange={(event) =>
+                  setPreferences((prev) => ({ ...prev, marketing: event.target.checked }))
+                }
+              />
             </label>
           </div>
 

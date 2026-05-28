@@ -15,7 +15,7 @@ export default async function CartPage() {
   const brandName = await getStoreBrandName();
 
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: "var(--store-footer-bg)" }}>
       <CheckoutClient
         heading={getCmsBlockField(cms.blocks, "summary", "title", "Din varukorg")}
         freeShippingText={getCmsBlockField(cms.blocks, "summary", "freeShippingText", "Fri frakt! Du har fri frakt på din beställning.")}

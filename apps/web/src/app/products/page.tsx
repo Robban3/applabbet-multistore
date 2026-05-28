@@ -13,13 +13,14 @@ import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
 import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 
 const navItems = [
   { label: "Hem", href: "/" },
   { label: "Kategorier", href: "/products" },
   { label: "Nyheter", href: "/nyheter" },
-  { label: "Bästsäljare", href: "/products?sort=bestsellers" },
+  { label: "Bästsäljare", href: "/bastsaljare" },
   { label: "Om oss", href: "/om-oss" },
   { label: "Kundservice", href: "/kundservice" },
 ];
@@ -161,8 +162,35 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     );
   }
 
-  const query = parseCatalogQuery(await searchParams);
+  const resolvedSearchParams = await searchParams;
+  const query = parseCatalogQuery(resolvedSearchParams);
+  const isBestSellersPage = (Array.isArray(resolvedSearchParams.sort) ? resolvedSearchParams.sort[0] : resolvedSearchParams.sort) === "bestsellers";
   const supabase = createSupabaseAdminClient();
+  const settings = await getTenantSettings(tenant);
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isFashion = themeKey === "fashion";
+  const isBeauty = themeKey === "beauty";
+  const isElectronics = themeKey === "electronics";
+  const isSport = themeKey === "sport";
+  const filterShellClass = isSport
+    ? "border-[#afcf90] bg-[#eef7e4]"
+    : isFashion
+      ? "border-[#d7c5ad] bg-[#f7f1ea]"
+      : isBeauty
+        ? "border-[#eac4d1] bg-[#fff1f6]"
+        : isElectronics
+          ? "border-[#bed2f4] bg-[#edf4ff]"
+          : "";
+  const cardVariant =
+    themeKey === "fashion"
+      ? "fashion"
+      : themeKey === "sport"
+        ? "sport"
+        : isBeauty
+          ? "beauty"
+          : isElectronics
+            ? "electronics"
+            : "default";
   const catalog = await getCatalogData(supabase, tenant.id, query);
   const favoriteProductIds = await getFavoriteProductIdsForCurrentUser(tenant.id);
   const categoryFilterOptions = catalog.availableCategories.map((category) => category.name);
@@ -206,27 +234,61 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     ? resultLabelTemplate.replace("{count}", String(catalog.total))
     : `${catalog.total} produkter`;
 
+  const shellBackground = "var(--store-footer-bg)";
+  const shellBorder = "var(--store-footer-border)";
+  const shellSurface = "var(--store-soft-surface)";
+  const shellCardBorder = "var(--store-card-border)";
+
   return (
-    <main className="bg-[#f6f3ee]">
+    <main style={{ background: shellBackground }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <div className="relative min-h-[390px] overflow-hidden bg-gradient-to-b from-[#11100d] via-[#12100e] to-[#0e0d0b] px-6 pb-18 pt-6 text-white">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: shellBorder }}
+        >
+          <div
+            className="relative min-h-[390px] overflow-hidden px-6 pb-18 pt-6 text-white"
+            style={{ background: "var(--store-header-gradient)" }}
+          >
             <header className="relative z-20 -mx-6 mb-4 flex items-center justify-between border-b border-white/10 px-6 pb-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs tracking-[0.26em] text-[#c8a164]">{brandName.toUpperCase()}</span>
+                <span className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</span>
               </div>
-              <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 lg:flex">
+              <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 xl:flex">
                 {navItems.map((item, idx) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={idx === 1 ? "border-b border-[#c8a164] pb-1 text-white" : "hover:text-[#c8a164]"}
+                    className={idx === 1 ? "border-b border-[color:var(--store-accent)] pb-1 text-white" : "hover:text-[color:var(--store-accent)]"}
                   >
                     {item.label}
                   </Link>
                 ))}
               </nav>
               <div className="flex items-center gap-2 text-white/85">
+                <details className="relative xl:hidden">
+                  <summary className="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
+                      <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                  </summary>
+                  <div
+                    className="fixed inset-x-3 top-16 z-[120] max-h-[70vh] overflow-auto rounded-lg border border-white/15 p-2 shadow-xl sm:inset-x-auto sm:right-4 sm:min-w-[260px]"
+                    style={{ background: "var(--store-header-overlay-surface)" }}
+                  >
+                    {navItems.map((item, idx) => (
+                      <Link
+                        key={`mobile-${item.label}`}
+                        href={item.href}
+                        className={`block rounded-md px-3 py-2 text-sm ${
+                          idx === 1 ? "bg-white/10 text-white" : "text-white/90 hover:bg-white/10"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
                 <Link
                   href="/sok"
                   aria-label="Sök"
@@ -262,95 +324,112 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </div>
             </header>
 
-            <div className="pointer-events-none absolute right-6 top-2 h-52 w-80 rounded-full border-[20px] border-[#d7b284]/40" />
-            <div className="pointer-events-none absolute right-24 top-16 h-36 w-56 rounded-full border-[12px] border-[#e2c297]/30" />
+            <div
+              className="pointer-events-none absolute right-6 top-2 h-52 w-80 rounded-full border-[20px]"
+              style={{ borderColor: isElectronics ? "rgba(88, 140, 255, 0.35)" : "rgba(215, 178, 132, 0.4)" }}
+            />
+            <div
+              className="pointer-events-none absolute right-24 top-16 h-36 w-56 rounded-full border-[12px]"
+              style={{ borderColor: isElectronics ? "rgba(124, 166, 255, 0.28)" : "rgba(226, 194, 151, 0.3)" }}
+            />
             <div className="relative z-10 pt-2">
               <p className="text-sm font-medium tracking-wide text-white/70">
                 <Link href="/" className="hover:text-white">Hem</Link>
                 <span className="mx-2 text-white/45">&gt;</span>
                 <Link href="/products" className="hover:text-white">Kategorier</Link>
                 <span className="mx-2 text-white/45">&gt;</span>
-                <Link href="/products" className="hover:text-white">Ljud & Hörlurar</Link>
+                <Link href="/products" className="hover:text-white">{isElectronics ? "Datorer & tillbehör" : "Ljud & Hörlurar"}</Link>
               </p>
-              <h1 className="mt-5 text-5xl font-semibold leading-tight">
-                {getCmsBlockField(cms.blocks, "hero", "title", "Ljud & Hörlurar")}
+              <h1 className="mt-5 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
+                {getCmsBlockField(cms.blocks, "hero", "title", isElectronics ? "Datorer & tillbehör" : "Ljud & Hörlurar")}
               </h1>
               <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-white/78">
                 {getCmsBlockField(
                   cms.blocks,
                   "hero",
                   "description",
-                  "Upptäck vår kollektion av hörlurar, högtalare och ljudprodukter.",
+                  isElectronics
+                    ? "Upptäck datorer, skärmar, tangentbord, möss och mycket mer."
+                    : "Upptäck vår kollektion av hörlurar, högtalare och ljudprodukter.",
                 )}
               </p>
               <div className="mt-7 grid max-w-3xl gap-4 sm:grid-cols-3">
                 <div className="flex items-center gap-2.5 text-sm text-white/90">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#c8a164]/60 bg-[#17130f]">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--store-accent)]/60 bg-[color:var(--store-header-overlay-surface)]">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M12 3l7 3v6c0 4.4-2.7 7.6-7 9-4.3-1.4-7-4.6-7-9V6z" />
                       <path d="M9 12l2 2 4-4" />
                     </svg>
                   </span>
-                  <span>{getCmsBlockField(cms.blocks, "hero", "trustLine1", "Premium kvalitet")}</span>
+                  <span>{getCmsBlockField(cms.blocks, "hero", "trustLine1", isElectronics ? "Fri frakt över 499 kr" : "Premium kvalitet")}</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-sm text-white/90">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#c8a164]/60 bg-[#17130f]">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--store-accent)]/60 bg-[color:var(--store-header-overlay-surface)]">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <circle cx="12" cy="12" r="8" />
                       <path d="M12 8v4l3 2" />
                     </svg>
                   </span>
-                  <span>{getCmsBlockField(cms.blocks, "hero", "trustLine2", "Topprankade av våra kunder")}</span>
+                  <span>{getCmsBlockField(cms.blocks, "hero", "trustLine2", isElectronics ? "30 dagars öppet köp" : "Topprankade av våra kunder")}</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-sm text-white/90">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#c8a164]/60 bg-[#17130f]">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--store-accent)]/60 bg-[color:var(--store-header-overlay-surface)]">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M12 3l7 3v6c0 4.4-2.7 7.6-7 9-4.3-1.4-7-4.6-7-9V6z" />
                       <path d="M12 9v4" />
                       <circle cx="12" cy="16" r="1" fill="currentColor" stroke="none" />
                     </svg>
                   </span>
-                  <span>{getCmsBlockField(cms.blocks, "hero", "trustLine3", "2 års garanti")}</span>
+                  <span>{getCmsBlockField(cms.blocks, "hero", "trustLine3", isElectronics ? "Snabb leverans 1-2 arbetsdagar" : "2 års garanti")}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="relative z-20 -mt-9 px-5 pb-4">
-            <div className={`grid gap-3 rounded-2xl border border-[#e7ddd1] bg-[#faf7f2] p-4 shadow-[0_8px_24px_rgba(21,17,12,0.14)] ${categoryGridClass}`}>
+            <div
+              className={`grid gap-3 rounded-2xl border p-4 shadow-[0_8px_24px_rgba(21,17,12,0.14)] ${categoryGridClass}`}
+              style={{ borderColor: shellCardBorder, background: shellSurface }}
+            >
               {primaryCategoryCards.map((item, idx) => (
                 <Link
                   key={item.title}
                   href={item.href}
-                  className="rounded-xl border border-[#e7ddd1] bg-white px-4 py-3 text-center"
+                  className="rounded-xl border bg-white px-4 py-3 text-center"
+                  style={{ borderColor: shellCardBorder }}
                 >
                   <div
                     className={`mx-auto mb-2 inline-flex items-center justify-center rounded-full border ${primaryIconSizeClass} ${
                       idx === 0
-                        ? "border-[#c8a164] bg-[#f7efe1]"
-                        : "border-[#d6ccbf] bg-[#fbf8f3]"
+                        ? "border-[color:var(--store-accent)] bg-white"
+                        : "border-[color:var(--store-footer-border)] bg-[color:var(--store-soft-surface)]"
                     }`}
                   >
                     <CategoryIcon type={item.icon} />
                   </div>
                   <p className={`${primaryTitleClass} font-semibold text-slate-900`}>{item.title}</p>
                   <p className={`${primaryCountClass} text-slate-500`}>{item.count} produkter</p>
-                  {idx === 0 ? <div className="mx-auto mt-2 h-0.5 w-12 rounded bg-[#c8a164]" /> : null}
+                  {idx === 0 ? <div className="mx-auto mt-2 h-0.5 w-12 rounded bg-[color:var(--store-accent)]" /> : null}
                 </Link>
               ))}
             </div>
           </div>
 
           <div className="grid gap-6 px-5 py-5 lg:grid-cols-[260px_1fr]">
-            <aside className="rounded-xl border border-[#e5dbcf] bg-[#fdfbf7] p-4">
+            <aside
+              className={`rounded-xl border p-4 ${filterShellClass}`}
+              style={filterShellClass ? undefined : { borderColor: shellCardBorder, background: shellSurface }}
+            >
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">Filter</h2>
-                <span className="text-sm text-slate-500">⚙</span>
+                <Link href="/products" className="text-xs text-slate-500 hover:text-slate-700">
+                  Rensa alla
+                </Link>
               </div>
 
               <AutoSubmitFilterForm action="/products" className="space-y-5 text-sm text-slate-700">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Kategori</p>
+                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Kategori</p>
                   <div className="space-y-2">
                     {categoryFilterOptions.map((category) => (
                       <label key={category} className="flex items-center gap-2">
@@ -359,6 +438,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                           name="category"
                           value={category}
                           defaultChecked={query.categories.includes(category)}
+                          className="accent-[color:var(--store-accent)]"
                         />
                         {category}
                       </label>
@@ -370,7 +450,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
 
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Varumärke</p>
+                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Varumärke</p>
                   <div className="space-y-2">
                     {brandFilterOptions.map((brand) => (
                       <label key={brand} className="flex items-center gap-2">
@@ -379,6 +459,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                           name="brand"
                           value={brand}
                           defaultChecked={query.brands.includes(brand)}
+                          className="accent-[color:var(--store-accent)]"
                         />
                         {brand}
                       </label>
@@ -390,7 +471,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
 
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Pris</p>
+                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Pris</p>
                   <PriceRangeFilter
                     minBound={0}
                     maxBound={10000}
@@ -400,7 +481,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
 
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Egenskaper</p>
+                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Egenskaper</p>
                   <div className="space-y-2">
                     {catalog.availableFeatures.map((feature) => (
                       <label key={feature} className="flex items-center gap-2">
@@ -409,6 +490,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                           name="feature"
                           value={feature}
                           defaultChecked={query.features.includes(feature)}
+                          className="accent-[color:var(--store-accent)]"
                         />
                         {feature}
                       </label>
@@ -459,18 +541,27 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
               </div>
 
-              <CatalogResultsGrid products={firstProducts} favoriteProductIds={favoriteProductIds} />
+              <CatalogResultsGrid
+                products={firstProducts}
+                favoriteProductIds={favoriteProductIds}
+                badgeLabel={isBestSellersPage ? "POPULÄR" : undefined}
+                cardVariant={cardVariant}
+              />
               {overflowCategoryCards.length > 0 ? (
-                <section className="mt-6 rounded-2xl border border-[#e7ddd1] bg-[#faf7f2] p-4">
+                <section className="mt-6 rounded-2xl border p-4" style={{ borderColor: shellCardBorder, background: shellSurface }}>
                   <h3 className="text-[28px] font-semibold leading-none text-slate-900">Fler kategorier</h3>
                   <div className={`mt-4 grid gap-3 ${overflowGridClass}`}>
                     {overflowCategoryCards.map((item) => (
                       <Link
                         key={`more-${item.title}`}
                         href={item.href}
-                        className="rounded-xl border border-[#e7ddd1] bg-white px-4 py-3 text-center"
+                        className="rounded-xl border bg-white px-4 py-3 text-center"
+                        style={{ borderColor: shellCardBorder }}
                       >
-                        <div className="mx-auto mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#d6ccbf] bg-[#fbf8f3]">
+                        <div
+                          className="mx-auto mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full border"
+                          style={{ borderColor: "var(--store-footer-border)", background: "var(--store-soft-surface)" }}
+                        >
                           <CategoryIcon type={item.icon} />
                         </div>
                         <p className="text-sm font-semibold text-slate-900">{item.title}</p>
@@ -482,18 +573,27 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               ) : null}
               {remainingProducts.length > 0 ? (
                 <div className="mt-6">
-                  <CatalogResultsGrid products={remainingProducts} favoriteProductIds={favoriteProductIds} />
+                  <CatalogResultsGrid
+                    products={remainingProducts}
+                    favoriteProductIds={favoriteProductIds}
+                    badgeLabel={isBestSellersPage ? "POPULÄR" : undefined}
+                    cardVariant={cardVariant}
+                  />
                 </div>
               ) : null}
               <CatalogPagination actionPath="/products" query={query} totalPages={catalog.totalPages} />
             </section>
           </div>
 
-          <section className="mt-7 grid overflow-hidden rounded-[10px] border border-[#e9dfd2] bg-[#fbf8f3] sm:grid-cols-2 lg:grid-cols-4">
+          <section
+            className="mt-7 grid overflow-hidden rounded-[10px] border sm:grid-cols-2 lg:grid-cols-4"
+            style={{ borderColor: "var(--store-card-border)", background: "var(--store-soft-surface)" }}
+          >
             {trustCards.map((item) => (
               <article
                 key={item.title}
-                className="flex min-h-[78px] items-center gap-3 border-t border-[#ece3d7] px-5 py-3 sm:border-t-0 lg:border-l lg:first:border-l-0"
+                className="flex min-h-[78px] items-center gap-3 border-t px-5 py-3 sm:border-t-0 lg:border-l lg:first:border-l-0"
+                style={{ borderColor: "var(--store-footer-border)" }}
               >
                 <span className="inline-flex h-6 w-6 items-center justify-center text-slate-700">
                   <TrustIcon type={item.icon} />

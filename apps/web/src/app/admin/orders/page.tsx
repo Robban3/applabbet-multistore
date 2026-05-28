@@ -17,7 +17,7 @@ export default async function AdminOrdersPage() {
   if (access.status === "forbidden") {
     return (
       <p className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-        Ditt konto har inte access till den har adminpanelen.
+        Ditt konto har inte åtkomst till den här adminpanelen.
       </p>
     );
   }
@@ -34,7 +34,7 @@ export default async function AdminOrdersPage() {
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-900">Orders for {access.tenant.name}</h2>
+      <h2 className="text-lg font-semibold text-slate-900">Ordrar för {access.tenant.name}</h2>
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>

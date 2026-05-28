@@ -59,7 +59,7 @@ export async function AccountSidebar({ activeHref, withIcons = false, items }: A
   const resolvedItems = items ?? (await getDefaultSidebarItems());
 
   return (
-    <aside className="space-y-1 rounded-xl border border-[#e6ddd1] bg-white p-3">
+    <aside className="space-y-1 rounded-xl border bg-white p-3" style={{ borderColor: "var(--store-card-border)" }}>
       {resolvedItems.map((item) => {
         const isLogout = item.href === "/mina-sidor/logga-ut";
         const isActive = item.href === activeHref;
@@ -73,7 +73,7 @@ export async function AccountSidebar({ activeHref, withIcons = false, items }: A
             href={item.href}
             className={`${baseClass} ${
               isActive
-                ? "bg-[#f7efe1] font-semibold text-slate-900"
+                ? "bg-[color:var(--store-soft-surface)] font-semibold text-slate-900"
                 : isLogout
                   ? "mt-2 border border-rose-200 text-rose-700 hover:bg-rose-50"
                   : "text-slate-700 hover:bg-slate-50"

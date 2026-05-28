@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { finalizeInventoryForOrder } from "@/lib/inventory";
 import { getStripeClient } from "@/lib/payments";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { normalizePaymentMethods } from "@/lib/tenant-settings";
@@ -155,7 +156,7 @@ export async function POST(request: Request) {
         shipping_carrier: shippingCarrierName,
         shipping_service: (selectedShippingMethod?.service_code as string) || null,
         shipping_price_minor: shippingMinor,
-        fulfillment_status: "allocated",
+        fulfillment_status: "unfulfilled",
         estimated_dispatch_date: dispatchDate ? dispatchDate.toISOString().slice(0, 10) : null,
         estimated_delivery_start: deliveryStart ? deliveryStart.toISOString().slice(0, 10) : null,
         estimated_delivery_end: deliveryEnd ? deliveryEnd.toISOString().slice(0, 10) : null,
@@ -182,33 +183,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Kunde inte spara orderrader." }, { status: 500 });
     }
 
-    for (const item of payload.items) {
-      const rows = [...(rowsByProduct.get(item.productId) || [])].sort((a, b) => b.available - a.available);
-      if (rows.length === 0) continue;
-      let remaining = item.quantity;
-      for (const row of rows) {
-        if (remaining <= 0) break;
-        const allocate = Math.min(remaining, Math.max(0, row.available));
-        if (allocate <= 0) continue;
-        row.available -= allocate;
-        row.reserved += allocate;
-        await supabase
-          .from("inventory_levels")
-          .update({ reserved_quantity: row.reserved })
-          .eq("id", row.id);
-        remaining -= allocate;
-      }
-    }
-
     const protocol = host.includes("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
     const successUrl = `${protocol}://${host}/order-confirmation?order_id=${order.id}`;
     const cancelUrl = `${protocol}://${host}/checkout?status=cancelled`;
 
     if (selectedPaymentMethod !== "stripe") {
+      const inventoryResult = await finalizeInventoryForOrder({
+        tenantId: tenant.id,
+        orderId: order.id,
+      });
+
+      if (!inventoryResult.ok) {
+        return NextResponse.json({ error: inventoryResult.error }, { status: 400 });
+      }
+
       await supabase
         .from("orders")
         .update({
+          status: "paid",
           payment_intent_id: `${selectedPaymentMethod}_${order.id}`,
+          fulfillment_status: "allocated",
         })
         .eq("id", order.id);
 

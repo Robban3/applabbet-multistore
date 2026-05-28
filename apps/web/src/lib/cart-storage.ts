@@ -4,6 +4,9 @@ export type CartItem = {
   priceMinor: number;
   quantity: number;
   currency: string;
+  selectedColor?: string;
+  selectedMaterial?: string;
+  selectedSize?: string;
 };
 
 export const CART_KEY = "applabbet_multistore_cart_v1";
@@ -31,13 +34,27 @@ export function addProductToCart(input: {
   title: string;
   priceMinor: number;
   currency: string;
+  quantity?: number;
+  selectedColor?: string;
+  selectedMaterial?: string;
+  selectedSize?: string;
 }) {
+  const quantityToAdd = Math.max(1, Math.floor(input.quantity || 1));
   const current = readCart();
-  const existing = current.find((item) => item.productId === input.productId);
+  const existing = current.find(
+    (item) =>
+      item.productId === input.productId &&
+      (item.selectedColor || "") === (input.selectedColor || "") &&
+      (item.selectedMaterial || "") === (input.selectedMaterial || "") &&
+      (item.selectedSize || "") === (input.selectedSize || ""),
+  );
   const next = existing
     ? current.map((item) =>
-        item.productId === input.productId
-          ? { ...item, quantity: item.quantity + 1 }
+        item.productId === input.productId &&
+        (item.selectedColor || "") === (input.selectedColor || "") &&
+        (item.selectedMaterial || "") === (input.selectedMaterial || "") &&
+        (item.selectedSize || "") === (input.selectedSize || "")
+          ? { ...item, quantity: item.quantity + quantityToAdd }
           : item,
       )
     : [
@@ -47,7 +64,10 @@ export function addProductToCart(input: {
           title: input.title,
           priceMinor: input.priceMinor,
           currency: input.currency,
-          quantity: 1,
+          quantity: quantityToAdd,
+          selectedColor: input.selectedColor,
+          selectedMaterial: input.selectedMaterial,
+          selectedSize: input.selectedSize,
         },
       ];
   writeCart(next);

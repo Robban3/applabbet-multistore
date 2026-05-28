@@ -7,7 +7,7 @@ import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 
-const steps = [
+const fallbackSteps = [
   { title: "Skapa din retur", text: "Logga in på Mina sidor och registrera din retur enkelt." },
   { title: "Packa varan", text: "Packa produkten i originalförpackning med alla lappar kvar." },
   { title: "Skicka tillbaka", text: "Använd förbetald retursedel som du får via e-post." },
@@ -111,6 +111,19 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
     faqItems.slice(0, Math.ceil(faqItems.length / 2)),
     faqItems.slice(Math.ceil(faqItems.length / 2)),
   ];
+  const steps = fallbackSteps.map((step, index) => ({
+    title: getCmsBlockField(cms.blocks, "steps", `item${index + 1}Title`, step.title),
+    text: getCmsBlockField(cms.blocks, "steps", `item${index + 1}Text`, step.text),
+  }));
+  const refundsRaw = [1, 2, 3, 4].map((index) =>
+    getCmsBlockField(cms.blocks, "cards", `refundsMethod${index}`, ""),
+  );
+  const refundRows = refundsRaw
+    .map((item) => {
+      const [label, value] = item.split("|");
+      return { label: (label || "").trim(), value: (value || "").trim() };
+    })
+    .filter((item) => item.label.length > 0 || item.value.length > 0);
 
   if (accountView) {
     const supabase = await createSupabaseServerClient();
@@ -175,10 +188,10 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
         {accountView ? (
           <div className="mt-5">
             <Link
-              href="/returer-aterbetalningar/skapa-retur?account=1"
+              href={getCmsBlockField(cms.blocks, "steps", "createReturnHref", "/returer-aterbetalningar/skapa-retur?account=1")}
               className="inline-flex items-center gap-2 rounded-md bg-black px-4 py-2 text-[13px] font-semibold text-white hover:bg-slate-900"
             >
-              Skapa din retur
+              {getCmsBlockField(cms.blocks, "steps", "createReturnLabel", "Skapa din retur")}
               <ArrowRightIcon />
             </Link>
           </div>
@@ -194,20 +207,23 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
               <path d="M19 10a7 7 0 0 0-12-3" />
               <path d="M5 14a7 7 0 0 0 12 3" />
             </svg>
-            30 dagars öppet köp
+            {getCmsBlockField(cms.blocks, "cards", "returnsTitle", "30 dagars öppet köp")}
           </h3>
           <p className="mt-1 text-[14px] leading-relaxed text-slate-600">
-            Du har alltid 30 dagars öppet köp från den dag du mottagit din vara.
+            {getCmsBlockField(cms.blocks, "cards", "returnsText", "Du har alltid 30 dagars öppet köp från den dag du mottagit din vara.")}
           </p>
           <ul className="mt-3 space-y-2 text-[13px] text-slate-700">
-            <li className="flex items-center gap-2"><CheckIcon />Varan är i originalskick</li>
-            <li className="flex items-center gap-2"><CheckIcon />Alla lappar och originalförpackning finns med</li>
-            <li className="flex items-center gap-2"><CheckIcon />Returkostnad: 49 kr (dras av från återbetalningen)</li>
+            <li className="flex items-center gap-2"><CheckIcon />{getCmsBlockField(cms.blocks, "cards", "returnsItem1", "Varan är i originalskick")}</li>
+            <li className="flex items-center gap-2"><CheckIcon />{getCmsBlockField(cms.blocks, "cards", "returnsItem2", "Alla lappar och originalförpackning finns med")}</li>
+            <li className="flex items-center gap-2"><CheckIcon />{getCmsBlockField(cms.blocks, "cards", "returnsItem3", "Returkostnad: 49 kr (dras av från återbetalningen)")}</li>
           </ul>
-          <button className="mt-4 inline-flex items-center gap-2 rounded-md bg-black px-4 py-2 text-[13px] font-semibold text-white">
-            Skapa en retur
+          <Link
+            href={getCmsBlockField(cms.blocks, "cards", "returnsButtonHref", "/returer-aterbetalningar/skapa-retur?account=1")}
+            className="mt-4 inline-flex items-center gap-2 rounded-md bg-black px-4 py-2 text-[13px] font-semibold text-white"
+          >
+            {getCmsBlockField(cms.blocks, "cards", "returnsButtonLabel", "Skapa en retur")}
             <ArrowRightIcon />
-          </button>
+          </Link>
         </article>
         <article className="rounded-lg border border-[#ebe5da] bg-white p-5">
           <h3 className="flex items-center gap-2 text-[37px] font-semibold">
@@ -216,17 +232,21 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
               <path d="M3 10h18" />
               <circle cx="8" cy="14" r="1" />
             </svg>
-            Återbetalningar
+            {getCmsBlockField(cms.blocks, "cards", "refundsTitle", "Återbetalningar")}
           </h3>
           <p className="mt-1 text-[14px] leading-relaxed text-slate-600">
-            När vi har mottagit och godkänt din retur återbetalas beloppet till samma betalningsmetod
-            som användes vid köpet.
+            {getCmsBlockField(cms.blocks, "cards", "refundsText", "När vi har mottagit och godkänt din retur återbetalas beloppet till samma betalningsmetod som användes vid köpet.")}
           </p>
           <div className="mt-4 space-y-2 text-[13px]">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-1"><span>Klarna</span><span>1-3 arbetsdagar</span></div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-1"><span>Kortbetalning</span><span>3-5 arbetsdagar</span></div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-1"><span>Swish</span><span>1-3 arbetsdagar</span></div>
-            <div className="flex items-center justify-between"><span>Apple Pay / Google Pay</span><span>3-5 arbetsdagar</span></div>
+            {refundRows.map((row, index) => (
+              <div
+                key={`${row.label}-${index}`}
+                className={`flex items-center justify-between ${index < refundRows.length - 1 ? "border-b border-slate-100 pb-1" : ""}`}
+              >
+                <span>{row.label}</span>
+                <span>{row.value}</span>
+              </div>
+            ))}
           </div>
         </article>
       </section>
@@ -240,11 +260,10 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
               <path d="M12 8v5" />
               <circle cx="12" cy="16.5" r="0.8" fill="currentColor" />
             </svg>
-            Observera
+            {getCmsBlockField(cms.blocks, "notice", "noticeTitle", "Observera")}
           </p>
           <p className="text-[13px] leading-relaxed text-slate-600">
-            Av hygienskäl kan vi inte acceptera returer av strumpor, underkläder, hörlurar och
-            kosttillskott om förpackningen har brutits.
+            {getCmsBlockField(cms.blocks, "notice", "noticeText", "Av hygienskäl kan vi inte acceptera returer av strumpor, underkläder, hörlurar och kosttillskott om förpackningen har brutits.")}
           </p>
         </article>
         <article className="rounded-lg border border-[#ebe5da] bg-[#faf7f2] px-5 py-4">
@@ -252,11 +271,16 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
             <svg viewBox="0 0 24 24" className="h-6 w-6 text-slate-900" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M4 6h16v10H8l-4 4V6Z" />
             </svg>
-            Har du frågor?
+            {getCmsBlockField(cms.blocks, "notice", "supportTitle", "Har du frågor?")}
           </p>
-          <p className="text-[13px] leading-relaxed text-slate-600">Kontakta vårt kundserviceteam så hjälper vi dig gärna.</p>
-          <Link href="/kundservice" className="mt-3 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-[13px] font-semibold text-slate-900">
-            Till kundservice
+          <p className="text-[13px] leading-relaxed text-slate-600">
+            {getCmsBlockField(cms.blocks, "notice", "supportText", "Kontakta vårt kundserviceteam så hjälper vi dig gärna.")}
+          </p>
+          <Link
+            href={getCmsBlockField(cms.blocks, "notice", "supportButtonHref", "/kundservice")}
+            className="mt-3 inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-[13px] font-semibold text-slate-900"
+          >
+            {getCmsBlockField(cms.blocks, "notice", "supportButtonLabel", "Till kundservice")}
             <ArrowRightIcon />
           </Link>
         </article>
@@ -268,7 +292,7 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
             {getCmsBlockField(cms.blocks, "sections", "faqTitle", "Vanliga frågor")}
           </h2>
           <button className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
-            Se alla frågor
+            {getCmsBlockField(cms.blocks, "sections", "faqViewAllLabel", "Se alla frågor")}
             <ArrowRightIcon />
           </button>
         </div>
