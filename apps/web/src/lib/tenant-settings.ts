@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import type { StorefrontThemeKey } from "@/lib/themes/types";
 import type { Tenant } from "@/types/commerce";
 
 export type PaymentMethods = {
@@ -44,7 +45,7 @@ export type TenantSettings = {
   trust_badges: TrustBadge[];
   navigation_menu: NavigationMenuItem[];
   loyalty_program_enabled: boolean;
-  theme_key: "classic" | "sport" | "fashion" | "beauty" | "electronics" | "minimal";
+  theme_key: StorefrontThemeKey;
 };
 
 const defaultPaymentMethods: PaymentMethods = {
@@ -110,10 +111,24 @@ export function normalizeLoyaltyProgramEnabled(input: unknown): boolean {
   return Boolean(input);
 }
 
-export function normalizeThemeKey(input: unknown): TenantSettings["theme_key"] {
+export function normalizeThemeKey(input: unknown): StorefrontThemeKey {
   const value = String(input || "").trim().toLowerCase();
-  if (value === "sport" || value === "fashion" || value === "beauty" || value === "electronics" || value === "minimal") return value;
-  return "classic";
+  if (
+    value === "luxury" ||
+    value === "sport" ||
+    value === "fashion" ||
+    value === "beauty" ||
+    value === "electronics" ||
+    value === "minimal"
+  ) {
+    return value;
+  }
+
+  if (value === "classic") {
+    return "luxury";
+  }
+
+  return "luxury";
 }
 
 function resolveMenuHref(hrefInput: string, slugInput: string): string {
@@ -163,7 +178,7 @@ export async function getTenantSettings(tenant: Tenant): Promise<TenantSettings 
 
   if (!data) return null;
   return {
-    ...(data as Omit<TenantSettings, "payment_methods" | "payment_config" | "trust_badges" | "loyalty_program_enabled">),
+    ...(data as Omit<TenantSettings, "payment_methods" | "payment_config" | "trust_badges" | "loyalty_program_enabled" | "theme_key">),
     payment_methods: normalizePaymentMethods(data.payment_methods),
     footer_show_company_name: Boolean(data.footer_show_company_name ?? true),
     footer_show_org_number: Boolean(data.footer_show_org_number ?? false),
