@@ -1,0 +1,352 @@
+import Link from "next/link";
+import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
+import { FavoriteToggle } from "@/components/favorite-toggle";
+import { PriceRangeFilter } from "@/components/price-range-filter";
+import { StorefrontHeader } from "@/components/storefront-header";
+import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
+import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
+import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { formatMinorPrice } from "@/lib/format";
+import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+
+const colorSwatchMap: Record<string, string> = {
+  svart: "#111111",
+  vit: "#f0ede6",
+  beige: "#d3c5ab",
+  brun: "#7a5c3d",
+  gra: "#6f7266",
+  grå: "#6f7266",
+  blå: "#1d3d72",
+  rod: "#a42a2a",
+  röd: "#a42a2a",
+  gron: "#2f5f49",
+  grön: "#2f5f49",
+  silver: "#9aa0a6",
+  guld: "#c8a164",
+};
+
+type SokPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20L16.65 16.65" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function withQuery(
+  basePath: string,
+  query: Awaited<ReturnType<typeof parseCatalogQuery>>,
+  overrides?: Partial<Awaited<ReturnType<typeof parseCatalogQuery>>>,
+) {
+  const next = { ...query, ...overrides };
+  const params = new URLSearchParams();
+  if (next.q) params.set("q", next.q);
+  for (const category of next.categories) params.append("category", category);
+  for (const brand of next.brands) params.append("brand", brand);
+  for (const feature of next.features) params.append("feature", feature);
+  for (const color of next.colors) params.append("color", color);
+  if (typeof next.minPrice === "number") params.set("minPrice", String(next.minPrice));
+  if (typeof next.maxPrice === "number") params.set("maxPrice", String(next.maxPrice));
+  if (next.sort !== "relevance") params.set("sort", next.sort);
+  if (next.page > 1) params.set("page", String(next.page));
+  return `${basePath}${params.toString() ? `?${params.toString()}` : ""}`;
+}
+
+export default async function SokPage({ searchParams }: SokPageProps) {
+  const definition = getCmsPage("sok");
+  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
+  const cms = await getPublishedPageContent("sok", { blocks: fallbackBlocks });
+
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  if (!tenant) {
+    return (
+      <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Ingen tenant hittades for domanen. Lagg till host i tenant_domains och satt den som verified.
+        </p>
+      </main>
+    );
+  }
+
+  const cmsSearchTerm = getCmsBlockField(cms.blocks, "search", "searchTerm", "träningsväska");
+  const resultCountTemplate = getCmsBlockField(cms.blocks, "search", "resultCountLabel", "Vi hittade {count} resultat");
+  const headingTemplate = getCmsBlockField(cms.blocks, "search", "headingTemplate", 'Sökresultat för "{term}"');
+
+  const parsed = parseCatalogQuery(await searchParams);
+  const query = {
+    ...parsed,
+    q: parsed.q || cmsSearchTerm,
+  };
+  const supabase = createSupabaseAdminClient();
+  const catalog = await getCatalogData(supabase, tenant.id, query);
+  const favoriteProductIds = await getFavoriteProductIdsForCurrentUser(tenant.id);
+  const favoriteIds = new Set(favoriteProductIds);
+  const heading = headingTemplate.replace("{term}", query.q || cmsSearchTerm);
+  const resultCountLabel = resultCountTemplate.replace("{count}", String(catalog.total));
+  const categoryOptions = catalog.availableCategories.map((category) => category.name);
+  const brandOptions = catalog.availableBrands;
+  const quickSuggestions = Array.from(
+    new Set(
+      [
+        ...catalog.items.map((item) => item.title),
+        ...categoryOptions,
+        ...brandOptions,
+      ]
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  ).slice(0, 6);
+
+  const featuredProducts = catalog.items.slice(0, 4);
+  const totalPages = Math.max(1, catalog.totalPages);
+  const currentPage = Math.min(query.page, totalPages);
+
+  return (
+    <main className="bg-white">
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div className="overflow-hidden rounded-[8px] border border-[#ece7de] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
+          <StorefrontHeader activeNav="Kategorier" cartCount={2} showAccountLabel searchActive />
+
+          <section className="bg-[#faf8f4] p-4">
+            <div className="overflow-hidden rounded-lg border border-[#e9dfd1] bg-white">
+              <form method="GET" action="/sok" className="flex items-center border-b border-[#ece3d7] px-4 py-2">
+                <input
+                  name="q"
+                  defaultValue={query.q}
+                  className="w-full text-[30px] font-medium outline-none"
+                />
+                {query.categories.map((category) => (
+                  <input key={`top-category-${category}`} type="hidden" name="category" value={category} />
+                ))}
+                {query.brands.map((brand) => (
+                  <input key={`top-brand-${brand}`} type="hidden" name="brand" value={brand} />
+                ))}
+                {query.features.map((feature) => (
+                  <input key={`top-feature-${feature}`} type="hidden" name="feature" value={feature} />
+                ))}
+                {query.colors.map((color) => (
+                  <input key={`top-color-${color}`} type="hidden" name="color" value={color} />
+                ))}
+                {typeof query.minPrice === "number" ? <input type="hidden" name="minPrice" value={query.minPrice} /> : null}
+                {typeof query.maxPrice === "number" ? <input type="hidden" name="maxPrice" value={query.maxPrice} /> : null}
+                {query.sort !== "relevance" ? <input type="hidden" name="sort" value={query.sort} /> : null}
+                <button type="button" className="px-2 text-slate-400">×</button>
+                <button type="submit" className="rounded border border-[#dbcdb8] p-2 text-[#b88f50]"><SearchIcon /></button>
+                <button type="button" className="ml-3 text-[12px] font-semibold text-slate-700">Stäng <span className="rounded bg-slate-100 px-1 py-0.5 text-[11px]">ESC</span></button>
+              </form>
+
+              <div className="grid md:grid-cols-[0.8fr_2fr]">
+                <div className="border-r border-[#ece3d7] px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Populära sökningar</p>
+                  <div className="mt-2 space-y-1">
+                    {quickSuggestions.map((item) => (
+                      <Link key={item} href={`/sok?q=${encodeURIComponent(item)}`} className="flex items-center gap-2 text-[13px] text-slate-700">
+                        <SearchIcon />
+                        {item}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div className="px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Populära produkter</p>
+                  <div className="mt-2 grid gap-3 sm:grid-cols-4">
+                    {featuredProducts.map((item) => (
+                      <Link key={item.id} href={`/products/${item.slug}`} className="group">
+                        <div className="relative h-24 rounded-md border border-slate-200 bg-gradient-to-br from-[#272727] to-[#101010]">
+                          <FavoriteToggle
+                            productId={item.id}
+                            initialFavorited={favoriteIds.has(item.id)}
+                            className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                          />
+                        </div>
+                        <p className="mt-1 text-[13px] font-semibold">{item.title}</p>
+                        <p className="text-[12px] text-slate-500">{item.description?.slice(0, 18) || "Svart"}</p>
+                        <p className="text-[25px] font-semibold">{formatMinorPrice(item.price_minor, item.currency)}</p>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link href={withQuery("/sok", query, { page: 1 })} className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
+                    <SearchIcon />
+                    {`Visa alla resultat för "${query.q}"`}
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-white px-4 pb-5 pt-4">
+            <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+              <aside className="rounded-md border border-[#ece3d7] bg-white p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[13px] font-semibold">FILTRERA</p>
+                  <Link href="/sok" className="text-[12px] text-slate-500">Rensa alla</Link>
+                </div>
+                <AutoSubmitFilterForm action="/sok" className="space-y-3 text-[13px]">
+                  {query.q ? <input type="hidden" name="q" value={query.q} /> : null}
+                  <div>
+                    <p className="mb-1 flex items-center justify-between font-semibold">KATEGORI <ChevronDownIcon /></p>
+                    {categoryOptions.map((category) => (
+                      <label key={category} className="flex items-center gap-2">
+                        <input type="checkbox" name="category" value={category} defaultChecked={query.categories.includes(category)} />
+                        {category}
+                      </label>
+                    ))}
+                    {categoryOptions.length === 0 ? <p className="text-xs text-slate-500">Inga kategorier ännu.</p> : null}
+                  </div>
+                  <div>
+                    <p className="mb-1 flex items-center justify-between font-semibold">VARUMÄRKE <ChevronDownIcon /></p>
+                    {brandOptions.map((brand) => (
+                      <label key={brand} className="flex items-center gap-2">
+                        <input type="checkbox" name="brand" value={brand} defaultChecked={query.brands.includes(brand)} />
+                        {brand}
+                      </label>
+                    ))}
+                    {brandOptions.length === 0 ? <p className="text-xs text-slate-500">Inga varumärken ännu.</p> : null}
+                  </div>
+                  {catalog.availableColors.length > 1 ? (
+                    <div>
+                      <p className="mb-1 flex items-center justify-between font-semibold">FÄRG <ChevronDownIcon /></p>
+                      {catalog.availableColors.map((color) => {
+                        const normalized = color.trim().toLowerCase();
+                        const swatch = colorSwatchMap[normalized] || "#b7b7b7";
+                        return (
+                          <label key={color} className="flex items-center gap-2">
+                            <input type="checkbox" name="color" value={color} defaultChecked={query.colors.includes(color)} />
+                            <span className="h-4 w-4 rounded-full border border-slate-300" style={{ backgroundColor: swatch }} />
+                            {color}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="mb-1 flex items-center justify-between font-semibold">PRIS <ChevronDownIcon /></p>
+                    <PriceRangeFilter
+                      minBound={0}
+                      maxBound={10000}
+                      initialMin={query.minPrice}
+                      initialMax={query.maxPrice}
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-1 flex items-center justify-between font-semibold">EGENSKAPER <ChevronDownIcon /></p>
+                    {catalog.availableFeatures.map((feature) => (
+                      <label key={feature} className="flex items-center gap-2">
+                        <input type="checkbox" name="feature" value={feature} defaultChecked={query.features.includes(feature)} />
+                        {feature}
+                      </label>
+                    ))}
+                    {catalog.availableFeatures.length === 0 ? <p className="text-xs text-slate-500">Inga egenskaper ännu.</p> : null}
+                  </div>
+                </AutoSubmitFilterForm>
+              </aside>
+
+              <section>
+                <div className="mb-3 flex items-start justify-between">
+                  <div>
+                    <h1 className="text-[42px] font-semibold leading-none">{heading}</h1>
+                    <p className="text-[14px] text-slate-600">{resultCountLabel}</p>
+                  </div>
+                  <form method="GET" action="/sok" className="flex items-center gap-2">
+                    {query.q ? <input type="hidden" name="q" value={query.q} /> : null}
+                    {query.categories.map((category) => (
+                      <input key={`sort-category-${category}`} type="hidden" name="category" value={category} />
+                    ))}
+                    {query.brands.map((brand) => (
+                      <input key={`sort-brand-${brand}`} type="hidden" name="brand" value={brand} />
+                    ))}
+                    {query.features.map((feature) => (
+                      <input key={`sort-feature-${feature}`} type="hidden" name="feature" value={feature} />
+                    ))}
+                    {query.colors.map((color) => (
+                      <input key={`sort-color-${color}`} type="hidden" name="color" value={color} />
+                    ))}
+                    {typeof query.minPrice === "number" ? <input type="hidden" name="minPrice" value={query.minPrice} /> : null}
+                    {typeof query.maxPrice === "number" ? <input type="hidden" name="maxPrice" value={query.maxPrice} /> : null}
+                    <select
+                      name="sort"
+                      defaultValue={query.sort}
+                      className="rounded-md border border-slate-300 px-3 py-1.5 text-[13px]"
+                    >
+                      <option value="relevance">Mest relevanta</option>
+                      <option value="newest">Nyast</option>
+                      <option value="price_asc">Pris stigande</option>
+                      <option value="price_desc">Pris fallande</option>
+                    </select>
+                    <button type="submit" className="rounded-md border border-slate-300 px-3 py-1.5 text-[13px] font-medium">
+                      Visa
+                    </button>
+                  </form>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {catalog.items.map((item, index) => (
+                    <article key={item.id} className="overflow-hidden rounded-xl border border-[#e5dbcf] bg-white shadow-sm">
+                      <Link href={`/products/${item.slug}`} className="block">
+                        <div className="relative h-40 bg-gradient-to-br from-[#272727] to-[#101010]">
+                          {index === 0 ? <span className="absolute left-2 top-2 rounded bg-[#f7ece0] px-2 py-0.5 text-[10px] font-bold">BÄSTSÄLJARE</span> : null}
+                          {index === 1 ? <span className="absolute left-2 top-2 rounded bg-[#e9f8f4] px-2 py-0.5 text-[10px] font-bold text-[#0f7f67]">NYHET</span> : null}
+                          <FavoriteToggle
+                            productId={item.id}
+                            initialFavorited={favoriteIds.has(item.id)}
+                            className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                          />
+                        </div>
+                      </Link>
+                      <div className="p-3">
+                        <p className="text-[31px] font-semibold leading-tight">{item.title}</p>
+                        <p className="text-[12px] text-slate-500">{item.description?.slice(0, 18) || "Svart"}</p>
+                        <p className="mt-1 text-[13px] text-[#b88f50]">★★★★★ <span className="text-slate-500">({128 - index * 7})</span></p>
+                        <p className="text-[38px] font-semibold leading-tight">{formatMinorPrice(item.price_minor, item.currency)}</p>
+                        <div className="mt-1 flex gap-2">
+                          <span className="h-4 w-4 rounded-full bg-black" />
+                          <span className="h-4 w-4 rounded-full bg-slate-700" />
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                {totalPages > 1 ? (
+                  <div className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-700">
+                    <Link href={withQuery("/sok", query, { page: Math.max(1, currentPage - 1) })} className="inline-flex h-8 min-w-8 items-center justify-center rounded border border-slate-300 px-2 hover:bg-slate-50">‹</Link>
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, idx) => {
+                      const page = idx + 1;
+                      return (
+                        <Link
+                          key={page}
+                          href={withQuery("/sok", query, { page })}
+                          className={`inline-flex h-8 min-w-8 items-center justify-center rounded px-2 ${page === currentPage ? "bg-black text-white" : "border border-slate-300 hover:bg-slate-50"}`}
+                        >
+                          {page}
+                        </Link>
+                      );
+                    })}
+                    <Link href={withQuery("/sok", query, { page: Math.min(totalPages, currentPage + 1) })} className="inline-flex h-8 min-w-8 items-center justify-center rounded border border-slate-300 px-2 hover:bg-slate-50">›</Link>
+                  </div>
+                ) : null}
+              </section>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  );
+}

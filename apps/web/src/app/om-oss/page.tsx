@@ -1,0 +1,243 @@
+import Link from "next/link";
+import { StorefrontHeader } from "@/components/storefront-header";
+import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
+import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getStoreBrandName } from "@/lib/store-brand";
+
+const stats = [
+  { value: "100 000+", label: "Nöjda kunder" },
+  { value: "250+", label: "Premium varumärken" },
+  { value: "4,8 / 5", label: "Snitt i betyg" },
+  { value: "10+", label: "År av passion" },
+];
+
+const values = [
+  {
+    title: "Kvalitet utan kompromisser",
+    text: "Vi väljer produkter vi själva använder och litar på. Hög kvalitet, alltid.",
+  },
+  {
+    title: "Hållbart i fokus",
+    text: "Vi jobbar aktivt för en mer hållbar framtid - för oss och kommande generationer.",
+  },
+  {
+    title: "För alla, varje dag",
+    text: "Oavsett nivå eller mål finns vi här för att stötta din resa - varje steg på vägen.",
+  },
+  {
+    title: "Prestation & utveckling",
+    text: "Vi inspirerar till rörelse, utveckling och att bli den bästa versionen av dig själv.",
+  },
+];
+
+const teamMembers = [
+  { name: "Markus Lind", role: "Grundare & CEO" },
+  { name: "Sara Eriksson", role: "Produkt & Sortiment" },
+  { name: "Daniel Berg", role: "Kundupplevelse" },
+];
+
+function ArrowRightIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+function UsersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3.5 18a5.5 5.5 0 0 1 11 0" />
+      <circle cx="17" cy="8.5" r="2.3" />
+      <path d="M15 18a4.3 4.3 0 0 1 5.5-3.9" />
+    </svg>
+  );
+}
+
+function BoxIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M4 8.5 12 4l8 4.5-8 4.5-8-4.5Z" />
+      <path d="M4 8.5V16l8 4 8-4V8.5" />
+      <path d="M12 13v7" />
+    </svg>
+  );
+}
+
+function StarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="m12 3.6 2.6 5.2 5.8.8-4.2 4.1 1 5.8L12 16.8 6.8 19.5l1-5.8L3.6 9.6l5.8-.8L12 3.6Z" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="3.5" y="5.5" width="17" height="15" rx="2" />
+      <path d="M3.5 10h17M8 3.5v4M16 3.5v4" />
+    </svg>
+  );
+}
+
+function AwardIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="12" cy="9" r="4" />
+      <path d="m9.5 13.5-1.6 6L12 17l4.1 2.5-1.6-6" />
+    </svg>
+  );
+}
+
+function LeafIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M20 4c-7.5.3-12.1 3.6-13.6 10.2-.5 2.1.6 4.3 2.7 5 6.5 2 11.3-2.7 10.9-15.2Z" />
+      <path d="M8 14c2.3-1.8 4.9-3.2 7.8-4.2" />
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 20.2C4.8 15.3 3.5 10.7 5.1 7.8A4.5 4.5 0 0 1 12 6.6a4.5 4.5 0 0 1 6.9 1.2c1.6 2.9.3 7.5-6.9 12.4Z" />
+    </svg>
+  );
+}
+
+function BoltIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M13.5 2 6 13h5l-1 9 8-12h-5l.5-8Z" />
+    </svg>
+  );
+}
+
+export default async function OmOssPage() {
+  const definition = getCmsPage("om-oss");
+  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
+  const cms = await getPublishedPageContent("om-oss", { blocks: fallbackBlocks });
+  const brandName = await getStoreBrandName();
+
+  return (
+    <main className="bg-[#f6f3ee]">
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+          <StorefrontHeader activeNav="Om oss" cartCount={0} brandName={brandName} />
+
+          <section className="grid border-b border-[#e6ddd1] lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="space-y-4 p-7 lg:p-8">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#b88f50]">{`Om ${brandName}`}</p>
+              <h1 className="max-w-[680px] text-5xl font-semibold leading-[1.06] text-slate-900 lg:text-[58px]">
+                {getCmsBlockField(cms.blocks, "hero", "title", "Mer än en sportbutik. En drivkraft för bättre prestation.")}
+              </h1>
+              <p className="max-w-[560px] text-[30px] leading-relaxed text-slate-700">
+                {getCmsBlockField(
+                  cms.blocks,
+                  "hero",
+                  "description",
+                  `${brandName} föddes ur en passion för träning, rörelse och viljan att hjälpa människor att nå sin fulla potential.`,
+                )}
+              </p>
+              <button className="inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white">
+                Vår historia
+                <ArrowRightIcon />
+              </button>
+            </div>
+            <div className="relative min-h-[340px] overflow-hidden bg-gradient-to-br from-[#5c5953] via-[#2d2a25] to-[#12110f]">
+              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent opacity-90" />
+              <div className="absolute -left-6 bottom-8 h-44 w-52 rounded-2xl bg-black/35" />
+              <div className="absolute right-20 bottom-8 h-36 w-48 rounded-2xl border border-white/10 bg-[#1a1713]/80" />
+              <div className="absolute right-6 bottom-10 h-44 w-24 rounded-[18px] border border-white/15 bg-black/45" />
+            </div>
+          </section>
+
+          <section className="grid border-b border-[#e6ddd1] sm:grid-cols-2 lg:grid-cols-4">
+            {stats.map((item, index) => (
+              <article key={item.label} className="border-t border-[#ece3d7] px-5 py-5 sm:border-r sm:last:border-r-0 sm:border-t-0">
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-[#c19a5e]">
+                    {index === 0 ? <UsersIcon /> : null}
+                    {index === 1 ? <BoxIcon /> : null}
+                    {index === 2 ? <StarIcon /> : null}
+                    {index === 3 ? <CalendarIcon /> : null}
+                  </span>
+                  <div>
+                    <p className="text-[44px] font-semibold leading-none text-slate-900">{item.value}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">{item.label}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </section>
+
+          <section className="grid gap-6 border-b border-[#e6ddd1] p-7 lg:grid-cols-[1.2fr_1fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#b88f50]">Våra värderingar</p>
+              <h2 className="mt-1 text-5xl font-semibold tracking-tight text-slate-900">Det vi står för</h2>
+              <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                {values.map((item, index) => (
+                  <article key={item.title}>
+                    <span className="text-[#c19a5e]">
+                      {index === 0 ? <AwardIcon /> : null}
+                      {index === 1 ? <LeafIcon /> : null}
+                      {index === 2 ? <HeartIcon /> : null}
+                      {index === 3 ? <BoltIcon /> : null}
+                    </span>
+                    <p className="mt-2 text-[31px] font-semibold leading-tight text-slate-900">{item.title}</p>
+                    <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{item.text}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className="min-h-[320px] rounded-xl border border-[#e6ddd1] bg-gradient-to-br from-[#7a756e] via-[#57524c] to-[#312d28]" />
+          </section>
+
+          <section className="grid gap-5 p-7 lg:grid-cols-[1.1fr_0.85fr_1.05fr]">
+            <article className="rounded-xl bg-gradient-to-r from-[#0f0f0f] to-[#1b1713] p-5 text-white">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#c8a164]">Vår historia</p>
+              <h3 className="mt-1 text-5xl font-semibold tracking-tight">Från idé till rörelse</h3>
+              <p className="mt-2 text-sm text-white/75">
+                Allt började 2014 med en enkel idé: att samla de bästa produkterna för träning och aktiv
+                livsstil på ett ställe. Idag är {brandName} en av Nordens snabbast växande sportbutiker.
+              </p>
+              <button className="mt-4 inline-flex items-center gap-2 rounded-md border border-[#c8a164] px-4 py-2 text-sm font-semibold text-[#c8a164]">
+                Läs hela vår resa
+                <ArrowRightIcon />
+              </button>
+            </article>
+
+            <article className="rounded-xl border border-[#e6ddd1] bg-white p-5">
+              <h3 className="text-4xl font-semibold">{`Team ${brandName}`}</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Vi är ett team av träningsexperter, coacher och problemlösare som brinner för att ge dig
+                den bästa upplevelsen - varje dag.
+              </p>
+              <button className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#b88f50]">
+                Möt teamet
+                <ArrowRightIcon />
+              </button>
+            </article>
+
+            <div className="space-y-3">
+              <div className="h-44 rounded-xl border border-[#e6ddd1] bg-gradient-to-br from-[#6d6861] via-[#58534c] to-[#2f2a25]" />
+              <div className="grid grid-cols-3 gap-2">
+                {teamMembers.map((member) => (
+                  <article key={member.name} className="space-y-1">
+                    <div className="h-24 rounded-lg border border-[#e6ddd1] bg-gradient-to-br from-[#6b665f] via-[#5b5650] to-[#3a352f]" />
+                    <p className="text-sm font-semibold">{member.name}</p>
+                    <p className="text-xs text-slate-500">{member.role}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  );
+}

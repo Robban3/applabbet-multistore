@@ -1,0 +1,17 @@
+# Root
+node_modules
+.env
+.env.local
+
+# Next.js
+.next
+out
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Supabase local
+supabase/.temp
