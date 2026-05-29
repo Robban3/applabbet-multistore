@@ -37,12 +37,6 @@ type HomeTrustCard = {
 
 
 
-const fallbackBrandLogos = ["SONY", "BOSE", "dyson", "GARMIN", "SAMSUNG", "APPLE", "PHILIPS"];
-const minimalBrandLogos = ["MUJI", "UNIQLO", "NORDIC", "Aarke", "BOSE", "SONOS", "IKEA"];
-const sportBrandLogos = ["NIKE", "adidas", "UNDER ARMOUR", "PUMA", "THE NORTH FACE", "GARMIN", "SALOMON"];
-const fashionBrandLogos = ["BOSS", "ZARA", "LEVI'S", "J.LINDEBERG", "CALVIN KLEIN", "NIKE", "ARKET"];
-const beautyBrandLogos = ["CHANEL", "ESTÉE LAUDER", "The Ordinary.", "L'ORÉAL", "KÉRASTASE", "CLINIQUE", "OLAPLEX"];
-const electronicsBrandLogos = ["SAMSUNG", "APPLE", "ASUS", "SONY", "logitech", "PHILIPS", "Lenovo"];
 
 const fallbackValueCards = [
   {
