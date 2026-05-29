@@ -19,59 +19,11 @@ import type { Product } from "@/types/commerce";
 
 
 
-const fallbackCategoryCards = [
-  { title: "Ljud & Hörlurar", accent: "from-[#2f251b]" },
-  { title: "Klockor", accent: "from-[#332820]" },
-  { title: "Hem & Inredning", accent: "from-[#3b2f24]" },
-  { title: "Väskor", accent: "from-[#2b2118]" },
-  { title: "Parfymer", accent: "from-[#241d18]" },
-  { title: "Accessoarer", accent: "from-[#3a2e22]" },
-];
 
-const minimalCategoryCards = [
-  { title: "Basprodukter", accent: "from-[#293545]" },
-  { title: "Hem", accent: "from-[#243243]" },
-  { title: "Kontor", accent: "from-[#233041]" },
-  { title: "Teknik", accent: "from-[#202b39]" },
-  { title: "Accessoarer", accent: "from-[#1f2935]" },
-  { title: "Nyheter", accent: "from-[#2b3748]" },
-];
 
-const sportCategoryCards = [
-  { title: "Löparskor", accent: "from-[#1f2a28]" },
-  { title: "Träningskläder", accent: "from-[#24312f]" },
-  { title: "Träning", accent: "from-[#212826]" },
-  { title: "Lagsport", accent: "from-[#27302c]" },
-  { title: "Outdoor", accent: "from-[#212724]" },
-  { title: "Accessoarer", accent: "from-[#222a27]" },
-];
 
-const fashionCategoryCards = [
-  { title: "Herr", accent: "from-[#2f2922]" },
-  { title: "Dam", accent: "from-[#3a332b]" },
-  { title: "Ytterkläder", accent: "from-[#2a241f]" },
-  { title: "Tröjor", accent: "from-[#383027]" },
-  { title: "Byxor & Jeans", accent: "from-[#2f2922]" },
-  { title: "Accessoarer", accent: "from-[#2b2520]" },
-];
 
-const beautyCategoryCards = [
-  { title: "Hudvård", accent: "from-[#3b2e33]" },
-  { title: "Smink", accent: "from-[#44353a]" },
-  { title: "Hårvård", accent: "from-[#3c3137]" },
-  { title: "Parfym", accent: "from-[#4a3c42]" },
-  { title: "Kropp & Bad", accent: "from-[#3f3339]" },
-  { title: "Beauty Tools", accent: "from-[#3a2f35]" },
-];
 
-const electronicsCategoryCards = [
-  { title: "Datorer & tillbehör", accent: "from-[#0b1f45]" },
-  { title: "Mobil & surfplattor", accent: "from-[#122a57]" },
-  { title: "Ljud & bild", accent: "from-[#0e244e]" },
-  { title: "Spel & gaming", accent: "from-[#112b5a]" },
-  { title: "Smarta hem", accent: "from-[#102750]" },
-  { title: "Hemelektronik", accent: "from-[#0f2248]" },
-];
 
 type HomeTrustCard = {
   title: string;
