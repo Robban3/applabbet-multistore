@@ -7,3 +7,8 @@ export * from './classic-newsletter';
 export * from './classic-storefront';
 export * from './classic-config';
 export * from './classic-default-config';
+export * from './classic-header';
+export * from './classic-best-sellers';
+export * from './classic-brands';
+export * from './classic-value-cards';
+export * from './classic-trust-strip';
