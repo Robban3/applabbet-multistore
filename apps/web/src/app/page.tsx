@@ -11,6 +11,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
+import { ClassicBrands } from "@/components/storefront/classic/classic-brands";
 import type { Product } from "@/types/commerce";
 
 
@@ -733,25 +734,29 @@ export default async function Home() {
         </section>
       ) : null}
 
-      <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
-        <div
-          className="rounded-[14px] border px-6 py-6 shadow-lg"
-          style={{
-            background: isBeauty ? "#fff5f8" : isSport ? "#0b0d0b" : "var(--store-footer-surface)",
-            borderColor: isBeauty ? "#ecd4dd" : isSport ? "#1c251d" : "transparent",
-            color: isBeauty ? "#0f172a" : "white",
-          }}
-        >
-          <p className={`mb-4 text-center text-sm ${isBeauty ? "text-slate-700" : "text-white/70"}`}>{brandsTitle}</p>
-          <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-3 lg:grid-cols-7">
-            {brandLogos.map((brand) => (
-              <p key={brand} className={`text-2xl tracking-[0.12em] ${isBeauty ? "text-slate-800" : "text-white/85"}`}>
-                {brand}
-              </p>
-            ))}
+      {themeKey === "classic" ? (
+        <ClassicBrands title={brandsTitle} brands={brandLogos} />
+      ) : (
+        <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
+          <div
+            className="rounded-[14px] border px-6 py-6 shadow-lg"
+            style={{
+              background: isBeauty ? "#fff5f8" : isSport ? "#0b0d0b" : "var(--store-footer-surface)",
+              borderColor: isBeauty ? "#ecd4dd" : isSport ? "#1c251d" : "transparent",
+              color: isBeauty ? "#0f172a" : "white",
+            }}
+          >
+            <p className={`mb-4 text-center text-sm ${isBeauty ? "text-slate-700" : "text-white/70"}`}>{brandsTitle}</p>
+            <div className="grid grid-cols-2 gap-4 text-center sm:grid-cols-3 lg:grid-cols-7">
+              {brandLogos.map((brand) => (
+                <p key={brand} className={`text-2xl tracking-[0.12em] ${isBeauty ? "text-slate-800" : "text-white/85"}`}>
+                  {brand}
+                </p>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="mx-auto w-full max-w-[1380px] px-4 pb-10 sm:px-5">
         <div
