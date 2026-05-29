@@ -14,6 +14,7 @@ import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config"
 import { ClassicBrands } from "@/components/storefront/classic/classic-brands";
 import { ClassicValueCards } from "@/components/storefront/classic/classic-value-cards";
 import { ClassicBestSellers } from "@/components/storefront/classic/classic-best-sellers";
+import { ClassicCategoryGrid } from "@/components/storefront/classic/classic-category-grid";
 import type { Product } from "@/types/commerce";
 
 
@@ -590,6 +591,12 @@ export default async function Home() {
         </div>
       </section>
 
+      {themeKey === "classic" ? (
+        <ClassicCategoryGrid
+          title={categoriesSectionTitle}
+          categories={displayedCategoryCards}
+        />
+      ) : (
       <section className="mx-auto w-full max-w-[1380px] px-4 py-8 sm:px-5">
         <h2 className={`${isElectronics ? "text-left text-2xl lg:text-3xl" : isBeauty ? "text-center text-[46px] sm:text-[52px]" : "text-center text-3xl sm:text-4xl lg:text-[44px]"} font-semibold leading-none`}>
           {categoriesSectionTitle}
@@ -640,6 +647,7 @@ export default async function Home() {
           ))}
         </div>
       </section>
+      )}
 
       {themeKey === "classic" ? (
         <ClassicBestSellers
