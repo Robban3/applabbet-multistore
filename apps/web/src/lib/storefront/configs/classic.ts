@@ -1,4 +1,6 @@
-export const classicThemeConfig = {
+import type { StorefrontThemeConfig } from '../types';
+
+export const classicThemeConfig: StorefrontThemeConfig = {
   key: 'classic',
   categoriesTitle: 'Upptäck våra kategorier',
   bestSellersTitle: 'Bästsäljare',
@@ -6,5 +8,11 @@ export const classicThemeConfig = {
   hero: {
     title: 'Upplev kvalitet. Varje dag.',
     description: 'Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.'
-  }
+  },
+  navItems: [],
+  categoryCards: [],
+  trustCards: [],
+  brandLogos: [],
+  valueCards: [],
+  products: []
 };
