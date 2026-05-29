@@ -18,9 +18,6 @@ import { ClassicCategoryGrid } from "@/components/storefront/classic/classic-cat
 import { ClassicHeader } from "@/components/storefront/classic/classic-header";
 import { ClassicTrustStrip } from "@/components/storefront/classic/classic-trust-strip";
 import type { Product } from "@/types/commerce";
-import { HeroUtilityBar } from "@/components/storefront/hero/hero-utility-bar";
-import { HeroTrustStrip } from "@/components/storefront/hero/hero-trust-strip";
-
 
 
 
@@ -359,19 +356,37 @@ export default async function Home() {
           }}
         >
           {isSport ? (
-  <HeroUtilityBar variant="sport" items={sportTopUtilityItems} />
-) : isBeauty ? (
-  <HeroUtilityBar
-    variant="beauty"
-    items={["FRI FRAKT OVER 499 KR", "30 DAGARS OPPET KOP", "CLEAN BEAUTY", "SAKRA BETALNINGAR"]}
-  />
-) : isElectronics ? (
-  <HeroUtilityBar
-    variant="electronics"
-    items={electronicsTopUtilityItems}
-    rightItems={["Kundservice", "Butiker"]}
-  />
-) : null}
+            <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-[#0b0b0d] px-5 py-2 text-[10px] font-semibold text-white/80">
+              {sportTopUtilityItems.map((item, index) => (
+                <span key={item} className="inline-flex items-center gap-3">
+                  {item}
+                  {index < sportTopUtilityItems.length - 1 ? <span className="text-white/35">|</span> : null}
+                </span>
+              ))}
+            </div>
+          ) : isBeauty ? (
+            <div className="flex flex-wrap items-center gap-3 border-b border-[#efd6e0] bg-[#f7dbe5] px-5 py-2 text-[10px] font-semibold text-slate-700">
+              <span>FRI FRAKT OVER 499 KR</span>
+              <span className="text-slate-400">|</span>
+              <span>30 DAGARS OPPET KOP</span>
+              <span className="text-slate-400">|</span>
+              <span>CLEAN BEAUTY</span>
+              <span className="text-slate-400">|</span>
+              <span>SAKRA BETALNINGAR</span>
+            </div>
+          ) : isElectronics ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-2 text-[11px] text-white/75">
+              <div className="flex flex-wrap items-center gap-4">
+                {electronicsTopUtilityItems.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+              <div className="flex items-center gap-4 text-white/70">
+                <span>Kundservice</span>
+                <span>Butiker</span>
+              </div>
+            </div>
+          ) : null}
           {themeKey === "classic" ? (
             <ClassicHeader
               brandName={brandName}
@@ -563,12 +578,29 @@ export default async function Home() {
           <ClassicTrustStrip items={homeTrustCards} />
         ) : (
         <div className={`relative z-20 px-4 pb-1 sm:px-6 ${isElectronics ? "-mt-4" : isBeauty ? "-mt-5" : "-mt-7"}`}>
-          <HeroTrustStrip
-            items={isElectronics ? electronicsTrustStrip : homeTrustCards}
-            isElectronics={isElectronics}
-            isBeauty={isBeauty}
-            isSport={isSport}
-        />
+          <div
+            className={`grid overflow-hidden rounded-xl border shadow-[0_8px_20px_rgba(21,17,12,0.14)] sm:grid-cols-2 ${
+              isElectronics ? "lg:grid-cols-5" : "lg:grid-cols-4"
+            }`}
+            style={{
+              borderColor: isBeauty ? "#efd9e2" : isSport ? "#d7decd" : "var(--store-card-border)",
+              background: isBeauty ? "#ffffff" : isSport ? "#ffffff" : "var(--store-soft-surface)",
+            }}
+          >
+            {(isElectronics ? electronicsTrustStrip : homeTrustCards).map((card) => (
+              <article
+                key={card.title}
+                className="flex min-h-[88px] items-center gap-3 border-t px-5 py-3 lg:min-h-[96px] lg:border-l lg:border-t-0 lg:first:border-l-0"
+                style={{ borderColor: isBeauty ? "#f1e3ea" : isSport ? "#e3e8dc" : "var(--store-footer-border)" }}
+              >
+                {"icon" in card ? <TrustCardIcon icon={card.icon} /> : <span className="h-3 w-3 rounded-full bg-[color:var(--store-accent)]" />}
+                <div>
+                  <p className="text-[15px] font-semibold">{card.title}</p>
+                  <p className="text-[13px] text-slate-600">{card.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
         )}
       </section>
