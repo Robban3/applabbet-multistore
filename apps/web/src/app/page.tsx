@@ -12,6 +12,7 @@ import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { ClassicBrands } from "@/components/storefront/classic/classic-brands";
+import { ClassicValueCards } from "@/components/storefront/classic/classic-value-cards";
 import type { Product } from "@/types/commerce";
 
 
@@ -758,6 +759,9 @@ export default async function Home() {
         </section>
       )}
 
+      {themeKey === "classic" ? (
+        <ClassicValueCards cards={valueCards} />
+      ) : (
       <section className="mx-auto w-full max-w-[1380px] px-4 pb-10 sm:px-5">
         <div
           className="grid gap-4 rounded-[14px] p-5 sm:grid-cols-3"
@@ -783,6 +787,7 @@ export default async function Home() {
           ))}
         </div>
       </section>
+      )}
       </div>
     </main>
   );
