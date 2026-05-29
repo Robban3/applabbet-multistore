@@ -13,6 +13,7 @@ import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { ClassicBrands } from "@/components/storefront/classic/classic-brands";
 import { ClassicValueCards } from "@/components/storefront/classic/classic-value-cards";
+import { ClassicBestSellers } from "@/components/storefront/classic/classic-best-sellers";
 import type { Product } from "@/types/commerce";
 
 
@@ -640,6 +641,13 @@ export default async function Home() {
         </div>
       </section>
 
+      {themeKey === "classic" ? (
+        <ClassicBestSellers
+          title={bestSellersTitle}
+          viewAllLabel={bestSellersViewAllLabel}
+          products={classicBestSellerProducts}
+        />
+      ) : (
       <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
         <div className="mb-4 flex items-end justify-between">
           <h2 className="text-3xl font-semibold leading-none sm:text-4xl lg:text-[42px]">{bestSellersTitle}</h2>
@@ -712,6 +720,9 @@ export default async function Home() {
           })}
         </div>
       </section>
+
+
+      )}
 
       {isBeauty ? (
         <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
