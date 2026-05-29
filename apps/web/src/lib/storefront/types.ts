@@ -1,8 +1,18 @@
 export type StorefrontNavItem = { label: string; href: string };
 
-export type StorefrontCategoryCard = { title: string; description?: string };
+export type StorefrontCategoryCard = {
+  title: string;
+  accent?: string;
+  description?: string;
+};
 
-export type StorefrontTrustCard = { title: string; text: string; icon?: string };
+export type StorefrontTrustIcon = 'star' | 'shield' | 'truck' | 'headset';
+
+export type StorefrontTrustCard = {
+  title: string;
+  text: string;
+  icon: StorefrontTrustIcon;
+};
 
 export type StorefrontValueCard = { title: string; text: string };
 
@@ -21,10 +31,10 @@ export type StorefrontThemeConfig = {
     title: string;
     description: string;
   };
-  navItems?: StorefrontNavItem[];
-  categoryCards?: StorefrontCategoryCard[];
-  trustCards?: StorefrontTrustCard[];
-  brandLogos?: string[];
-  valueCards?: StorefrontValueCard[];
-  products?: StorefrontProduct[];
+  navItems: StorefrontNavItem[];
+  categoryCards: StorefrontCategoryCard[];
+  trustCards: StorefrontTrustCard[];
+  brandLogos: string[];
+  valueCards: StorefrontValueCard[];
+  products: StorefrontProduct[];
 };
