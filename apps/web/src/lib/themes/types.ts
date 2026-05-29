@@ -1,4 +1,5 @@
 export type StorefrontThemeKey =
+  | "classic"
   | "luxury"
   | "minimal"
   | "fashion"
