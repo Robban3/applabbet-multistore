@@ -15,6 +15,7 @@ import { ClassicBrands } from "@/components/storefront/classic/classic-brands";
 import { ClassicValueCards } from "@/components/storefront/classic/classic-value-cards";
 import { ClassicBestSellers } from "@/components/storefront/classic/classic-best-sellers";
 import { ClassicCategoryGrid } from "@/components/storefront/classic/classic-category-grid";
+import { ClassicHeader } from "@/components/storefront/classic/classic-header";
 import type { Product } from "@/types/commerce";
 
 
@@ -385,7 +386,14 @@ export default async function Home() {
               </div>
             </div>
           ) : null}
-          <header className="relative flex items-center justify-between border-b border-white/10 bg-[#0b0b0d] px-5 py-3">
+          {themeKey === "classic" ? (
+            <ClassicHeader
+              brandName={brandName}
+              storeName={tenant?.name || "PREMIUM STORE"}
+              links={navItems}
+            />
+          ) : (
+<header className="relative flex items-center justify-between border-b border-white/10 bg-[#0b0b0d] px-5 py-3">
             <div className="flex items-center gap-2">
               <span className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</span>
               <span className="text-[10px] text-white/60">{tenant?.name || "PREMIUM STORE"}</span>
@@ -479,6 +487,7 @@ export default async function Home() {
               </Link>
             </div>
           </header>
+          )}
           {isElectronics ? (
             <nav className="hidden items-center gap-6 border-b border-white/10 bg-[#0b0b0d] px-5 py-2.5 text-[13px] font-medium text-white/85 xl:flex">
               {navItems.map((item, idx) => (
