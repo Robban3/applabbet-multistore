@@ -5,3 +5,5 @@ export * from './classic-brand-strip';
 export * from './classic-value-props';
 export * from './classic-newsletter';
 export * from './classic-storefront';
+export * from './classic-config';
+export * from './classic-default-config';
