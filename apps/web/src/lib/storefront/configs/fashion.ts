@@ -1,4 +1,6 @@
-export const fashionThemeConfig = {
+import type { StorefrontThemeConfig } from '../types';
+
+export const fashionThemeConfig: StorefrontThemeConfig = {
   key: 'fashion',
   categoriesTitle: 'Upptäck våra kollektioner',
   bestSellersTitle: 'Bästsäljare',
@@ -6,5 +8,11 @@ export const fashionThemeConfig = {
   hero: {
     title: 'Klä dig med självförtroende.',
     description: 'Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil.'
-  }
+  },
+  navItems: [],
+  categoryCards: [],
+  trustCards: [],
+  brandLogos: [],
+  valueCards: [],
+  products: []
 };
