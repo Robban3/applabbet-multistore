@@ -13,64 +13,11 @@ import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import type { Product } from "@/types/commerce";
 
-const fallbackNavItems = [
-  { label: "Hem", href: "/" },
-  { label: "Kategorier", href: "/products" },
-  { label: "Nyheter", href: "/nyheter" },
-  { label: "Bästsäljare", href: "/bastsaljare" },
-  { label: "Om oss", href: "/om-oss" },
-  { label: "Kundservice", href: "/kundservice" },
-];
 
-const minimalNavItems = [
-  { label: "Hem", href: "/" },
-  { label: "Produkter", href: "/products" },
-  { label: "Nyheter", href: "/nyheter" },
-  { label: "Populart", href: "/bastsaljare" },
-  { label: "Om oss", href: "/om-oss" },
-  { label: "Support", href: "/kundservice" },
-];
 
-const sportNavItems = [
-  { label: "Hem", href: "/" },
-  { label: "Herr", href: "/products?category=herr" },
-  { label: "Dam", href: "/products?category=dam" },
-  { label: "Barn", href: "/products?category=barn" },
-  { label: "Skor", href: "/products?category=skor" },
-  { label: "Utvalda", href: "/bastsaljare" },
-  { label: "Nyheter", href: "/nyheter" },
-  { label: "Varumärken", href: "/products?sort=relevance" },
-];
 
-const fashionNavItems = [
-  { label: "Hem", href: "/" },
-  { label: "Herr", href: "/products?category=herr" },
-  { label: "Dam", href: "/products?category=dam" },
-  { label: "Ytterkläder", href: "/products?category=ytterklader" },
-  { label: "Nyheter", href: "/nyheter" },
-  { label: "Varumärken", href: "/products?sort=relevance" },
-];
 
-const beautyNavItems = [
-  { label: "Hudvård", href: "/products?category=hudvard" },
-  { label: "Smink", href: "/products?category=smink" },
-  { label: "Hårvård", href: "/products?category=harvard" },
-  { label: "Parfym", href: "/products?category=parfym" },
-  { label: "Kropp & Bad", href: "/products?category=kropp-bad" },
-  { label: "Nyheter", href: "/nyheter" },
-  { label: "Varumärken", href: "/products?sort=relevance" },
-];
 
-const electronicsNavItems = [
-  { label: "Alla kategorier", href: "/products" },
-  { label: "Datorer & tillbehör", href: "/products?category=datorer-tillbehor" },
-  { label: "Mobil & surfplattor", href: "/products?category=mobil-surfplattor" },
-  { label: "Ljud & bild", href: "/products?category=ljud-bild" },
-  { label: "Spel & gaming", href: "/products?category=spel-gaming" },
-  { label: "Smarta hem", href: "/products?category=smarta-hem" },
-  { label: "Erbjudanden", href: "/products?sort=price_desc" },
-  { label: "Nyheter", href: "/nyheter" },
-];
 
 const fallbackCategoryCards = [
   { title: "Ljud & Hörlurar", accent: "from-[#2f251b]" },
