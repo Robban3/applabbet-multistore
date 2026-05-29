@@ -31,47 +31,11 @@ type HomeTrustCard = {
   icon: "star" | "shield" | "truck" | "headset";
 };
 
-const trustCards: HomeTrustCard[] = [
-  { title: "Premium kvalitet", text: "Utvalt med omsorg", icon: "star" },
-  { title: "Säkra betalningar", text: "Tryggt & säkert", icon: "shield" },
-  { title: "Snabb leverans", text: "1-2 arbetsdagar", icon: "truck" },
-  { title: "Kundtjänst", text: "Vi finns här för dig", icon: "headset" },
-];
 
-const minimalTrustCards: HomeTrustCard[] = [
-  { title: "Fri frakt", text: "Over 499 kr", icon: "truck" },
-  { title: "30 dagars oppet kop", text: "Enkelt & smidigt", icon: "shield" },
-  { title: "Snabb leverans", text: "1-2 arbetsdagar", icon: "star" },
-  { title: "Trygg support", text: "Vi hjalper dig snabbt", icon: "headset" },
-];
 
-const sportTrustCards: HomeTrustCard[] = [
-  { title: "Fri frakt", text: "På beställningar över 499 kr", icon: "truck" },
-  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
-  { title: "Äkta produkter", text: "100% original", icon: "star" },
-  { title: "Säkra betalningar", text: "Klarna, Swish & kort", icon: "headset" },
-];
 
-const fashionTrustCards: HomeTrustCard[] = [
-  { title: "Fri frakt", text: "Vid köp över 499 kr", icon: "truck" },
-  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
-  { title: "Premium kvalitet", text: "Noggrant utvalt sortiment", icon: "star" },
-  { title: "Säkra betalningar", text: "Tryggt & säkert", icon: "headset" },
-];
 
-const beautyTrustCards: HomeTrustCard[] = [
-  { title: "Fri frakt", text: "På beställningar över 499 kr", icon: "truck" },
-  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
-  { title: "Clean beauty", text: "Utvalda hållbara produkter", icon: "star" },
-  { title: "Säkra betalningar", text: "Klarna, Swish & kort", icon: "headset" },
-];
 
-const electronicsTrustCards: HomeTrustCard[] = [
-  { title: "Fri frakt", text: "Över 499 kr", icon: "truck" },
-  { title: "30 dagars öppet köp", text: "Enkelt & smidigt", icon: "shield" },
-  { title: "Snabba leveranser", text: "1-2 arbetsdagar", icon: "star" },
-  { title: "Säkra betalningar", text: "Klarna, Swish & kort", icon: "headset" },
-];
 
 const fallbackBrandLogos = ["SONY", "BOSE", "dyson", "GARMIN", "SAMSUNG", "APPLE", "PHILIPS"];
 const minimalBrandLogos = ["MUJI", "UNIQLO", "NORDIC", "Aarke", "BOSE", "SONOS", "IKEA"];
