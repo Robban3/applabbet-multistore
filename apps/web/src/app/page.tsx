@@ -38,80 +38,10 @@ type HomeTrustCard = {
 
 
 
-const fallbackValueCards = [
-  {
-    title: "Hållbarhet i fokus",
-    text: "Vi väljer produkter och leverantörer med omtanke om miljön.",
-  },
-  {
-    title: "Kundservice i världsklass",
-    text: "Vi finns här för dig - snabbt, personligt och engagerat.",
-  },
-  {
-    title: "Nöjda kunder",
-    text: "Över 10 000+ kunder älskar våra produkter.",
-  },
-];
 
-const minimalValueCards = [
-  {
-    title: "Mindre brus",
-    text: "Vi fokuserar pa produkter som gor vardagen enklare.",
-  },
-  {
-    title: "Kvalitet forst",
-    text: "Noggrant utvalda produkter med hog kvalitet.",
-  },
-  {
-    title: "Snabb support",
-    text: "Personlig hjalp nar du behover den.",
-  },
-];
 
-const sportValueCards = [
-  {
-    title: "Hållbarhet i fokus",
-    text: "Vi väljer produkter och leverantörer med omtanke.",
-  },
-  {
-    title: "Kundservice i världsklass",
-    text: "Vi finns här för dig - snabbt, personligt och engagerat.",
-  },
-  {
-    title: "Enkla returer",
-    text: "30 dagars öppet köp och smidig retur.",
-  },
-];
 
-const fashionValueCards = [
-  {
-    title: "Hållbart i fokus",
-    text: "Vi väljer material och samarbeten med omtanke om miljön.",
-  },
-  {
-    title: "Kundservice i världsklass",
-    text: "Vi finns här för dig - snabbt, personligt och engagerat.",
-  },
-  {
-    title: "Enkla returer",
-    text: "30 dagars öppet köp och smidiga returer.",
-  },
-];
 
-const beautyValueCards = [
-  {
-    title: "Expertkunskap",
-    text: "Noggrant utvalda produkter av skönhetsexperter.",
-  },
-  {
-    title: "100% äkta produkter",
-    text: "Garanterad äkthet - alltid original.",
-  },
-  {
-    title: "Personliga rekommendationer",
-    text: "Hitta produkterna som passar just dig.",
-  },
-];
 
 const beautyPromoCards = [
   {
@@ -131,20 +61,6 @@ const beautyPromoCards = [
   },
 ];
 
-const electronicsValueCards = [
-  {
-    title: "Expertkunskap",
-    text: "Våra specialister hjälper dig välja rätt teknik.",
-  },
-  {
-    title: "100% äkta produkter",
-    text: "Originalprodukter från officiella varumärken.",
-  },
-  {
-    title: "Personliga rekommendationer",
-    text: "Hitta rätt produkt för dina behov.",
-  },
-];
 
 const fallbackProducts = [
   { title: "Premium Hörlurar Pro", priceMinor: 199900, currency: "SEK" },
