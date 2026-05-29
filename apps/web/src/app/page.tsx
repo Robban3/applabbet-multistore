@@ -62,59 +62,11 @@ const beautyPromoCards = [
 ];
 
 
-const fallbackProducts = [
-  { title: "Premium Hörlurar Pro", priceMinor: 199900, currency: "SEK" },
-  { title: "Chrono Elite Klocka", priceMinor: 249900, currency: "SEK" },
-  { title: "Nordic Bordslampa", priceMinor: 89900, currency: "SEK" },
-  { title: "Noir Intense Eau de Parfum", priceMinor: 74900, currency: "SEK" },
-  { title: "Aviator Solglasögon", priceMinor: 59900, currency: "SEK" },
-  { title: "Urban Läderväska", priceMinor: 159900, currency: "SEK" },
-];
 
-const minimalFallbackProducts = [
-  { title: "Minimal Desk Lamp", priceMinor: 69900, currency: "SEK" },
-  { title: "Essential Wireless Speaker", priceMinor: 129900, currency: "SEK" },
-  { title: "Nordic Coffee Brewer", priceMinor: 89900, currency: "SEK" },
-  { title: "Slate Storage Box", priceMinor: 29900, currency: "SEK" },
-  { title: "Core Backpack", priceMinor: 79900, currency: "SEK" },
-  { title: "Everyday Notebook Set", priceMinor: 14900, currency: "SEK" },
-];
 
-const sportFallbackProducts = [
-  { title: "Nike Pegasus 41", priceMinor: 159900, currency: "SEK" },
-  { title: "Adidas Ultraboost 5", priceMinor: 179900, currency: "SEK" },
-  { title: "Nike Dri-FIT Hoodie", priceMinor: 69900, currency: "SEK" },
-  { title: "FAST Shaker 700ml", priceMinor: 12900, currency: "SEK" },
-  { title: "Nike Swoosh Medium Support", priceMinor: 39900, currency: "SEK" },
-  { title: "Garmin Forerunner 265", priceMinor: 429900, currency: "SEK" },
-];
 
-const fashionFallbackProducts = [
-  { title: "Iconic Bomber Jacket", priceMinor: 149700, currency: "SEK" },
-  { title: "Luxe Merino Sweater", priceMinor: 69900, currency: "SEK" },
-  { title: "Slim Fit Jeans", priceMinor: 79900, currency: "SEK" },
-  { title: "Essential Hoodie", priceMinor: 59900, currency: "SEK" },
-  { title: "Wool Blend Coat", priceMinor: 229900, currency: "SEK" },
-  { title: "Classic Sunglasses", priceMinor: 39900, currency: "SEK" },
-];
 
-const beautyFallbackProducts = [
-  { title: "The Ordinary Hyaluronic Acid 2% + B5", priceMinor: 13900, currency: "SEK" },
-  { title: "Estée Lauder Advanced Night Repair Serum", priceMinor: 71900, currency: "SEK" },
-  { title: "Paula's Choice 2% BHA Liquid Exfoliant", priceMinor: 34900, currency: "SEK" },
-  { title: "Chanel Coco Mademoiselle EdP", priceMinor: 124900, currency: "SEK" },
-  { title: "Kérastase Elixir Ultime Hair Oil", priceMinor: 42400, currency: "SEK" },
-  { title: "Clinique Moisture Surge 100H", priceMinor: 39900, currency: "SEK" },
-];
 
-const electronicsFallbackProducts = [
-  { title: "Samsung Galaxy S24", priceMinor: 109900, currency: "SEK" },
-  { title: "MacBook Air M3", priceMinor: 149900, currency: "SEK" },
-  { title: "PlayStation 5", priceMinor: 649900, currency: "SEK" },
-  { title: "Sony WH-1000XM5", priceMinor: 399900, currency: "SEK" },
-  { title: "Logitech MX Master 3S", priceMinor: 129900, currency: "SEK" },
-  { title: "Philips Hue Starter Kit", priceMinor: 169900, currency: "SEK" },
-];
 
 function ArrowRightIcon() {
   return (
