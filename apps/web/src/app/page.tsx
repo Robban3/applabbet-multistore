@@ -10,6 +10,7 @@ import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import type { Product } from "@/types/commerce";
 
 const fallbackNavItems = [
@@ -429,6 +430,7 @@ export default async function Home() {
   const brandName = await getStoreBrandName();
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const storefrontConfig = getStorefrontConfig(themeKey);
   const isSport = themeKey === "sport";
   const isFashion = themeKey === "fashion";
   const isBeauty = themeKey === "beauty";
@@ -437,72 +439,12 @@ export default async function Home() {
   const enforceThemePreset = themeKey !== "classic";
   const readHomeField = (blockKey: string, fieldKey: string, fallback: string) =>
     enforceThemePreset ? fallback : getCmsBlockField(cms.blocks, blockKey, fieldKey, fallback);
-  const navFallback = isSport
-    ? sportNavItems
-    : isFashion
-      ? fashionNavItems
-      : isBeauty
-        ? beautyNavItems
-      : isElectronics
-        ? electronicsNavItems
-      : isMinimal
-        ? minimalNavItems
-      : fallbackNavItems;
-  const categoryFallback = isSport
-    ? sportCategoryCards
-    : isFashion
-      ? fashionCategoryCards
-      : isBeauty
-        ? beautyCategoryCards
-      : isElectronics
-        ? electronicsCategoryCards
-      : isMinimal
-        ? minimalCategoryCards
-      : fallbackCategoryCards;
-  const trustFallback = isSport
-    ? sportTrustCards
-    : isFashion
-      ? fashionTrustCards
-      : isBeauty
-        ? beautyTrustCards
-      : isElectronics
-        ? electronicsTrustCards
-      : isMinimal
-        ? minimalTrustCards
-      : trustCards;
-  const brandLogosFallback = isSport
-    ? sportBrandLogos
-    : isFashion
-      ? fashionBrandLogos
-      : isBeauty
-        ? beautyBrandLogos
-      : isElectronics
-        ? electronicsBrandLogos
-      : isMinimal
-        ? minimalBrandLogos
-      : fallbackBrandLogos;
-  const valueCardsFallback = isSport
-    ? sportValueCards
-    : isFashion
-      ? fashionValueCards
-      : isBeauty
-        ? beautyValueCards
-      : isElectronics
-        ? electronicsValueCards
-      : isMinimal
-        ? minimalValueCards
-      : fallbackValueCards;
-  const productsFallback = isSport
-    ? sportFallbackProducts
-    : isFashion
-      ? fashionFallbackProducts
-      : isBeauty
-        ? beautyFallbackProducts
-      : isElectronics
-        ? electronicsFallbackProducts
-      : isMinimal
-        ? minimalFallbackProducts
-      : fallbackProducts;
+  const navFallback = storefrontConfig.navItems;
+  const categoryFallback = storefrontConfig.categoryCards;
+  const trustFallback = storefrontConfig.trustCards;
+  const brandLogosFallback = storefrontConfig.brandLogos;
+  const valueCardsFallback = storefrontConfig.valueCards;
+  const productsFallback = storefrontConfig.products;
 
   const navItems = navFallback.map((item, index) => {
     const itemNumber = index + 1;
