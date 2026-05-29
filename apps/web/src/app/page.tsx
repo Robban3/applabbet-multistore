@@ -16,6 +16,7 @@ import { ClassicValueCards } from "@/components/storefront/classic/classic-value
 import { ClassicBestSellers } from "@/components/storefront/classic/classic-best-sellers";
 import { ClassicCategoryGrid } from "@/components/storefront/classic/classic-category-grid";
 import { ClassicHeader } from "@/components/storefront/classic/classic-header";
+import { BeautyPromoCards } from "@/components/storefront/beauty-promo-cards";
 import type { Product } from "@/types/commerce";
 
 
@@ -741,27 +742,7 @@ export default async function Home() {
 
       )}
 
-      {isBeauty ? (
-        <section className="mx-auto w-full max-w-[1380px] px-4 pb-8 sm:px-5">
-          <div className="grid gap-3 md:grid-cols-3">
-            {beautyPromoCards.map((card, index) => (
-              <article
-                key={`${card.title}-${index}`}
-                className="rounded-[14px] border border-[#ecd4dd] bg-gradient-to-br from-[#fff5f8] to-[#f8e8ef] p-5"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a16f84]">{card.title}</p>
-                <p className="mt-2 text-sm text-slate-700">{card.text}</p>
-                <button
-                  type="button"
-                  className="mt-4 inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  {card.cta}
-                </button>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {isBeauty ? <BeautyPromoCards cards={beautyPromoCards} /> : null}
 
       {themeKey === "classic" ? (
         <ClassicBrands title={brandsTitle} brands={brandLogos} />
