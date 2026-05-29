@@ -18,6 +18,7 @@ import { ClassicCategoryGrid } from "@/components/storefront/classic/classic-cat
 import { ClassicHeader } from "@/components/storefront/classic/classic-header";
 import { ClassicTrustStrip } from "@/components/storefront/classic/classic-trust-strip";
 import type { Product } from "@/types/commerce";
+import { HeroUtilityBar } from "@/components/storefront/hero/hero-utility-bar";
 
 
 
@@ -356,37 +357,19 @@ export default async function Home() {
           }}
         >
           {isSport ? (
-            <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-[#0b0b0d] px-5 py-2 text-[10px] font-semibold text-white/80">
-              {sportTopUtilityItems.map((item, index) => (
-                <span key={item} className="inline-flex items-center gap-3">
-                  {item}
-                  {index < sportTopUtilityItems.length - 1 ? <span className="text-white/35">|</span> : null}
-                </span>
-              ))}
-            </div>
-          ) : isBeauty ? (
-            <div className="flex flex-wrap items-center gap-3 border-b border-[#efd6e0] bg-[#f7dbe5] px-5 py-2 text-[10px] font-semibold text-slate-700">
-              <span>FRI FRAKT OVER 499 KR</span>
-              <span className="text-slate-400">|</span>
-              <span>30 DAGARS OPPET KOP</span>
-              <span className="text-slate-400">|</span>
-              <span>CLEAN BEAUTY</span>
-              <span className="text-slate-400">|</span>
-              <span>SAKRA BETALNINGAR</span>
-            </div>
-          ) : isElectronics ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-2 text-[11px] text-white/75">
-              <div className="flex flex-wrap items-center gap-4">
-                {electronicsTopUtilityItems.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
-              <div className="flex items-center gap-4 text-white/70">
-                <span>Kundservice</span>
-                <span>Butiker</span>
-              </div>
-            </div>
-          ) : null}
+  <HeroUtilityBar variant="sport" items={sportTopUtilityItems} />
+) : isBeauty ? (
+  <HeroUtilityBar
+    variant="beauty"
+    items={["FRI FRAKT OVER 499 KR", "30 DAGARS OPPET KOP", "CLEAN BEAUTY", "SAKRA BETALNINGAR"]}
+  />
+) : isElectronics ? (
+  <HeroUtilityBar
+    variant="electronics"
+    items={electronicsTopUtilityItems}
+    rightItems={["Kundservice", "Butiker"]}
+  />
+) : null}
           {themeKey === "classic" ? (
             <ClassicHeader
               brandName={brandName}
