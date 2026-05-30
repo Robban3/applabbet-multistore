@@ -18,6 +18,7 @@ import { ClassicCategoryGrid } from "@/components/storefront/classic/classic-cat
 import { ClassicHeader } from "@/components/storefront/classic/classic-header";
 import { ClassicTrustStrip } from "@/components/storefront/classic/classic-trust-strip";
 import type { Product } from "@/types/commerce";
+import { ClassicHeroContent } from "@/components/storefront/classic/classic-hero-content";
 
 
 
@@ -317,6 +318,12 @@ export default async function Home() {
   }
 
   const bestSellers = (featuredProducts.length > 0 ? featuredProducts : productsFallback).slice(0, 6);
+  const classicBestSellerProducts = bestSellers.map((product) => ({
+    title: "title" in product ? product.title : "",
+    priceMinor: "price_minor" in product ? product.price_minor : product.priceMinor,
+    currency: "currency" in product ? product.currency : "SEK",
+    href: "slug" in product ? `/products/${product.slug}` : "/products",
+  }));
   const electronicsTopUtilityItems = [
     "Fri frakt över 499 kr",
     "30 dagars öppet köp",
@@ -509,71 +516,45 @@ export default async function Home() {
             className={`relative z-10 px-6 ${isElectronics ? "py-7 min-h-[460px]" : isBeauty ? "py-10 min-h-[520px]" : "py-8 min-h-[480px]"} lg:px-10`}
           >
             <div className={`flex ${isHeroContentRight ? "justify-end" : "justify-start"}`}>
-              <div className="flex max-w-[560px] flex-col justify-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--store-accent)]">
-                {heroEyebrow}
-              </p>
-              <h1 className={`mt-3 text-4xl font-semibold leading-[1.02] sm:text-5xl lg:text-[62px] lg:leading-[0.98] ${isBeauty ? "text-slate-900" : ""}`}>
-                {readHomeField(
-                  "hero",
-                  "title",
-                  isSport
-                    ? "Din träning.\nDin styrka."
-                    : isFashion
-                      ? "Klä dig med\nsjälvförtroende."
-                      : isBeauty
-                        ? "Lyft din naturliga\nskönhet"
-                      : isElectronics
-                        ? "Teknik för\nvarje dag"
-                      : isMinimal
-                        ? "Det viktigaste\nutan brus"
-                      : "Upplev kvalitet. Varje dag.",
-                )}
-              </h1>
-              <p className={`mt-4 max-w-[430px] text-lg sm:text-xl lg:text-[22px] ${isBeauty ? "text-slate-900" : "text-white/80"}`}>
-                {readHomeField(
-                  "hero",
-                  "description",
-                  isSport
-                    ? "Utrustning, kläder och skor som hjälper dig att nå dina mål - oavsett nivå."
-                    : isFashion
-                      ? "Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil - för alla tillfällen."
-                      : isBeauty
-                        ? "Upptäck vårt handplockade sortiment av hudvård, smink och dofter - noggrant utvalt för att framhäva det bästa i dig."
-                      : isElectronics
-                        ? "Upptäck de senaste produkterna inom elektronik. Kvalitet, prestanda och design i perfekt kombination."
-                      : isMinimal
-                        ? "Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet."
-                      : "Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.",
-                )}
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                {showPrimaryCta ? (
-                  <Link
-                    href={primaryCtaHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1a1a1f]"
-                  >
-                    {primaryCtaLabel}
-                    <ArrowRightIcon />
-                  </Link>
-                ) : null}
-                {showSecondaryCta ? (
-                  <Link
-                    href={secondaryCtaHref}
-                    className={`inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-semibold transition ${
-                      isBeauty
-                        ? "border border-white/60 bg-white text-slate-900 hover:bg-[#fff4f8]"
-                        : "border border-white/35 text-white hover:border-white hover:bg-white/10"
-                    }`}
-                  >
-                    {secondaryCtaLabel}
-                  </Link>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
+            <ClassicHeroContent
+  eyebrow={heroEyebrow}
+  title={readHomeField(
+    "hero",
+    "title",
+    isSport
+      ? "Din träning.\nDin styrka."
+      : isFashion
+        ? "Klä dig med\nsjälvförtroende."
+        : isBeauty
+          ? "Lyft din naturliga\nskönhet"
+          : isElectronics
+            ? "Teknik för\nvarje dag"
+            : isMinimal
+              ? "Det viktigaste\nutan brus"
+              : "Upplev kvalitet. Varje dag.",
+  )}
+  description={readHomeField(
+    "hero",
+    "description",
+    isSport
+      ? "Utrustning, kläder och skor som hjälper dig att nå dina mål - oavsett nivå."
+      : isFashion
+        ? "Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil - för alla tillfällen."
+        : isBeauty
+          ? "Upptäck vårt handplockade sortiment av hudvård, smink och dofter - noggrant utvalt för att framhäva det bästa i dig."
+          : isElectronics
+            ? "Upptäck de senaste produkterna inom elektronik. Kvalitet, prestanda och design i perfekt kombination."
+            : isMinimal
+              ? "Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet."
+              : "Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.",
+  )}
+  primaryCtaHref={primaryCtaHref}
+  primaryCtaLabel={primaryCtaLabel}
+  secondaryCtaHref={secondaryCtaHref}
+  secondaryCtaLabel={secondaryCtaLabel}
+  showPrimaryCta={showPrimaryCta}
+  showSecondaryCta={showSecondaryCta}
+/>
         {themeKey === "classic" ? (
           <ClassicTrustStrip items={homeTrustCards} />
         ) : (
@@ -603,6 +584,9 @@ export default async function Home() {
           </div>
         </div>
         )}
+         </div>
+        </div>
+      </div>
       </section>
 
       {themeKey === "classic" ? (
