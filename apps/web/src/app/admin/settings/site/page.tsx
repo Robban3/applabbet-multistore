@@ -9,6 +9,7 @@ function canManageTheme(email: string | null) {
   const normalized = (email || "").trim().toLowerCase();
   if (!normalized) return false;
   if (normalized.endsWith("@applabbet.local")) return true;
+  if (normalized.endsWith("@applabbet.com")) return true;
 
   const allowList = (process.env.THEME_BUILDER_EMAILS || process.env.ADMIN_BOOTSTRAP_EMAILS || "")
     .split(",")

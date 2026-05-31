@@ -189,13 +189,14 @@ export function CatalogResultsGrid({
   products: Product[];
   favoriteProductIds?: string[];
   badgeLabel?: string;
-  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport";
+  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport" | "luxury";
 }) {
   const favoriteIds = new Set(favoriteProductIds);
   const isFashion = cardVariant === "fashion";
   const isBeauty = cardVariant === "beauty";
   const isElectronics = cardVariant === "electronics";
   const isSport = cardVariant === "sport";
+  const isLuxury = cardVariant === "luxury";
   const beautyCardBorder = "border-[#ecd8df]";
   const beautyImageSurface = "bg-gradient-to-br from-[#fdf3f6] via-[#f8e8ee] to-[#f3dde6]";
 
@@ -217,6 +218,38 @@ export function CatalogResultsGrid({
       brun: "#7c4a2d",
     };
     return map[normalized] || "#111827";
+  }
+
+  if (isLuxury) {
+    return (
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        {products.map((product, idx) => (
+          <article key={product.id} className="group">
+            <Link href={`/products/${product.slug}`} className="block">
+              <div className="relative overflow-hidden bg-[#F5F0E8]" style={{ aspectRatio: "3/4" }}>
+                <FavoriteToggle productId={product.id} initialFavorited={favoriteIds.has(product.id)} className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white" />
+                {badgeLabel ? (
+                  <span className="absolute left-3 top-3 bg-[#C41E3A] px-2.5 py-1 text-[9px] font-light tracking-[0.25em] uppercase text-white">{badgeLabel}</span>
+                ) : idx === 0 ? (
+                  <span className="absolute left-3 top-3 bg-[#C41E3A] px-2.5 py-1 text-[9px] font-light tracking-[0.25em] uppercase text-white">POPULÄR</span>
+                ) : null}
+              </div>
+            </Link>
+            <div className="mt-4">
+              <Link href={`/products/${product.slug}`}>
+                <p className="text-[12px] font-light tracking-[0.05em] text-[#17120d] transition group-hover:text-[#C41E3A] line-clamp-2">{product.title}</p>
+              </Link>
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-[13px] font-light text-[#5f4a3a]">{formatMinorPrice(product.price_minor, product.currency)}</p>
+                <AddToCartControl productId={product.id} title={product.title} priceMinor={product.price_minor} currency={product.currency} className="inline-flex h-7 w-7 items-center justify-center border border-[#17120d]/20 text-[#17120d] transition hover:border-[#C41E3A] hover:text-[#C41E3A]" ariaLabel={`Lägg ${product.title} i varukorgen`}>
+                  <MiniCartIcon />
+                </AddToCartControl>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
   }
 
   return (

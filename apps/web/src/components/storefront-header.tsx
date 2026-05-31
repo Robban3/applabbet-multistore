@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { CartCountBadge } from "@/components/cart-count-badge";
 import { TopTrustStrip } from "@/components/top-trust-strip";
+import { LuxuryHeader } from "@/components/storefront/luxury/luxury-header";
 import {
   defaultNavigationMenu,
   defaultTrustBadges,
   getTenantSettings,
+  normalizeThemeKey,
   type NavigationMenuItem,
   type TrustBadge,
 } from "@/lib/tenant-settings";
@@ -31,6 +33,8 @@ export async function StorefrontHeader({
 }: StorefrontHeaderProps) {
   let topTrust = trustBadges || defaultTrustBadges;
   let navItems: NavigationMenuItem[] = defaultNavigationMenu;
+  let themeKey = "classic";
+
   if (!trustBadges) {
     const host = await getCurrentHost();
     const tenant = await resolveTenantByHost(host);
@@ -38,11 +42,31 @@ export async function StorefrontHeader({
       const settings = await getTenantSettings(tenant);
       topTrust = settings?.trust_badges || defaultTrustBadges;
       navItems = settings?.navigation_menu || defaultNavigationMenu;
+      themeKey = normalizeThemeKey(settings?.theme_key);
     }
   }
 
-  const normalizeNavHref = (href: string) => (href === "/products?sort=bestsellers" ? "/bastsaljare" : href);
+  const normalizeNavHref = (href: string) =>
+    href === "/products?sort=bestsellers" ? "/bastsaljare" : href;
 
+  const links = navItems
+    .filter((item) => item.enabled)
+    .map((item) => ({ label: item.label, href: normalizeNavHref(item.href) }));
+
+  // ── Luxury-tema: eget header ──────────────────────────────────
+  if (themeKey === "luxury") {
+    return (
+      <div style={{ background: "var(--store-header-gradient)" }}>
+        <LuxuryHeader
+          brandName={brandName}
+          links={links}
+          cartInitialCount={cartCount}
+        />
+      </div>
+    );
+  }
+
+  // ── Generiskt header för övriga teman ────────────────────────
   return (
     <>
       <header
@@ -51,17 +75,15 @@ export async function StorefrontHeader({
       >
         <p className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</p>
         <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 xl:flex">
-          {navItems
-            .filter((item) => item.enabled)
-            .map((item) => (
+          {links.map((item) => (
             <Link
               key={item.label}
-              href={normalizeNavHref(item.href)}
+              href={item.href}
               className={item.label === activeNav ? "border-b border-[color:var(--store-accent)] pb-1 text-white" : "hover:text-[color:var(--store-accent)]"}
             >
               {item.label}
             </Link>
-            ))}
+          ))}
         </nav>
         <div className="flex items-center gap-2 text-white/85">
           <details className="relative xl:hidden">
@@ -74,19 +96,17 @@ export async function StorefrontHeader({
               className="fixed inset-x-3 top-16 z-[120] max-h-[70vh] overflow-auto rounded-lg border border-white/15 p-2 shadow-xl sm:inset-x-auto sm:right-4 sm:min-w-[260px]"
               style={{ background: "var(--store-header-overlay-surface)" }}
             >
-              {navItems
-                .filter((item) => item.enabled)
-                .map((item) => (
-                  <Link
-                    key={`mobile-${item.label}`}
-                    href={normalizeNavHref(item.href)}
-                    className={`block rounded-md px-3 py-2 text-sm ${
-                      item.label === activeNav ? "bg-white/10 text-white" : "text-white/90 hover:bg-white/10"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+              {links.map((item) => (
+                <Link
+                  key={`mobile-${item.label}`}
+                  href={item.href}
+                  className={`block rounded-md px-3 py-2 text-sm ${
+                    item.label === activeNav ? "bg-white/10 text-white" : "text-white/90 hover:bg-white/10"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </details>
           <Link
@@ -120,7 +140,6 @@ export async function StorefrontHeader({
           </Link>
         </div>
       </header>
-
       <TopTrustStrip items={topTrust} size={trustStripSize} />
     </>
   );

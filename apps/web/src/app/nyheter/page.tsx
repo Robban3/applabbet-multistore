@@ -44,11 +44,14 @@ export default async function NyheterPage({ searchParams }: NyheterPageProps) {
   const supabase = createSupabaseAdminClient();
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isLuxury = themeKey === "luxury";
   const isFashion = themeKey === "fashion";
   const isBeauty = themeKey === "beauty";
   const isElectronics = themeKey === "electronics";
   const isSport = themeKey === "sport";
-  const filterShellClass = isSport
+  const filterShellClass = isLuxury
+    ? "border-[#EDE5DC] bg-[#FAF8F5]"
+    : isSport
     ? "border-[#afcf90] bg-[#eef7e4]"
     : isFashion
       ? "border-[#d7c5ad] bg-[#f7f1ea]"
@@ -58,21 +61,101 @@ export default async function NyheterPage({ searchParams }: NyheterPageProps) {
           ? "border-[#bed2f4] bg-[#edf4ff]"
           : "border-[color:var(--store-card-border)] bg-[color:var(--store-soft-surface)]";
   const cardVariant =
-    themeKey === "fashion"
-      ? "fashion"
-      : themeKey === "sport"
-        ? "sport"
-        : themeKey === "beauty"
-          ? "beauty"
-          : isElectronics
-            ? "electronics"
-            : "default";
+    isLuxury
+      ? "luxury"
+      : themeKey === "fashion"
+        ? "fashion"
+        : themeKey === "sport"
+          ? "sport"
+          : themeKey === "beauty"
+            ? "beauty"
+            : isElectronics
+              ? "electronics"
+              : "default";
   const catalog = await getCatalogData(supabase, tenant.id, query, { onlyNew: true });
   const favoriteProductIds = await getFavoriteProductIdsForCurrentUser(tenant.id);
   const resultLabelTemplate = getCmsBlockField(cms.blocks, "listing", "resultLabel", "{count} produkter");
   const resultLabel = resultLabelTemplate.includes("{count}")
     ? resultLabelTemplate.replace("{count}", String(catalog.total))
     : `${catalog.total} produkter`;
+
+  if (isLuxury) {
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div style={{ background: "var(--store-header-gradient)" }}>
+          <StorefrontHeader activeNav="Nyheter" cartCount={2} />
+          <div className="px-8 py-16 sm:px-12 lg:px-14 lg:py-20 border-b border-white/8">
+            <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">Nouveautés</p>
+            <h1 className="mt-4 font-light text-white" style={{ fontSize: "clamp(36px, 4vw, 64px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}>
+              {getCmsBlockField(cms.blocks, "hero", "title", "Nyheter")}
+            </h1>
+            <p className="mt-4 max-w-[500px] text-[14px] font-light leading-relaxed text-white/55">
+              {getCmsBlockField(cms.blocks, "hero", "description", "Upptäck årets senaste pjäser — noggrant utvalt för dig som värderar det extraordinära.")}
+            </p>
+            <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
+          </div>
+        </div>
+        <section className="mx-auto w-full max-w-[1380px] px-8 py-10 sm:px-12 lg:px-14">
+          <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
+            <aside className={`rounded-none border p-5 ${filterShellClass}`}>
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-[11px] font-light tracking-[0.3em] uppercase text-[#17120d]">Filter</h2>
+                <Link href="/nyheter" className="text-[10px] tracking-[0.1em] text-[#C41E3A] hover:underline">Rensa</Link>
+              </div>
+              <AutoSubmitFilterForm action="/nyheter" className="space-y-5 text-sm text-[#5f4a3a]">
+                <div>
+                  <p className="mb-3 text-[10px] font-light tracking-[0.3em] uppercase text-[#5f4a3a]">Kategori</p>
+                  <div className="space-y-2">
+                    {catalog.availableCategories.map((category) => (
+                      <label key={category.id} className="flex items-center gap-2 text-[12px]">
+                        <input type="checkbox" name="category" value={category.slug} defaultChecked={query.categories.includes(category.slug)} className="accent-[#C41E3A]" />
+                        {category.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-3 text-[10px] font-light tracking-[0.3em] uppercase text-[#5f4a3a]">Varumärke</p>
+                  <div className="space-y-2">
+                    {catalog.availableBrands.map((brand) => (
+                      <label key={brand} className="flex items-center gap-2 text-[12px]">
+                        <input type="checkbox" name="brand" value={brand} defaultChecked={query.brands.includes(brand)} className="accent-[#C41E3A]" />
+                        {brand}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-3 text-[10px] font-light tracking-[0.3em] uppercase text-[#5f4a3a]">Pris</p>
+                  <PriceRangeFilter minBound={0} maxBound={100000} initialMin={query.minPrice} initialMax={query.maxPrice} />
+                </div>
+                {query.q ? <input type="hidden" name="q" value={query.q} /> : null}
+                {query.sort !== "relevance" ? <input type="hidden" name="sort" value={query.sort} /> : null}
+              </AutoSubmitFilterForm>
+            </aside>
+            <section>
+              <div className="mb-6 flex items-center justify-between">
+                <p className="text-[12px] font-light tracking-[0.05em] text-[#5f4a3a]">{resultLabel}</p>
+                <form method="GET" action="/nyheter" className="flex items-center gap-2">
+                  {query.q ? <input type="hidden" name="q" value={query.q} /> : null}
+                  {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+                  {query.brands.map((b) => <input key={b} type="hidden" name="brand" value={b} />)}
+                  <select name="sort" defaultValue={query.sort} className="border border-[#EDE5DC] bg-white px-3 py-1.5 text-[11px] font-light tracking-[0.1em] text-[#5f4a3a]">
+                    <option value="newest">Nyast</option>
+                    <option value="price_asc">Pris stigande</option>
+                    <option value="price_desc">Pris fallande</option>
+                  </select>
+                  <button type="submit" className="border border-[#EDE5DC] bg-white px-3 py-1.5 text-[11px] font-light text-[#5f4a3a] hover:bg-[#FAF8F5]">Visa</button>
+                </form>
+              </div>
+              <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} badgeLabel="NOUVEAU" cardVariant="luxury" />
+              <CatalogPagination actionPath="/nyheter" query={query} totalPages={catalog.totalPages} />
+            </section>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main style={{ background: "var(--store-footer-bg)" }}>

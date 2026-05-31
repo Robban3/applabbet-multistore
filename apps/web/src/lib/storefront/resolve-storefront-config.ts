@@ -1,4 +1,4 @@
-import { beautyThemeConfig, classicThemeConfig, electronicsThemeConfig, fashionThemeConfig, minimalThemeConfig, sportThemeConfig } from './configs';
+import { beautyThemeConfig, classicThemeConfig, electronicsThemeConfig, fashionThemeConfig, luxuryThemeConfig, minimalThemeConfig, sportThemeConfig } from './configs';
 
 export function getStorefrontConfig(themeKey?: string | null) {
   switch (themeKey) {
@@ -12,6 +12,8 @@ export function getStorefrontConfig(themeKey?: string | null) {
       return electronicsThemeConfig;
     case 'minimal':
       return minimalThemeConfig;
+    case 'luxury':
+      return luxuryThemeConfig;
     default:
       return classicThemeConfig;
   }

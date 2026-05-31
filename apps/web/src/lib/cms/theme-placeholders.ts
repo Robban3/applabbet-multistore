@@ -5,39 +5,172 @@ type ThemeKey = TenantSettings["theme_key"];
 
 type ThemeBlocks = Record<string, Record<string, string>>;
 
-function mergeBlocks(base: CmsBlocksContent, override: ThemeBlocks): CmsBlocksContent {
+function mergeBlocks(
+  base: CmsBlocksContent,
+  override?: ThemeBlocks,
+): CmsBlocksContent {
+  if (!override) {
+    return base;
+  }
+
   const merged: CmsBlocksContent = { ...base };
+
   for (const [blockKey, fields] of Object.entries(override)) {
     merged[blockKey] = {
       ...(merged[blockKey] || {}),
       ...fields,
     };
   }
+
   return merged;
 }
 
 const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   classic: {
+    navigation: {
+      item1Label: "Hem",
+      item1Href: "/",
+      item2Label: "Kategorier",
+      item2Href: "/products",
+      item3Label: "Nyheter",
+      item3Href: "/nyheter",
+      item4Label: "Bästsäljare",
+      item4Href: "/bastsaljare",
+      item5Label: "Om oss",
+      item5Href: "/om-oss",
+      item6Label: "Kundservice",
+      item6Href: "/kundservice",
+    },
     hero: {
       eyebrow: "Premium kvalitet. Utvalt med omsorg.",
       title: "Upplev kvalitet. Varje dag.",
-      description: "Noggrant utvalda produkter som kombinerar design, prestanda och hallbarhet.",
+      description: "Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.",
+      primaryCtaLabel: "Shoppa nu",
+      primaryCtaHref: "/products",
+      secondaryCtaLabel: "Utforska kollektioner",
+      secondaryCtaHref: "/products",
+      imageUrl: "/images/hero-classic.png",
+    },
+    trustCards: {
+      card1Title: "Fri frakt",
+      card1Text: "Vid köp över 499 kr",
+      card1Icon: "truck",
+      card2Title: "30 dagars öppet köp",
+      card2Text: "Enkelt & smidigt",
+      card2Icon: "headset",
+      card3Title: "Premium kvalitet",
+      card3Text: "Utvalt med omsorg",
+      card3Icon: "star",
+      card4Title: "Säkra betalningar",
+      card4Text: "Tryggt & säkert",
+      card4Icon: "shield",
     },
     categories: {
-      sectionTitle: "Upptack vara kategorier",
-      item1Title: "Ljud & Horlurar",
+      sectionTitle: "Upptäck våra kategorier",
+      item1Title: "Ljud & Hörlurar",
       item2Title: "Klockor",
       item3Title: "Hem & Inredning",
-      item4Title: "Vaskor",
+      item4Title: "Väskor",
       item5Title: "Parfymer",
       item6Title: "Accessoarer",
     },
     bestSellers: {
-      sectionTitle: "Bastsaljare",
+      sectionTitle: "Bästsäljare",
       viewAllLabel: "Visa alla",
-      badgeBestSeller: "BASTSALJARE",
+      badgeBestSeller: "BÄSTSÄLJARE",
       badgeNew: "NYHET",
       ratingCount: "(120)",
+    },
+    brands: {
+      title: "Betrodd av tusentals nöjda kunder",
+      brand1: "SONY",
+      brand2: "BOSE",
+      brand3: "dyson",
+      brand4: "GARMIN",
+      brand5: "SAMSUNG",
+      brand6: "APPLE",
+      brand7: "PHILIPS",
+    },
+    valueCards: {
+      card1Title: "Hållbarhet i fokus",
+      card1Text: "Vi väljer produkter och leverantörer med omtanke om miljön.",
+      card2Title: "Kundservice i världsklass",
+      card2Text: "Vi finns här för dig - snabbt, personligt och engagerat.",
+      card3Title: "Nöjda kunder",
+      card3Text: "Över 10 000+ kunder älskar våra produkter.",
+    },
+  },
+  luxury: {
+    navigation: {
+      item1Label: "Hem",
+      item1Href: "/",
+      item2Label: "Kollektioner",
+      item2Href: "/products",
+      item3Label: "Nyheter",
+      item3Href: "/nyheter",
+      item4Label: "Bästsäljare",
+      item4Href: "/bastsaljare",
+      item5Label: "Om oss",
+      item5Href: "/om-oss",
+      item6Label: "Kontakt",
+      item6Href: "/kontakt",
+    },
+    hero: {
+      eyebrow: "Exklusivt urval av tidlösa pjäser",
+      title: "Konsten att\nleva väl.",
+      description: "Noggrant utvalt för dig som värderar det extraordinära — tidlösa pjäser med oöverträffad kvalitet.",
+      primaryCtaLabel: "Utforska kollektionen",
+      primaryCtaHref: "/products",
+      secondaryCtaLabel: "Boka rådgivning",
+      secondaryCtaHref: "/kontakt",
+      imageUrl: "/images/hero-luxury.jpg",
+    },
+    trustCards: {
+      card1Title: "Fri frakt",
+      card1Text: "Vid köp över 999 kr",
+      card1Icon: "truck",
+      card2Title: "Äkthetsintyg",
+      card2Text: "Garanterat original",
+      card2Icon: "shield",
+      card3Title: "Premium kvalitet",
+      card3Text: "Utvalt med precision",
+      card3Icon: "star",
+      card4Title: "Diskret service",
+      card4Text: "Personlig rådgivning",
+      card4Icon: "headset",
+    },
+    categories: {
+      sectionTitle: "Nos Collections",
+      item1Title: "Smycken",
+      item2Title: "Ur & Klockor",
+      item3Title: "Lädervaror",
+      item4Title: "Parfym",
+      item5Title: "Accessoarer",
+      item6Title: "Limited Edition",
+    },
+    bestSellers: {
+      sectionTitle: "Pièces d'exception",
+      viewAllLabel: "Visa hela kollektionen",
+      badgeBestSeller: "EXKLUSIV",
+      badgeNew: "NOUVEAU",
+      ratingCount: "(48)",
+    },
+    brands: {
+      title: "Maisons partenaires",
+      brand1: "CARTIER",
+      brand2: "HERMÈS",
+      brand3: "CHANEL",
+      brand4: "BULGARI",
+      brand5: "TIFFANY",
+      brand6: "VAN CLEEF",
+    },
+    valueCards: {
+      card1Title: "Tidlös elegans",
+      card1Text: "Vi kurerar enbart pjäser som håller i generationer.",
+      card2Title: "Personlig service",
+      card2Text: "Din dedikerade rådgivare finns tillgänglig för dig.",
+      card3Title: "Garanterad äkthet",
+      card3Text: "Varje produkt levereras med äkthetsintyg.",
     },
   },
   minimal: {
@@ -141,6 +274,15 @@ const productsThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
       trustLine3: "2 ars garanti",
     },
   },
+  luxury: {
+    hero: {
+      title: "Luxury Collection",
+      description: "Exklusiva produkter for dig som vill ha premiumkansla, kvalitet och hantverk.",
+      trustLine1: "Premium kvalitet",
+      trustLine2: "Noggrant utvalt sortiment",
+      trustLine3: "Exklusiv service",
+    },
+  },
   minimal: {
     hero: {
       title: "Noggrant utvalt",
@@ -184,6 +326,12 @@ const productsThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
 
 const nyheterThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   classic: { hero: { title: "Nyheter 2026" } },
+  luxury: {
+    hero: {
+      title: "Luxury News",
+      description: "Senaste premiumprodukterna och exklusiva nyheter i sortimentet.",
+    },
+  },
   minimal: { hero: { title: "Nya favoriter", description: "Nyheter med fokus pa enkel design och kvalitet." } },
   sport: { hero: { title: "Nya sportslapp", description: "Senaste inom lopning, traning och outdoor." } },
   fashion: { hero: { title: "Nya kollektioner", description: "Sasongens senaste mode och accessoarer." } },
@@ -193,6 +341,13 @@ const nyheterThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
 
 const detailThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   classic: {},
+  luxury: {
+    productInfo: {
+      trustLine1: "Premium kvalitet",
+      trustLine2: "Exklusiv service",
+      trustLine3: "Noggrant utvalt sortiment",
+    },
+  },
   minimal: {
     productInfo: {
       trustLine1: "Fri frakt vid kop over 499 kr",
@@ -245,4 +400,3 @@ export function applyThemePlaceholdersToDefaults(
   }
   return defaults;
 }
-

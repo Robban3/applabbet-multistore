@@ -56,9 +56,9 @@ export function TopTrustStrip({ items, size = "default" }: TopTrustStripProps) {
 
   return (
     <div className={`grid ${gridColumnsClass}`} style={{ background: "var(--store-trust-gradient)" }}>
-      {visibleItems.map((item) => (
+      {visibleItems.map((item, idx) => (
         <article
-          key={`${item.title}-${item.icon}`}
+          key={`${item.title}-${item.icon}-${idx}`}
           className={`flex items-center border-t border-white/10 text-white/90 sm:border-r sm:last:border-r-0 sm:border-t-0 ${
             isLarge ? "min-h-[82px] gap-4 px-6 py-4" : "min-h-[68px] gap-3 px-5 py-3"
           }`}

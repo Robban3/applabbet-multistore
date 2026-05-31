@@ -50,7 +50,7 @@ export function ClassicHeroContent({
         {showPrimaryCta ? (
           <Link
             href={primaryCtaHref}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1a1a1f]"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[color:var(--store-accent)] px-7 py-3 text-sm font-semibold text-[#17120d] transition hover:brightness-110"
           >
             {primaryCtaLabel}
             <ArrowRightIcon />

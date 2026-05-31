@@ -33,8 +33,9 @@ function canBootstrapAdminMembership(email: string | null) {
   const normalized = email.trim().toLowerCase();
   if (!normalized) return false;
 
-  // Local testkonto ska fungera direkt utan manuell SQL.
+  // Applabbet-anställda och lokala testkonton bootstrappas automatiskt.
   if (normalized.endsWith("@applabbet.local")) return true;
+  if (normalized.endsWith("@applabbet.com")) return true;
 
   const allowList = (process.env.ADMIN_BOOTSTRAP_EMAILS || "")
     .split(",")

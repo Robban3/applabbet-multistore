@@ -182,3 +182,18 @@ body[data-store-theme="minimal"] {
   --store-header-overlay-surface: #111827;
 }
 
+body[data-store-theme="luxury"] {
+  --store-accent: #C41E3A;
+  --store-accent-gold: #B8963E;
+  --store-header-gradient: linear-gradient(to bottom, #0c0a08, #100d0a, #0a0806);
+  --store-trust-gradient: linear-gradient(to right, #0c0a08, #100d0a);
+  --store-footer-surface: #0c0a08;
+  --store-footer-bg: #FAF8F5;
+  --store-footer-border: #EDE5DC;
+  --store-shell-surface: #ffffff;
+  --store-soft-surface: #F5F0E8;
+  --store-card-border: #E8E0D8;
+  --store-media-gradient: linear-gradient(135deg, #1a1208 0%, #120e07 50%, #0c0906 100%);
+  --store-header-overlay-surface: #100d0a;
+}
+

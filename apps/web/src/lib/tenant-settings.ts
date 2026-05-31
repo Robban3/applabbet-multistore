@@ -125,10 +125,10 @@ export function normalizeThemeKey(input: unknown): StorefrontThemeKey {
   }
 
   if (value === "classic") {
-    return "luxury";
+    return "classic";
   }
 
-  return "luxury";
+  return "classic";
 }
 
 function resolveMenuHref(hrefInput: string, slugInput: string): string {

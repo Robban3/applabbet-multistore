@@ -4,6 +4,7 @@ export type StorefrontCategoryCard = {
   title: string;
   accent?: string;
   description?: string;
+  imageUrl?: string;
 };
 
 export type StorefrontTrustIcon = 'star' | 'shield' | 'truck' | 'headset';
@@ -20,6 +21,7 @@ export type StorefrontProduct = {
   title: string;
   priceMinor: number;
   currency: string;
+  imageUrl?: string;
 };
 
 export type StorefrontThemeConfig = {

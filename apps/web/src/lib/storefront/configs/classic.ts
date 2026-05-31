@@ -26,10 +26,10 @@ export const classicThemeConfig: StorefrontThemeConfig = {
     { title: 'Accessoarer', accent: 'from-[#3a2e22]' }
   ],
   trustCards: [
+    { title: 'Fri frakt', text: 'Vid köp över 499 kr', icon: 'truck' },
+    { title: '30 dagars öppet köp', text: 'Enkelt & smidigt', icon: 'headset' },
     { title: 'Premium kvalitet', text: 'Utvalt med omsorg', icon: 'star' },
-    { title: 'Säkra betalningar', text: 'Tryggt & säkert', icon: 'shield' },
-    { title: 'Snabb leverans', text: '1-2 arbetsdagar', icon: 'truck' },
-    { title: 'Kundtjänst', text: 'Vi finns här för dig', icon: 'headset' }
+    { title: 'Säkra betalningar', text: 'Tryggt & säkert', icon: 'shield' }
   ],
   brandLogos: ['SONY', 'BOSE', 'dyson', 'GARMIN', 'SAMSUNG', 'APPLE', 'PHILIPS'],
   valueCards: [
