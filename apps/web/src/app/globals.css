@@ -197,3 +197,320 @@ body[data-store-theme="luxury"] {
   --store-header-overlay-surface: #100d0a;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   LUXURY THEME — Global overrides
+   Applies to every element on every page when theme = luxury
+   ═══════════════════════════════════════════════════════════ */
+
+/* Base typography */
+body[data-store-theme="luxury"] {
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  background: #FAF8F5;
+  color: #17120d;
+}
+
+/* Headings */
+body[data-store-theme="luxury"] h1,
+body[data-store-theme="luxury"] h2,
+body[data-store-theme="luxury"] h3,
+body[data-store-theme="luxury"] h4 {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+/* All buttons → luxury style */
+body[data-store-theme="luxury"] button:not([class*="bg-"]):not([class*="rounded-full"]),
+body[data-store-theme="luxury"] [type="submit"]:not([class*="bg-"]) {
+  border-radius: 0;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+/* Primary buttons with bg-black → luxury red */
+body[data-store-theme="luxury"] .bg-black {
+  background-color: #C41E3A !important;
+}
+body[data-store-theme="luxury"] .hover\:bg-slate-800:hover,
+body[data-store-theme="luxury"] .hover\:bg-\[\#1a1a1f\]:hover {
+  background-color: #a01830 !important;
+}
+
+/* Input fields */
+body[data-store-theme="luxury"] input[type="text"],
+body[data-store-theme="luxury"] input[type="email"],
+body[data-store-theme="luxury"] input[type="password"],
+body[data-store-theme="luxury"] input[type="tel"],
+body[data-store-theme="luxury"] input[type="number"],
+body[data-store-theme="luxury"] textarea,
+body[data-store-theme="luxury"] select {
+  border-radius: 0 !important;
+  border-color: #EDE5DC !important;
+  background: #ffffff !important;
+  font-weight: 300;
+  letter-spacing: 0.03em;
+}
+body[data-store-theme="luxury"] input:focus,
+body[data-store-theme="luxury"] textarea:focus,
+body[data-store-theme="luxury"] select:focus {
+  outline-color: #C41E3A !important;
+  border-color: #C41E3A !important;
+}
+
+/* Cards / articles */
+body[data-store-theme="luxury"] article {
+  border-color: #EDE5DC !important;
+}
+body[data-store-theme="luxury"] article.rounded-xl,
+body[data-store-theme="luxury"] article.rounded-2xl,
+body[data-store-theme="luxury"] article.rounded-\[14px\],
+body[data-store-theme="luxury"] article.rounded-\[18px\] {
+  border-radius: 0 !important;
+}
+
+/* Page backgrounds */
+body[data-store-theme="luxury"] main {
+  background: #FAF8F5 !important;
+}
+body[data-store-theme="luxury"] .bg-white {
+  background-color: #ffffff;
+}
+body[data-store-theme="luxury"] .bg-slate-50,
+body[data-store-theme="luxury"] .bg-\[\#f6f3ee\],
+body[data-store-theme="luxury"] .bg-\[\#faf7f2\] {
+  background-color: #FAF8F5 !important;
+}
+
+/* Rounded corners → sharp for luxury feel */
+body[data-store-theme="luxury"] .rounded-xl { border-radius: 0 !important; }
+body[data-store-theme="luxury"] .rounded-2xl { border-radius: 0 !important; }
+body[data-store-theme="luxury"] .rounded-3xl { border-radius: 0 !important; }
+body[data-store-theme="luxury"] .rounded-\[14px\] { border-radius: 0 !important; }
+body[data-store-theme="luxury"] .rounded-\[18px\] { border-radius: 0 !important; }
+body[data-store-theme="luxury"] .rounded-\[20px\] { border-radius: 0 !important; }
+body[data-store-theme="luxury"] .rounded-\[22px\] { border-radius: 0 !important; }
+
+/* Keep rounded-full (circles/avatars) */
+body[data-store-theme="luxury"] .rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Accent color overrides */
+body[data-store-theme="luxury"] .text-\[color\:var\(--store-accent\)\],
+body[data-store-theme="luxury"] .border-\[color\:var\(--store-accent\)\] {
+  color: #C41E3A;
+  border-color: #C41E3A;
+}
+
+/* Borders */
+body[data-store-theme="luxury"] .border-slate-200,
+body[data-store-theme="luxury"] .border-slate-300,
+body[data-store-theme="luxury"] .border-\[color\:var\(--store-card-border\)\],
+body[data-store-theme="luxury"] .border-\[color\:var\(--store-footer-border\)\] {
+  border-color: #EDE5DC !important;
+}
+
+/* Filter sidebar */
+body[data-store-theme="luxury"] .border-\[color\:var\(--store-card-border\)\].bg-\[color\:var\(--store-soft-surface\)\] {
+  border-color: #EDE5DC !important;
+  background-color: #FAF8F5 !important;
+}
+body[data-store-theme="luxury"] input[type="checkbox"] {
+  accent-color: #C41E3A;
+}
+
+/* Pagination */
+body[data-store-theme="luxury"] .bg-black.text-white {
+  background-color: #C41E3A !important;
+}
+
+/* Shadows → subtle for luxury */
+body[data-store-theme="luxury"] .shadow-md,
+body[data-store-theme="luxury"] .shadow-lg,
+body[data-store-theme="luxury"] .shadow-xl,
+body[data-store-theme="luxury"] .shadow-2xl {
+  box-shadow: 0 4px 20px rgba(12, 10, 8, 0.08) !important;
+}
+
+/* Hero sections on non-home pages */
+body[data-store-theme="luxury"] .min-h-\[320px\] {
+  min-height: 260px;
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+}
+
+/* Text sizes for luxury feel */
+body[data-store-theme="luxury"] .text-5xl {
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+body[data-store-theme="luxury"] .text-4xl {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+body[data-store-theme="luxury"] .text-3xl {
+  font-weight: 300;
+}
+
+/* Breadcrumb / small text */
+body[data-store-theme="luxury"] .text-sm.font-medium.tracking-wide {
+  font-weight: 300;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Badge/pill → sharp */
+body[data-store-theme="luxury"] .rounded-full.bg-\[color\:var\(--store-accent\)\],
+body[data-store-theme="luxury"] .rounded-full.bg-black {
+  border-radius: 0 !important;
+  background-color: #C41E3A !important;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+}
+
+/* Login / auth pages */
+body[data-store-theme="luxury"] .auth-shell,
+body[data-store-theme="luxury"] form.auth-form {
+  font-weight: 300;
+}
+
+/* Legal pages */
+body[data-store-theme="luxury"] .prose h2,
+body[data-store-theme="luxury"] .prose h3 {
+  font-weight: 300;
+  color: #17120d;
+}
+
+/* Returns / returer */
+body[data-store-theme="luxury"] .step-indicator {
+  background-color: #C41E3A !important;
+}
+
+/* Cart / Checkout */
+body[data-store-theme="luxury"] .cart-item-border {
+  border-color: #EDE5DC !important;
+}
+
+/* Decorative circle used on hero pages → hide for luxury */
+body[data-store-theme="luxury"] .rounded-full.border-\[16px\] {
+  display: none !important;
+}
+
+/* "Se alla"-länk accent */
+body[data-store-theme="luxury"] a.text-\[\#8a6a44\]:hover,
+body[data-store-theme="luxury"] a.text-slate-700:hover {
+  color: #C41E3A !important;
+}
+
+/* Font family override → system serif for luxury feel */
+body[data-store-theme="luxury"] h1,
+body[data-store-theme="luxury"] h2 {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* ── FOOTER: full-width för luxury ───────────────────────── */
+body[data-store-theme="luxury"] footer > div {
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+body[data-store-theme="luxury"] footer .grid {
+  padding-left: 3.5rem !important;
+  padding-right: 3.5rem !important;
+}
+body[data-store-theme="luxury"] footer .border-t.px-6 {
+  padding-left: 3.5rem !important;
+  padding-right: 3.5rem !important;
+}
+body[data-store-theme="luxury"] footer p.text-xs.tracking-\[0\.26em\] {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+body[data-store-theme="luxury"] footer a {
+  font-weight: 300;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+/* ── FULL-PAGE layout: ta bort alla card/box-wrappers ─────── */
+/* Yttre kort-wrapper (rounded-[20px]) */
+body[data-store-theme="luxury"] .rounded-\[20px\] {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Inre hero-box (rounded-[18px] med border och shadow) */
+body[data-store-theme="luxury"] .overflow-hidden.rounded-\[18px\] {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Section-padding som skapar box-känslan */
+body[data-store-theme="luxury"] section.mx-auto.w-full.max-w-\[1380px\].px-4.pt-2 {
+  padding: 0 !important;
+  max-width: 100% !important;
+}
+
+/* bg-white kort-containers på content-sidor */
+body[data-store-theme="luxury"] .overflow-hidden.rounded-\[18px\].border.bg-\[color\:var\(--store-shell-surface\)\] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* Innehålls-sektionerna inuti boxarna */
+body[data-store-theme="luxury"] .overflow-hidden.rounded-\[18px\].border.bg-white {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* ── IKONER: konsekvent röd accent på ALLA sidor ──────────── */
+/* Guldikoner → röd */
+body[data-store-theme="luxury"] svg.text-\[\#8a6a44\],
+body[data-store-theme="luxury"] svg.text-\[\#c9973d\],
+body[data-store-theme="luxury"] svg.text-\[\#b8963e\],
+body[data-store-theme="luxury"] svg.text-\[\#B8963E\] {
+  color: #C41E3A !important;
+}
+
+/* Accentfärgade ikoner via CSS-variabel */
+body[data-store-theme="luxury"] svg.text-\[color\:var\(--store-accent\)\] {
+  color: #C41E3A !important;
+}
+
+/* Slate/mörkgrå ikoner på vita bakgrunder → röd accent */
+body[data-store-theme="luxury"] svg.text-slate-700,
+body[data-store-theme="luxury"] svg.text-slate-600 {
+  color: #C41E3A !important;
+}
+
+/* Trust strip ikoner */
+body[data-store-theme="luxury"] article svg,
+body[data-store-theme="luxury"] .trust-icon svg {
+  color: #C41E3A !important;
+}
+
+/* Navigations-ikoner → behåll vita */
+body[data-store-theme="luxury"] header svg {
+  color: inherit;
+}
+
+/* Checkmark/bekräftelse-ikoner */
+body[data-store-theme="luxury"] svg.text-green-500,
+body[data-store-theme="luxury"] svg.text-emerald-500 {
+  color: #C41E3A !important;
+}
+

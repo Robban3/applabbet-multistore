@@ -95,7 +95,7 @@ export default async function NyheterPage({ searchParams }: NyheterPageProps) {
             <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
           </div>
         </div>
-        <section className="mx-auto w-full max-w-[1380px] px-8 py-10 sm:px-12 lg:px-14">
+        <section className="w-full px-8 py-10 sm:px-12 lg:px-14">
           <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
             <aside className={`rounded-none border p-5 ${filterShellClass}`}>
               <div className="mb-5 flex items-center justify-between">
