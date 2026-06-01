@@ -13,6 +13,7 @@ import { SportBestSellers } from "@/components/storefront/sport/sport-best-selle
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
+import { BeautyCatalogPage } from "@/components/storefront/beauty";
 import { ElectronicsPageHero } from "@/components/storefront/electronics";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
@@ -356,6 +357,33 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </div>
         </section>
       </main>
+    );
+  }
+
+  if (isBeauty) {
+    return (
+      <BeautyCatalogPage
+        brandName={brandName}
+        actionPath="/products"
+        activeNav="Produkter"
+        breadcrumbLabel="Produkter"
+        title="Alla produkter"
+        activeCategoryName={activeCategoryName}
+        totalCount={catalog.total}
+        navCategories={navCategories.map((c) => ({ name: c.name, slug: c.slug }))}
+        filterCategories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+        brandFilterOptions={brandFilterOptions}
+        query={query}
+        items={catalog.items}
+        favoriteProductIds={favoriteProductIds}
+        totalPages={catalog.totalPages}
+        sortOptions={[
+          { value: "relevance", label: "Mest relevanta" },
+          { value: "newest", label: "Nyast" },
+          { value: "price_asc", label: "Lägsta pris" },
+          { value: "price_desc", label: "Högsta pris" },
+        ]}
+      />
     );
   }
 

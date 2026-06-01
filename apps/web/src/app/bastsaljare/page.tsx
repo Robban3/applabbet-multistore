@@ -9,6 +9,7 @@ import { PriceRangeFilter } from "@/components/price-range-filter";
 import { CatalogFilterSidebar } from "@/components/catalog-filter-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { SportCatalogPage } from "@/components/storefront/sport/sport-catalog-page";
+import { BeautyCatalogPage } from "@/components/storefront/beauty";
 import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
 import { ElectronicsPageHero } from "@/components/storefront/electronics";
@@ -178,6 +179,40 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
           </div>
         </section>
       </main>
+    );
+  }
+
+  if (isBeauty) {
+    const activeCat =
+      query.categories.length === 1
+        ? (visibleCategories.find(
+            (c) =>
+              c.slug.toLowerCase() === query.categories[0].toLowerCase() ||
+              c.name.toLowerCase() === query.categories[0].toLowerCase(),
+          )?.name ?? null)
+        : null;
+    return (
+      <BeautyCatalogPage
+        actionPath="/bastsaljare"
+        activeNav="Utvalda"
+        breadcrumbLabel="Bästsäljare"
+        title="Bästsäljare"
+        activeCategoryName={activeCat}
+        totalCount={catalog.total}
+        navCategories={visibleCategories.map((c) => ({ name: c.name, slug: c.slug }))}
+        filterCategories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+        brandFilterOptions={catalog.availableBrands}
+        query={query}
+        items={catalog.items}
+        favoriteProductIds={favoriteProductIds}
+        totalPages={catalog.totalPages}
+        badgeLabel="BÄSTSÄLJARE"
+        sortOptions={[
+          { value: "bestsellers", label: "Populärast" },
+          { value: "price_asc", label: "Lägsta pris" },
+          { value: "price_desc", label: "Högsta pris" },
+        ]}
+      />
     );
   }
 

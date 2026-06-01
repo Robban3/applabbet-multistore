@@ -60,6 +60,26 @@ export default async function CartPage() {
     );
   }
 
+  // ── Beauty: KICKS-stil cart ──────────────────────────────────
+  if (themeKey === "beauty") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader cartCount={0} brandName={brandName} />
+        <div className="mx-auto max-w-[1320px] px-4 py-8 sm:px-6">
+          <h1 className="mb-6 text-[30px] font-extrabold uppercase tracking-[-0.02em] text-[#1A1A1A] lg:text-[40px]">
+            {getCmsBlockField(cms.blocks, "summary", "title", "Varukorg")}
+          </h1>
+          <CheckoutClient
+            heading=""
+            freeShippingText={getCmsBlockField(cms.blocks, "summary", "freeShippingText", "Fri frakt! Du har fri frakt på din beställning.")}
+            brandName={brandName}
+            trustBadges={settings?.trust_badges}
+          />
+        </div>
+      </main>
+    );
+  }
+
   // ── Default (övriga teman): befintlig cart ───────────────────
   return (
     <main style={{ background: "var(--store-footer-bg)" }}>
