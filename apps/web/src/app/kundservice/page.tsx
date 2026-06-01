@@ -2,6 +2,7 @@ import Link from "next/link";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { MinimalHeader } from "@/components/storefront/minimal";
+import { BeautyHeader } from "@/components/storefront/beauty";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
@@ -123,6 +124,63 @@ export default async function KundservicePage() {
     faqItems.slice(0, Math.ceil(faqItems.length / 2)),
     faqItems.slice(Math.ceil(faqItems.length / 2)),
   ];
+
+  if (themeKey === "beauty") {
+    const navLinks = getStorefrontConfig(themeKey).navItems;
+    return (
+      <main className="bg-white">
+        <BeautyHeader brandName={brandName} links={navLinks} activeNav="Kundservice" />
+        <section className="bg-[#FBE9F2] px-6 py-14 text-center">
+          <h1 className="mx-auto max-w-[800px] font-extrabold uppercase tracking-[-0.02em] text-[#1A1A1A]" style={{ fontSize: "clamp(32px, 4.5vw, 52px)", lineHeight: 1.05 }}>
+            {getCmsBlockField(cms.blocks, "hero", "title", "Hur kan vi hjälpa dig?")}
+          </h1>
+          <p className="mx-auto mt-3 max-w-[600px] text-[17px] text-[#1A1A1A]/70">
+            {getCmsBlockField(cms.blocks, "hero", "description", "Hitta svar snabbt eller kontakta vårt team.")}
+          </p>
+        </section>
+        <section className="px-6 py-10">
+          <div className="mx-auto grid max-w-[1100px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {contactCards.map((card) => (
+              <article key={card.title} className="flex flex-col rounded-[14px] border border-[#ECECEC] bg-white p-6">
+                <h3 className="text-[18px] font-bold text-[#1A1A1A]">{card.title}</h3>
+                <p className="mt-2 whitespace-pre-line text-[14px] leading-relaxed text-[#6B6B6B]">{card.text}</p>
+                {card.action ? <p className="mt-4 text-[15px] font-bold text-[#EC008C]">{card.action} ›</p> : null}
+                {card.footer ? <p className="mt-1 text-[13px] text-[#9A9A9A]">{card.footer}</p> : null}
+              </article>
+            ))}
+          </div>
+        </section>
+        {faqItems.length > 0 ? (
+          <section className="px-6 py-14">
+            <h2 className="text-center text-[28px] font-extrabold uppercase tracking-[-0.01em] text-[#1A1A1A] lg:text-[34px]">
+              {getCmsBlockField(cms.blocks, "faq", "title", "Vanliga frågor")}
+            </h2>
+            <div className="mx-auto mt-8 max-w-[820px] overflow-hidden rounded-[14px] border border-[#ECECEC]">
+              {faqItems.map((item, idx) => (
+                <details key={idx} className="group border-b border-[#ECECEC] last:border-0">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-[16px] font-semibold text-[#1A1A1A]">
+                    {item.question}
+                    <span className="text-[#EC008C] transition group-open:rotate-180"><ChevronDownIcon /></span>
+                  </summary>
+                  <p className="px-6 pb-5 text-[15px] leading-relaxed text-[#6B6B6B]">{item.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        ) : null}
+        <section className="bg-[#FAFAFA] px-6 py-14">
+          <div className="mx-auto grid max-w-[1100px] gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {trustBottom.map((item) => (
+              <div key={item.title} className="text-center">
+                <h3 className="text-[16px] font-bold uppercase text-[#1A1A1A]">{item.title}</h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-[#6B6B6B]">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (themeKey === "minimal") {
     const navLinks = getStorefrontConfig(themeKey).navItems;

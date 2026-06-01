@@ -3,6 +3,7 @@ import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
 import { CatalogPagination, CatalogResultsGrid } from "@/components/catalog-blocks";
 import { ElectronicsPageHero } from "@/components/storefront/electronics";
 import { MinimalHeader } from "@/components/storefront/minimal";
+import { BeautyHeader } from "@/components/storefront/beauty";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { FavoriteToggle } from "@/components/favorite-toggle";
@@ -147,6 +148,49 @@ export default async function SokPage({ searchParams }: SokPageProps) {
   const featuredProducts = catalog.items.slice(0, 4);
   const totalPages = Math.max(1, catalog.totalPages);
   const currentPage = Math.min(query.page, totalPages);
+
+  if (themeKey === "beauty") {
+    const navLinks = getStorefrontConfig(themeKey).navItems;
+    const beautyBrandName = await getStoreBrandName();
+    return (
+      <main className="bg-white">
+        <BeautyHeader brandName={beautyBrandName} links={navLinks} activeNav="" />
+        <section className="bg-[#FBE9F2] px-6 pt-12 pb-8 text-center">
+          <h1 className="mx-auto max-w-[800px] font-extrabold uppercase tracking-[-0.02em] text-[#1A1A1A]" style={{ fontSize: "clamp(28px, 4vw, 44px)", lineHeight: 1.08 }}>
+            {heading}
+          </h1>
+          <p className="mt-2 text-[16px] text-[#1A1A1A]/70">{resultCountLabel}</p>
+          <form method="GET" action="/sok" className="mx-auto mt-6 flex max-w-[560px] items-center gap-2">
+            <input name="q" defaultValue={query.q} placeholder="Sök produkter…"
+              className="h-12 flex-1 rounded-full border border-[#1A1A1A] bg-white px-6 text-[15px] text-[#1A1A1A] focus:border-[#EC008C] focus:outline-none" />
+            <button type="submit" className="inline-flex h-12 items-center rounded-full bg-[#EC008C] px-6 text-[14px] font-bold uppercase text-white hover:bg-[#d1007d]">Sök</button>
+          </form>
+          {quickSuggestions.length > 0 ? (
+            <div className="mx-auto mt-5 flex max-w-[640px] flex-wrap items-center justify-center gap-2">
+              {quickSuggestions.map((s) => (
+                <Link key={s} href={`/sok?q=${encodeURIComponent(s)}`} className="rounded-full border border-[#ECECEC] bg-white px-4 py-1.5 text-[14px] text-[#1A1A1A] transition hover:border-[#EC008C] hover:text-[#EC008C]">{s}</Link>
+              ))}
+            </div>
+          ) : null}
+        </section>
+        <section className="px-4 pb-16 sm:px-6">
+          <div className="mx-auto max-w-[1320px]">
+            {catalog.items.length > 0 ? (
+              <>
+                <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} cardVariant="beauty" />
+                <CatalogPagination actionPath="/sok" query={query} totalPages={totalPages} />
+              </>
+            ) : (
+              <div className="py-20 text-center">
+                <p className="text-[19px] font-bold text-[#1A1A1A]">Inga resultat för “{query.q}”</p>
+                <Link href="/products" className="mt-6 inline-flex h-11 items-center rounded-full bg-[#1A1A1A] px-6 text-[14px] font-bold uppercase text-white hover:bg-[#EC008C]">Visa alla produkter</Link>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (themeKey === "minimal") {
     const navLinks = getStorefrontConfig(themeKey).navItems;

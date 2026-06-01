@@ -159,6 +159,88 @@ body[data-store-theme="beauty"] {
   --store-header-overlay-surface: #ffffff;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   BEAUTY THEME (KICKS.se) — Global overrides
+   Vit bakgrund, svart text, hot pink-accent. Gäller alla sidor.
+   ═══════════════════════════════════════════════════════════ */
+body[data-store-theme="beauty"] {
+  background: #ffffff;
+  color: #1A1A1A;
+}
+body[data-store-theme="beauty"] h1,
+body[data-store-theme="beauty"] h2,
+body[data-store-theme="beauty"] h3 {
+  color: #1A1A1A;
+}
+/* Gamla mörka hero/sektioner (sport/classic-grenar) → vit/rosa */
+body[data-store-theme="beauty"] [style*="var(--store-header-gradient)"] { background: #ffffff !important; }
+/* Främmande accenter (guld/grön/lime/lyx-röd) → KICKS pink */
+body[data-store-theme="beauty"] .text-\[\#b88f50\],
+body[data-store-theme="beauty"] .text-\[\#8a6a44\],
+body[data-store-theme="beauty"] .text-\[\#c9973d\],
+body[data-store-theme="beauty"] .text-\[\#c19a5e\],
+body[data-store-theme="beauty"] .text-\[\#B8963E\],
+body[data-store-theme="beauty"] svg.text-\[\#b88f50\],
+body[data-store-theme="beauty"] .text-\[\#b3ff00\],
+body[data-store-theme="beauty"] .text-\[\#C41E3A\] { color: #EC008C !important; }
+body[data-store-theme="beauty"] .bg-\[\#b88f50\],
+body[data-store-theme="beauty"] .bg-\[\#b3ff00\],
+body[data-store-theme="beauty"] .bg-\[\#C41E3A\] { background-color: #EC008C !important; }
+/* Slate → KICKS svart/grått, ytor → ljusgrå */
+body[data-store-theme="beauty"] .text-slate-900,
+body[data-store-theme="beauty"] .text-slate-800 { color: #1A1A1A !important; }
+body[data-store-theme="beauty"] .text-slate-700,
+body[data-store-theme="beauty"] .text-slate-600,
+body[data-store-theme="beauty"] .text-slate-500 { color: #6B6B6B !important; }
+body[data-store-theme="beauty"] .bg-slate-50,
+body[data-store-theme="beauty"] .bg-slate-100,
+body[data-store-theme="beauty"] .bg-\[\#f6f3ee\],
+body[data-store-theme="beauty"] .bg-\[\#faf7f2\] { background-color: #FAFAFA !important; }
+body[data-store-theme="beauty"] .border-slate-100,
+body[data-store-theme="beauty"] .border-slate-200,
+body[data-store-theme="beauty"] .border-slate-300,
+body[data-store-theme="beauty"] .border-\[color\:var\(--store-card-border\)\],
+body[data-store-theme="beauty"] .border-\[\#e3d8cc\],
+body[data-store-theme="beauty"] .border-\[\#e6ddd1\] { border-color: #ECECEC !important; }
+/* Primärknappar (.bg-black / accent) → KICKS svart-pill med pink hover */
+body[data-store-theme="beauty"] .bg-black,
+body[data-store-theme="beauty"] .bg-\[color\:var\(--store-accent\)\] {
+  background-color: #1A1A1A !important;
+  color: #fff !important;
+  border-radius: 9999px !important;
+}
+body[data-store-theme="beauty"] .bg-black:hover,
+body[data-store-theme="beauty"] .bg-\[color\:var\(--store-accent\)\]:hover {
+  background-color: #EC008C !important;
+}
+/* Accent-länkar → pink */
+body[data-store-theme="beauty"] a.text-\[color\:var\(--store-accent\)\],
+body[data-store-theme="beauty"] .text-\[color\:var\(--store-accent\)\] { color: #EC008C !important; }
+/* Boxad shell (innehållssidor) → ta bort yttre kort-ram, full-bredd */
+body[data-store-theme="beauty"] .overflow-hidden.rounded-\[18px\].border.bg-white {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+/* Inputs → KICKS rundade, pink focus */
+body[data-store-theme="beauty"] input[type="text"],
+body[data-store-theme="beauty"] input[type="email"],
+body[data-store-theme="beauty"] input[type="password"],
+body[data-store-theme="beauty"] input[type="tel"],
+body[data-store-theme="beauty"] input[type="number"],
+body[data-store-theme="beauty"] textarea,
+body[data-store-theme="beauty"] select {
+  border-color: #1A1A1A !important;
+}
+body[data-store-theme="beauty"] input:focus,
+body[data-store-theme="beauty"] textarea:focus,
+body[data-store-theme="beauty"] select:focus {
+  border-color: #EC008C !important;
+  outline: none;
+}
+body[data-store-theme="beauty"] input[type="checkbox"],
+body[data-store-theme="beauty"] input[type="radio"] { accent-color: #EC008C; }
+
 body[data-store-theme="electronics"] {
   --store-accent: #2f7dff;
   --store-accent-fg: #ffffff;

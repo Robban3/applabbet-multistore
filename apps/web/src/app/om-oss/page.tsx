@@ -2,6 +2,7 @@ import { CmsInlineText } from "@/components/cms-inline-text";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { MinimalHeader } from "@/components/storefront/minimal";
+import { BeautyHeader } from "@/components/storefront/beauty";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
@@ -158,6 +159,63 @@ export default async function OmOssPage() {
 
   const isSport = themeKey === "sport";
   const isMinimal = themeKey === "minimal";
+
+  if (themeKey === "beauty") {
+    const navLinks = getStorefrontConfig(themeKey).navItems;
+    return (
+      <main className="bg-white">
+        <BeautyHeader brandName={brandName} links={navLinks} activeNav="Om oss" />
+        <section className="bg-[#FBE9F2] px-6 py-16 text-center">
+          <p className="text-[13px] font-bold uppercase tracking-[0.18em] text-[#EC008C]">
+            {getCmsBlockField(cms.blocks, "hero", "eyebrow", `Om ${brandName}`)}
+          </p>
+          <h1 className="mx-auto mt-3 max-w-[820px] whitespace-pre-line font-extrabold uppercase tracking-[-0.02em] text-[#1A1A1A]" style={{ fontSize: "clamp(34px, 5vw, 60px)", lineHeight: 1.03 }}>
+            {getCmsBlockField(cms.blocks, "hero", "title", "Skönhet för alla.")}
+          </h1>
+          <p className="mx-auto mt-4 max-w-[620px] text-[17px] text-[#1A1A1A]/70">
+            {getCmsBlockField(cms.blocks, "hero", "description", `${brandName} – din destination för smink, hudvård och doft.`)}
+          </p>
+        </section>
+        <section className="px-6 py-14">
+          <div className="mx-auto grid max-w-[1100px] grid-cols-2 gap-8 lg:grid-cols-4">
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <p className="text-[40px] font-extrabold text-[#EC008C] lg:text-[48px]">{stat.value}</p>
+                <p className="mt-1 text-[14px] font-semibold uppercase tracking-[0.04em] text-[#1A1A1A]/60">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="bg-[#FAFAFA] px-6 py-16">
+          <h2 className="text-center text-[28px] font-extrabold uppercase tracking-[-0.01em] text-[#1A1A1A] lg:text-[34px]">
+            {getCmsBlockField(cms.blocks, "values", "title", "Det vi tror på")}
+          </h2>
+          <div className="mx-auto mt-10 grid max-w-[1100px] gap-4 sm:grid-cols-2">
+            {values.map((value) => (
+              <article key={value.title} className="rounded-[14px] border border-[#ECECEC] bg-white p-8">
+                <h3 className="text-[19px] font-bold text-[#1A1A1A]">{value.title}</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-[#6B6B6B]">{value.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section className="px-6 py-16">
+          <h2 className="text-center text-[28px] font-extrabold uppercase tracking-[-0.01em] text-[#1A1A1A] lg:text-[34px]">
+            {getCmsBlockField(cms.blocks, "story", "teamTitle", "Människorna bakom")}
+          </h2>
+          <div className="mx-auto mt-10 grid max-w-[900px] gap-6 sm:grid-cols-3">
+            {teamMembers.map((member) => (
+              <div key={member.name} className="rounded-[14px] bg-[#FBE9F2] p-8 text-center">
+                <div className="mx-auto mb-4 h-20 w-20 rounded-full bg-white" />
+                <p className="text-[17px] font-bold text-[#1A1A1A]">{member.name}</p>
+                <p className="mt-1 text-[14px] text-[#6B6B6B]">{member.role}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (isMinimal) {
     const navLinks = getStorefrontConfig(themeKey).navItems;

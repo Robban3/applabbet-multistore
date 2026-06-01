@@ -4,6 +4,7 @@ import { FashionAccountTabs } from "@/components/storefront/fashion";
 import { MinimalAccountTabs } from "@/components/storefront/minimal";
 import { ElectronicsAccountTabs, ElectronicsMinaSidorContent } from "@/components/storefront/electronics";
 import { SportAccountTabs } from "@/components/storefront/sport/sport-account-tabs";
+import { BeautyAccountTabs } from "@/components/storefront/beauty";
 import type { loadAccountContext } from "@/lib/account-context";
 
 export type MinaSidorAccountContext = Awaited<ReturnType<typeof loadAccountContext>>;
@@ -14,6 +15,7 @@ export function usesMinaSidorTabShell(ctx: MinaSidorAccountContext): boolean {
     ctx.isSport ||
     ctx.themeKey === "fashion" ||
     ctx.themeKey === "minimal" ||
+    ctx.themeKey === "beauty" ||
     ctx.isElectronics
   );
 }
@@ -75,6 +77,22 @@ export function MinaSidorAccountChrome({
           <h1 className="mt-1 text-[28px] font-medium text-[#111] lg:text-[36px]">Hej, {ctx.greetingName}</h1>
         </section>
         <SportAccountTabs items={ctx.sidebarItems} />
+        {tabShell}
+      </main>
+    );
+  }
+
+  if (ctx.themeKey === "beauty") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader cartCount={0} />
+        <section className="bg-[#FBE9F2] px-4 pt-8 pb-6 sm:px-6">
+          <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#EC008C]">Mitt konto</p>
+          <h1 className="mt-1 text-[28px] font-extrabold uppercase tracking-[-0.01em] text-[#1A1A1A] lg:text-[36px]">
+            Hej, {ctx.greetingName}
+          </h1>
+        </section>
+        <BeautyAccountTabs items={ctx.sidebarItems} />
         {tabShell}
       </main>
     );
