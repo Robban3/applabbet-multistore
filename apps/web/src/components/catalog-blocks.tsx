@@ -324,6 +324,16 @@ export function CatalogResultsGrid({
               <p className="mt-1.5 text-[14px] text-[#1A1A1A]">
                 {formatMinorPrice(product.price_minor, product.currency)}
               </p>
+              <AddToCartControl
+                productId={product.id}
+                title={product.title}
+                priceMinor={product.price_minor}
+                currency={product.currency}
+                className="mt-3 inline-flex h-11 w-full items-center justify-center border border-[#1A1A1A] px-5 text-[12px] uppercase tracking-[0.18em] text-[#1A1A1A] transition hover:bg-[#1A1A1A] hover:text-[#FAF9F6]"
+                ariaLabel={`Lägg ${product.title} i varukorgen`}
+              >
+                Lägg i varukorg
+              </AddToCartControl>
             </div>
           </article>
         ))}
@@ -372,6 +382,16 @@ export function CatalogResultsGrid({
               <p className="mt-1.5 text-[15px] font-medium text-[#111]">
                 {formatMinorPrice(product.price_minor, product.currency)}
               </p>
+              <AddToCartControl
+                productId={product.id}
+                title={product.title}
+                priceMinor={product.price_minor}
+                currency={product.currency}
+                className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#111] px-5 text-[14px] font-medium text-white transition hover:bg-black"
+                ariaLabel={`Lägg ${product.title} i varukorgen`}
+              >
+                Lägg i varukorg
+              </AddToCartControl>
             </div>
           </article>
         ))}
