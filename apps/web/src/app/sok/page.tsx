@@ -203,6 +203,8 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                             productId={item.id}
                             initialFavorited={favoriteIds.has(item.id)}
                             className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                            inactiveClassName="text-white"
+                            activeClassName="text-rose-400"
                           />
                         </div>
                         <p className="mt-1 text-[13px] font-semibold">{item.title}</p>

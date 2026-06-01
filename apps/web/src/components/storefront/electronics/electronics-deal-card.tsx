@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatMinorPrice } from "@/lib/format";
 import { AddToCartControl } from "@/components/add-to-cart-control";
+import { FavoriteToggle } from "@/components/favorite-toggle";
 
 export type ElectronicsDealProduct = {
   id?: string;
@@ -11,6 +12,7 @@ export type ElectronicsDealProduct = {
   href?: string;
   imageUrl?: string;
   subtitle?: string;
+  favorited?: boolean;
 };
 
 /**
@@ -34,7 +36,16 @@ export function ElectronicsDealCard({ product }: { product: ElectronicsDealProdu
   const deal = dealFor(product.slug ?? product.title, product.priceMinor);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-[12px] border border-[#DCE6F5] bg-white transition hover:shadow-[0_8px_24px_rgba(10,37,64,0.10)]">
+    <article className="group relative flex flex-col overflow-hidden rounded-[12px] border border-[#DCE6F5] bg-white transition hover:shadow-[0_8px_24px_rgba(10,37,64,0.10)]">
+      {product.id ? (
+        <FavoriteToggle
+          productId={product.id}
+          initialFavorited={product.favorited ?? false}
+          className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:bg-[#eef3fb]"
+          inactiveClassName="text-[#0A2540]"
+          activeClassName="text-[#E8362D]"
+        />
+      ) : null}
       <Link href={href} className="relative block">
         {deal ? (
           <span className="absolute left-3 top-3 z-10 rounded-[6px] bg-[#E8362D] px-2 py-1 text-[12px] font-bold text-white">

@@ -237,6 +237,7 @@ export function CatalogResultsGrid({
               priceMinor: product.price_minor,
               currency: product.currency,
               imageUrl: product.image_url ?? undefined,
+              favorited: favoriteIds.has(product.id),
             }}
           />
         ))}
@@ -249,7 +250,7 @@ export function CatalogResultsGrid({
     return (
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
-          <article key={product.id} className="flex flex-col items-center rounded-[18px] bg-[#F5F5F7] p-6 text-center">
+          <article key={product.id} className="relative flex flex-col items-center rounded-[18px] bg-[#F5F5F7] p-6 text-center">
             <Link href={`/products/${product.slug}`} className="block w-full">
               <div className="relative aspect-square w-full">
                 {product.image_url ? (
@@ -258,6 +259,13 @@ export function CatalogResultsGrid({
                 ) : null}
               </div>
             </Link>
+            <FavoriteToggle
+              productId={product.id}
+              initialFavorited={favoriteIds.has(product.id)}
+              className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:bg-[#ececef]"
+              inactiveClassName="text-[#1D1D1F]"
+              activeClassName="text-[#0071E3]"
+            />
             {badgeLabel ? (
               <p className="mt-3 text-[12px] font-semibold uppercase tracking-wide text-[#0066CC]">{badgeLabel}</p>
             ) : null}

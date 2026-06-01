@@ -40,22 +40,15 @@ export function FashionBestSellers({
         {products.slice(0, 8).map((p, idx) => {
           const href = p.href ?? "/products";
           return (
-            <article key={p.id ?? `${p.title}-${idx}`} className="group flex flex-col">
+            <article key={p.id ?? `${p.title}-${idx}`} className="group relative flex flex-col">
               <Link href={href} className="block">
-                <div className="relative aspect-[4/5] overflow-hidden bg-[#F5F1EA]">
+                <div className="relative aspect-square overflow-hidden bg-[#F5F1EA]">
                   {p.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={p.imageUrl}
                       alt={p.title}
                       className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
-                    />
-                  ) : null}
-                  {p.id ? (
-                    <FavoriteToggle
-                      productId={p.id}
-                      initialFavorited={p.favorited ?? false}
-                      className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white/85 text-[#1A1A1A] backdrop-blur-sm transition hover:bg-white"
                     />
                   ) : null}
                   {p.badge ? (
@@ -65,6 +58,15 @@ export function FashionBestSellers({
                   ) : null}
                 </div>
               </Link>
+              {p.id ? (
+                <FavoriteToggle
+                  productId={p.id}
+                  initialFavorited={p.favorited ?? false}
+                  className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center bg-white/85 backdrop-blur-sm transition hover:bg-white"
+                  inactiveClassName="text-[#1A1A1A]"
+                  activeClassName="text-[#1A1A1A]"
+                />
+              ) : null}
 
               <div className="mt-4 flex items-start justify-between gap-3">
                 <div className="min-w-0">

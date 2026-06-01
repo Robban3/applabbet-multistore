@@ -673,6 +673,8 @@ export default async function Home() {
                         productId={product.id}
                         initialFavorited={favoriteIds.has(product.id)}
                         className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                        inactiveClassName="text-white"
+                        activeClassName="text-rose-400"
                       />
                     ) : null}
                     {idx === 0 ? (

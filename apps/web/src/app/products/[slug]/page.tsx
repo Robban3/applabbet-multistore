@@ -290,6 +290,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                         productId={item.id}
                         initialFavorited={favoriteIds.has(item.id)}
                         className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                        inactiveClassName="text-white"
+                        activeClassName="text-rose-400"
                       />
                     </div>
                     <div className="space-y-1 p-3">

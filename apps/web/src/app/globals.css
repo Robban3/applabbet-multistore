@@ -508,6 +508,10 @@ body[data-store-theme="luxury"] article svg,
 body[data-store-theme="luxury"] .trust-icon svg {
   color: #C41E3A !important;
 }
+/* Favorithjärtat ska styra sin egen färg (inaktiv mörk, aktiv röd) */
+body[data-store-theme="luxury"] article [data-favorite] svg {
+  color: inherit !important;
+}
 
 /* Navigations-ikoner → behåll vita */
 body[data-store-theme="luxury"] header svg {
