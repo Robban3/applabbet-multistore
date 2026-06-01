@@ -31,7 +31,10 @@ export function MinimalHero({
       <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-black/55" />
       <div className="relative mx-auto flex min-h-[460px] max-w-[980px] flex-col items-center justify-center px-6 py-16 text-center lg:min-h-[600px]">
         {eyebrow ? <p className="text-[19px] font-semibold tracking-[-0.01em] text-white">{eyebrow}</p> : null}
-        <h1 className="mx-auto max-w-[900px] whitespace-pre-line font-semibold tracking-[-0.03em] text-white" style={{ fontSize: "clamp(40px, 6.5vw, 80px)", lineHeight: 1.05 }}>
+        <h1
+          className="minimal-hero-title mx-auto max-w-[900px] whitespace-pre-line font-semibold tracking-[-0.03em]"
+          style={{ fontSize: "clamp(40px, 6.5vw, 80px)", lineHeight: 1.05, color: "#7373e3" }}
+        >
           {title}
         </h1>
         {description ? <p className="mx-auto mt-4 max-w-[640px] text-[19px] tracking-[-0.01em] text-white/90 sm:text-[21px]">{description}</p> : null}

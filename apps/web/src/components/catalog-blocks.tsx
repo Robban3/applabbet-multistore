@@ -190,9 +190,10 @@ export function CatalogResultsGrid({
   products: Product[];
   favoriteProductIds?: string[];
   badgeLabel?: string;
-  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport" | "luxury" | "minimal" | "electronics-deal";
+  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport" | "luxury" | "minimal" | "electronics-deal" | "classic";
 }) {
   const favoriteIds = new Set(favoriteProductIds);
+  const isClassic = cardVariant === "classic";
   const isFashion = cardVariant === "fashion";
   const isBeauty = cardVariant === "beauty";
   const isElectronics = cardVariant === "electronics";
@@ -396,6 +397,59 @@ export function CatalogResultsGrid({
                 priceMinor={product.price_minor}
                 currency={product.currency}
                 className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#111] px-5 text-[14px] font-medium text-white transition hover:bg-black"
+                ariaLabel={`Lägg ${product.title} i varukorgen`}
+              >
+                Lägg i varukorg
+              </AddToCartControl>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  if (isClassic) {
+    // NK/Ralph Lauren-stil: heritage, vit, cream bildyta, guldaccent,
+    // varumärke + namn + betyg + pris + elegant knapp.
+    return (
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product, idx) => (
+          <article key={product.id} className="group relative flex flex-col overflow-hidden rounded-[14px] border border-[#e6ddd1] bg-white transition hover:shadow-[0_12px_32px_rgba(31,24,18,0.10)]">
+            <Link href={`/products/${product.slug}`} className="block">
+              <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-[#f7f2ea] to-[#ece3d4]">
+                {product.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
+                ) : null}
+                {badgeLabel ? (
+                  <span className="absolute left-3 top-3 rounded-full bg-[#17120d] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#e9cf9e]">{badgeLabel}</span>
+                ) : idx === 0 ? (
+                  <span className="absolute left-3 top-3 rounded-full bg-[#17120d] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#e9cf9e]">BÄSTSÄLJARE</span>
+                ) : null}
+              </div>
+            </Link>
+            <FavoriteToggle
+              productId={product.id}
+              initialFavorited={favoriteIds.has(product.id)}
+              className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:bg-white"
+              inactiveClassName="text-[#17120d]"
+              activeClassName="text-[#c9973d]"
+            />
+            <div className="flex flex-1 flex-col p-4">
+              {product.brand?.trim() ? (
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#b88f50]">{product.brand}</p>
+              ) : null}
+              <Link href={`/products/${product.slug}`}>
+                <p className="mt-1 line-clamp-2 min-h-[40px] text-[15px] font-semibold leading-snug text-[#17120d] transition group-hover:text-[#8a6a44]">{product.title}</p>
+              </Link>
+              <p className="mt-1 text-[12px] text-[#c9973d]">★★★★<span className="text-[#e3d8c4]">★</span> <span className="text-[#17120d]/40">({70 + idx * 11})</span></p>
+              <p className="mt-2 text-[17px] font-semibold text-[#17120d]">{formatMinorPrice(product.price_minor, product.currency)}</p>
+              <AddToCartControl
+                productId={product.id}
+                title={product.title}
+                priceMinor={product.price_minor}
+                currency={product.currency}
+                className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-[#17120d] px-4 text-[13px] font-semibold tracking-[0.02em] text-white transition hover:bg-[#2a1f14]"
                 ariaLabel={`Lägg ${product.title} i varukorgen`}
               >
                 Lägg i varukorg

@@ -1036,6 +1036,10 @@ body[data-store-theme="minimal"] h3 {
   color: #1D1D1F;
 }
 
+body[data-store-theme="minimal"] .minimal-hero-title {
+  color: #7373e3 !important;
+}
+
 /* Stora rundade hörn (Apple-kort) */
 body[data-store-theme="minimal"] .rounded-md,
 body[data-store-theme="minimal"] .rounded-lg,

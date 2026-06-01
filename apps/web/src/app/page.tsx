@@ -248,7 +248,7 @@ export default async function Home() {
         : "Premium kvalitet. Utvalt med omsorg.",
   );
   const heroImageUrlCms = getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim();
-  const heroImageUrl = heroImageUrlCms || (isBeauty ? "/images/hero-skonhet.png" : isClassic ? "/images/hero-classic.png" : getThemeHeroImage(themeKey));
+  const heroImageUrl = heroImageUrlCms || (isBeauty ? "/images/hero-skonhet.png" : isClassic ? "/images/hero-classic.png" : isMinimalTheme ? "/images/heroes/minimal-hero.jpg" : getThemeHeroImage(themeKey));
   const heroContentPositionRaw = readHomeField("hero", "contentPosition", "left").trim().toLowerCase();
   const heroContentPosition = heroContentPositionRaw === "right" ? "right" : "left";
   const isHeroContentRight = heroContentPosition === "right";

@@ -195,7 +195,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           ? "beauty"
           : isElectronics
             ? "electronics"
-            : "default";
+            : themeKey === "classic"
+              ? "classic"
+              : "default";
   // Begränsa till temats kategorier när användaren inte uttryckligen filtrerat.
   const scopedQuery = await applyThemeScopeToCatalogQuery(supabase, tenant.id, themeKey, query);
   const catalog = await getCatalogData(supabase, tenant.id, scopedQuery);
