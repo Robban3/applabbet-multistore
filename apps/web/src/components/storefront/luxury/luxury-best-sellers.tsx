@@ -35,9 +35,9 @@ export function LuxuryBestSellers({ title, viewAllLabel, products }: LuxuryBestS
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {products.slice(0, 6).map((product, index) => (
-          <article key={`${product.title}-${index}`} className="group">
+          <article key={`${product.title}-${index}`} className="group relative">
             <Link href={product.href || "/products"} className="block">
-              <div className="relative overflow-hidden bg-[#F5F0E8]" style={{ aspectRatio: "3/4" }}>
+              <div className="relative aspect-square overflow-hidden bg-[#F5F0E8]">
                 {product.imageUrl ? (
                   <img
                     src={product.imageUrl}
@@ -49,13 +49,6 @@ export function LuxuryBestSellers({ title, viewAllLabel, products }: LuxuryBestS
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(184,150,62,0.08),transparent_60%)]" />
                   </div>
                 )}
-                {product.id ? (
-                  <FavoriteToggle
-                    productId={product.id}
-                    initialFavorited={product.favorited ?? false}
-                    className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white"
-                  />
-                ) : null}
                 {product.badge ? (
                   <span className="absolute left-3 top-3 bg-[#C41E3A] px-2.5 py-1 text-[9px] font-light tracking-[0.25em] uppercase text-white">
                     {product.badge}
@@ -63,6 +56,15 @@ export function LuxuryBestSellers({ title, viewAllLabel, products }: LuxuryBestS
                 ) : null}
               </div>
             </Link>
+            {product.id ? (
+              <FavoriteToggle
+                productId={product.id}
+                initialFavorited={product.favorited ?? false}
+                className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white"
+                inactiveClassName="text-[#17120d]"
+                activeClassName="text-[#C41E3A]"
+              />
+            ) : null}
 
             <div className="mt-4 flex items-start justify-between gap-2">
               <div className="flex-1">
