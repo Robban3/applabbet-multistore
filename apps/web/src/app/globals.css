@@ -144,17 +144,19 @@ body[data-store-theme="fashion"] {
 }
 
 body[data-store-theme="beauty"] {
-  --store-accent: #f1a9bf;
-  --store-header-gradient: linear-gradient(to bottom, #140f14, #0f0b10, #0a080c);
-  --store-trust-gradient: linear-gradient(to right, #fff1f5, #fde8ee);
-  --store-footer-surface: #0f0d12;
-  --store-footer-bg: #fff6f8;
-  --store-footer-border: #f2d7df;
+  /* KICKS.se: vitt + svart med hot pink-accent */
+  --store-accent: #EC008C;
+  --store-accent-fg: #ffffff;
+  --store-header-gradient: #ffffff;
+  --store-trust-gradient: linear-gradient(to right, #1A1A1A, #1A1A1A);
+  --store-footer-surface: #1A1A1A;
+  --store-footer-bg: #ffffff;
+  --store-footer-border: #ECECEC;
   --store-shell-surface: #ffffff;
-  --store-soft-surface: #fffafb;
-  --store-card-border: #f2dbe3;
-  --store-media-gradient: linear-gradient(135deg, #5a3f49 0%, #3e2d35 50%, #291e24 100%);
-  --store-header-overlay-surface: #130d13;
+  --store-soft-surface: #FAFAFA;
+  --store-card-border: #ECECEC;
+  --store-media-gradient: linear-gradient(135deg, #FBE9F2 0%, #f7d6e6 100%);
+  --store-header-overlay-surface: #ffffff;
 }
 
 body[data-store-theme="electronics"] {

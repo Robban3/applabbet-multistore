@@ -6,6 +6,7 @@ import { SportHeader } from "@/components/storefront/sport/sport-header";
 import { FashionHeader } from "@/components/storefront/fashion/fashion-header";
 import { MinimalHeader } from "@/components/storefront/minimal/minimal-header";
 import { ElectronicsHeader } from "@/components/storefront/electronics/electronics-header";
+import { BeautyHeader } from "@/components/storefront/beauty/beauty-header";
 import {
   defaultNavigationMenu,
   defaultTrustBadges,
@@ -129,6 +130,19 @@ export async function StorefrontHeader({
   if (themeKey === "minimal") {
     return (
       <MinimalHeader
+        brandName={brandName}
+        links={links}
+        cartInitialCount={cartCount}
+        activeNav={activeNav}
+        isLoggedIn={isLoggedIn}
+      />
+    );
+  }
+
+  // ── Beauty-tema (KICKS): eget header ─────────────────────────
+  if (themeKey === "beauty") {
+    return (
+      <BeautyHeader
         brandName={brandName}
         links={links}
         cartInitialCount={cartCount}

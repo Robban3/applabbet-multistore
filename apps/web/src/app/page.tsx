@@ -50,6 +50,12 @@ import {
   MinimalBestSellers,
 } from "@/components/storefront/minimal";
 import {
+  BeautyHeader,
+  BeautyHero,
+  BeautyCategoryGrid,
+  BeautyBestSellers,
+} from "@/components/storefront/beauty";
+import {
   ElectronicsHeader,
   ElectronicsHero,
   ElectronicsCategoryGrid,
@@ -361,6 +367,44 @@ export default async function Home() {
     "SNABBA LEVERANSER",
   ];
   const displayedCategoryCards = isBeauty || isSport ? categoryCards.slice(0, 5) : categoryCards;
+
+  if (isBeauty) {
+    const beautyCategories = displayedCategoryCards.map((c) => ({
+      title: c.title,
+      href: `/products?category=${encodeURIComponent(c.title.toLowerCase())}`,
+      imageUrl: c.imageUrl,
+    }));
+    const beautyProducts = classicBestSellerProducts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      priceMinor: p.priceMinor,
+      currency: p.currency,
+      href: p.href,
+      imageUrl: p.imageUrl,
+      badge: p.badge,
+      favorited: p.favorited,
+      subtitle: p.subtitle,
+      rating: p.rating,
+      reviewCount: p.reviewCount,
+    }));
+    return (
+      <main className="bg-white">
+        <BeautyHeader brandName={brandName} links={navItems} />
+        <BeautyHero
+          eyebrow={heroEyebrow}
+          title={getCmsBlockField(cms.blocks, "hero", "title", "Skönhet som\nlyfter dig.")}
+          description={getCmsBlockField(cms.blocks, "hero", "description", "Upptäck smink, hudvård och dofter från dina favoritvarumärken.")}
+          primaryCtaHref={primaryCtaHref}
+          primaryCtaLabel={primaryCtaLabel}
+          secondaryCtaHref={secondaryCtaHref}
+          secondaryCtaLabel={secondaryCtaLabel}
+          heroImageUrl={heroImageUrl || undefined}
+        />
+        <BeautyCategoryGrid title={categoriesSectionTitle} categories={beautyCategories} />
+        <BeautyBestSellers title={bestSellersTitle} viewAllLabel={bestSellersViewAllLabel} products={beautyProducts} />
+      </main>
+    );
+  }
 
   if (isElectronics) {
     const elecCategories = categoryCards.map((c) => ({
