@@ -303,7 +303,9 @@ export function CatalogResultsGrid({
                 <FavoriteToggle
                   productId={product.id}
                   initialFavorited={favoriteIds.has(product.id)}
-                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white/85 text-[#1A1A1A] backdrop-blur-sm transition hover:bg-white"
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white/85 backdrop-blur-sm transition hover:bg-white"
+                  inactiveClassName="text-[#1A1A1A]"
+                  activeClassName="text-[#1A1A1A]"
                 />
                 {badgeLabel ? (
                   <span className="absolute left-3 top-3 bg-[#1A1A1A] px-2.5 py-1 text-[10px] tracking-[0.2em] uppercase text-[#FAF9F6]">
@@ -388,7 +390,7 @@ export function CatalogResultsGrid({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                 ) : null}
-                <FavoriteToggle productId={product.id} initialFavorited={favoriteIds.has(product.id)} className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white" />
+                <FavoriteToggle productId={product.id} initialFavorited={favoriteIds.has(product.id)} className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white" inactiveClassName="text-[#17120d]" activeClassName="text-[#C41E3A]" />
                 {badgeLabel ? (
                   <span className="absolute left-3 top-3 bg-[#C41E3A] px-2.5 py-1 text-[9px] font-light tracking-[0.25em] uppercase text-white">{badgeLabel}</span>
                 ) : idx === 0 ? (
@@ -451,13 +453,15 @@ export function CatalogResultsGrid({
                 initialFavorited={favoriteIds.has(product.id)}
                 className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full ${
                   isBeauty
-                    ? "border-[#f3dbe4] bg-white text-[#8b5c6f]"
+                    ? "border-[#f3dbe4] bg-white"
                     : isElectronics
-                      ? "border-white/25 bg-black/25 text-white"
+                      ? "border-white/25 bg-black/25"
                       : isSport
-                        ? "border-white/20 bg-black/25 text-white"
+                        ? "border-white/20 bg-black/25"
                       : "border-white/20 bg-black/30"
                 }`}
+                inactiveClassName={isBeauty ? "text-[#8b5c6f]" : "text-white"}
+                activeClassName={isBeauty ? "text-[#c4486b]" : "text-rose-400"}
               />
               {badgeLabel ? (
                 <span
