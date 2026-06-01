@@ -291,7 +291,7 @@ export function CatalogResultsGrid({
         {products.map((product) => (
           <article key={product.id} className="group relative flex flex-col">
             <Link href={`/products/${product.slug}`} className="block">
-              <div className="relative aspect-[4/5] overflow-hidden bg-[#F5F1EA]">
+              <div className="relative aspect-square overflow-hidden bg-[#F5F1EA]">
                 {product.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -405,7 +405,7 @@ export function CatalogResultsGrid({
         {products.map((product, idx) => (
           <article key={product.id} className="group relative">
             <Link href={`/products/${product.slug}`} className="block">
-              <div className="relative overflow-hidden bg-[#F5F0E8]" style={{ aspectRatio: "3/4" }}>
+              <div className="relative aspect-square overflow-hidden bg-[#F5F0E8]">
                 {product.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
@@ -456,7 +456,7 @@ export function CatalogResultsGrid({
         >
           <Link href={`/products/${product.slug}`} className="block">
             <div
-              className={`relative ${isFashion || isBeauty || isElectronics || isSport ? "h-52" : "h-40"} ${
+              className={`relative ${isFashion || isBeauty || isElectronics || isSport ? "aspect-square" : "h-40"} ${
                 isBeauty
                   ? beautyImageSurface
                   : isElectronics
