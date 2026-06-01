@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { toPublicCustomerId } from "@/lib/customer-id";
@@ -256,63 +258,46 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
   const fullNameLabel = [firstName, lastName].filter(Boolean).join(" ").trim() || "-";
   const passwordUpdatedLabel = formatShortDate(context.user.updated_at || "");
 
-  return (
-    <main style={{ background: "var(--store-footer-bg)" }}>
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div
-          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
-          style={{ borderColor: "var(--store-footer-border)" }}
-        >
-          <StorefrontHeader cartCount={2} trustStripSize="large" />
+  const accountCtx = await loadAccountContext();
+  const pageTitle = getCmsBlockField(cms.blocks, "hero", "title", "Mina uppgifter");
+  const pageSubtitle = getCmsBlockField(
+    cms.blocks,
+    "hero",
+    "subtitle",
+    "Här kan du se och uppdatera dina personuppgifter, kontaktuppgifter och lösenord.",
+  );
 
-          <div className="px-6 py-5">
-          <p className="text-xs text-slate-500">
-            <Link href="/" className="hover:text-slate-700">Hem</Link>
-            <span className="mx-1">&gt;</span>
-            <Link href="/mina-sidor" className="hover:text-slate-700">Mina sidor</Link>
-            <span className="mx-1">&gt;</span>
-            <Link href="/mina-sidor/profil" className="hover:text-slate-700">
-              {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Mina uppgifter")}
-            </Link>
-          </p>
-          <h1 className="mt-2 text-5xl font-semibold tracking-tight text-slate-900">
-            {getCmsBlockField(cms.blocks, "hero", "title", "Mina uppgifter")}
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {getCmsBlockField(
-              cms.blocks,
-              "hero",
-              "subtitle",
-              "Här kan du se och uppdatera dina personuppgifter, kontaktuppgifter och lösenord.",
-            )}
-          </p>
-          {status === "saved" ? (
-            <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-              {section === "profile"
-                ? "Personuppgifter sparades."
-                : section === "password"
-                  ? "Lösenordet uppdaterades."
-                  : "Inställningarna sparades."}
-            </p>
-          ) : null}
-          {status === "error" ? (
-            <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              {section === "password"
-                ? passwordError === "empty"
-                  ? "Ange ett nytt lösenord."
-                  : passwordError === "length"
-                    ? "Lösenordet måste vara minst 8 tecken."
-                    : passwordError === "mismatch"
-                      ? "Lösenorden matchar inte."
-                      : "Kunde inte uppdatera lösenordet. Försök igen."
-                : "Kunde inte spara ändringarna. Kontrollera fälten och försök igen."}
-            </p>
-          ) : null}
+  const statusAlerts = (
+    <>
+      {status === "saved" ? (
+        <p className="mb-4 rounded-[10px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          {section === "profile"
+            ? "Personuppgifter sparades."
+            : section === "password"
+              ? "Lösenordet uppdaterades."
+              : "Inställningarna sparades."}
+        </p>
+      ) : null}
+      {status === "error" ? (
+        <p className="mb-4 rounded-[10px] border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          {section === "password"
+            ? passwordError === "empty"
+              ? "Ange ett nytt lösenord."
+              : passwordError === "length"
+                ? "Lösenordet måste vara minst 8 tecken."
+                : passwordError === "mismatch"
+                  ? "Lösenorden matchar inte."
+                  : "Kunde inte uppdatera lösenordet. Försök igen."
+            : "Kunde inte spara ändringarna. Kontrollera fälten och försök igen."}
+        </p>
+      ) : null}
+    </>
+  );
 
-          <div className="mt-4 grid gap-5 lg:grid-cols-[230px_1fr]">
-            <AccountSidebar activeHref="/mina-sidor/profil" withIcons />
-
-            <section className="space-y-3">
+  const profileBody = (
+    <>
+      {statusAlerts}
+      <section className="space-y-3">
               <article className="w-full rounded-xl border bg-white px-5 py-4" style={{ borderColor: "var(--store-card-border)" }}>
                 <div className="flex items-start gap-3">
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-700">
@@ -502,7 +487,43 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
                   <p className="text-xs text-slate-500">{fullNameLabel}</p>
                 </div>
               </article>
-            </section>
+      </section>
+    </>
+  );
+
+  if (usesMinaSidorTabShell(accountCtx)) {
+    return (
+      <MinaSidorTabShellContent ctx={accountCtx} title={pageTitle} subtitle={pageSubtitle}>
+        {profileBody}
+      </MinaSidorTabShellContent>
+    );
+  }
+
+  return (
+    <main style={{ background: "var(--store-footer-bg)" }}>
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
+          <StorefrontHeader cartCount={2} trustStripSize="large" />
+
+          <div className="px-6 py-5">
+          <p className="text-xs text-slate-500">
+            <Link href="/" className="hover:text-slate-700">Hem</Link>
+            <span className="mx-1">&gt;</span>
+            <Link href="/mina-sidor" className="hover:text-slate-700">Mina sidor</Link>
+            <span className="mx-1">&gt;</span>
+            <Link href="/mina-sidor/profil" className="hover:text-slate-700">
+              {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Mina uppgifter")}
+            </Link>
+          </p>
+          <h1 className="mt-2 text-5xl font-semibold tracking-tight text-slate-900">{pageTitle}</h1>
+          <p className="mt-1 text-sm text-slate-600">{pageSubtitle}</p>
+
+          <div className="mt-4 grid gap-5 lg:grid-cols-[230px_1fr]">
+            <AccountSidebar activeHref="/mina-sidor/profil" withIcons />
+            {profileBody}
           </div>
           </div>
         </div>

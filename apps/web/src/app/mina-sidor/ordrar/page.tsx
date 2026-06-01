@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorTabShellContent } from "@/lib/mina-sidor-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -170,9 +172,126 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
     return matchesTab && matchesQuery;
   });
 
-  // Tema-detektering. Sport renderar utan boxad shell — layouten ger header + tabs.
-  const settings = await getTenantSettings(tenant);
-  const isSport = normalizeThemeKey(settings?.theme_key) === "sport";
+  const accountCtx = await loadAccountContext();
+  const isSport = accountCtx.isSport;
+  const isElectronics = accountCtx.isElectronics;
+
+  const orderTabs: Array<{ key: OrderTab; label: string }> = [
+    { key: "alla", label: "Alla" },
+    { key: "pagaende", label: "Pågående" },
+    { key: "levererade", label: "Levererade" },
+    { key: "returnerade", label: "Returnerade" },
+  ];
+
+  if (isElectronics) {
+    const statusPill = (status: string) =>
+      status === "Skickad"
+        ? "bg-[#EAF1FB] text-[#2f7dff]"
+        : status === "Returnerad"
+          ? "bg-[#F4F7FC] text-[#0A2540]/70"
+          : status === "Levererad"
+            ? "bg-[#e8f5ee] text-[#1a8754]"
+            : "bg-[#fff8e6] text-[#b45309]";
+
+    const searchForm = (
+      <form method="GET" action="/mina-sidor/ordrar" className="flex items-center gap-2">
+        {activeTab !== "alla" ? <input type="hidden" name="tab" value={activeTab} /> : null}
+        <label className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#DCE6F5] bg-white px-4 text-[14px] text-[#0A2540]">
+          <SearchIcon />
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Sök ordrar"
+            className="w-44 bg-transparent outline-none placeholder:text-[#0A2540]/40 sm:w-52"
+          />
+        </label>
+        <button
+          type="submit"
+          className="inline-flex h-10 items-center rounded-full bg-[#2f7dff] px-5 text-[14px] font-semibold text-white hover:bg-[#1a6cf0]"
+        >
+          Sök
+        </button>
+      </form>
+    );
+
+    return (
+      <MinaSidorTabShellContent
+        ctx={accountCtx}
+        title={getCmsBlockField(cms.blocks, "hero", "title", "Mina ordrar")}
+        subtitle={getCmsBlockField(cms.blocks, "hero", "subtitle", "Här ser du alla dina ordrar och deras status.")}
+        headerExtra={searchForm}
+      >
+          <div className="flex flex-wrap gap-2">
+            {orderTabs.map((t) => {
+              const active = activeTab === t.key;
+              return (
+                <Link
+                  key={t.key}
+                  href={createOrdersQuery("/mina-sidor/ordrar", t.key, q)}
+                  className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-semibold transition ${
+                    active
+                      ? "bg-[#2f7dff] text-white"
+                      : "border border-[#DCE6F5] bg-white text-[#0A2540] hover:border-[#2f7dff]/50"
+                  }`}
+                >
+                  {t.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 space-y-3">
+            {filteredOrders.map((order) => (
+              <article
+                key={order.id}
+                className="rounded-[12px] border border-[#DCE6F5] bg-white p-5 shadow-[0_2px_8px_rgba(10,37,64,0.04)]"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="aspect-square h-20 w-20 shrink-0 rounded-[10px] bg-[#F4F7FC]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] text-[#0A2540]/55">
+                      Order {order.id} · Lagd {order.date}
+                    </p>
+                    <p className="mt-1 text-[15px] font-semibold text-[#0A2540]">{order.title}</p>
+                    <p className="mt-0.5 text-[13px] text-[#0A2540]/55">{order.quantity} st</p>
+                    <span
+                      className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${statusPill(order.status)}`}
+                    >
+                      {order.status}
+                    </span>
+                    {order.note ? (
+                      <p className="mt-2 text-[12px] text-[#0A2540]/55">{order.note}</p>
+                    ) : null}
+                  </div>
+                  <div className="flex shrink-0 flex-col items-stretch gap-3 sm:items-end">
+                    <p className="text-[18px] font-bold text-[#0A2540] sm:text-right">{order.price}</p>
+                    <Link
+                      href={`/mina-sidor/ordrar?tab=${activeTab}&id=${order.id}`}
+                      className="inline-flex h-9 items-center justify-center rounded-full border border-[#DCE6F5] px-4 text-[13px] font-semibold text-[#0A2540] transition hover:border-[#2f7dff] hover:text-[#2f7dff]"
+                    >
+                      {order.action}
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+            {filteredOrders.length === 0 ? (
+              <div className="rounded-[12px] border border-[#DCE6F5] bg-white py-16 text-center">
+                <p className="text-[15px] text-[#0A2540]/65">
+                  {getCmsBlockField(cms.blocks, "orders", "emptyState", "Inga ordrar matchar ditt filter.")}
+                </p>
+                <Link
+                  href="/products"
+                  className="mt-6 inline-flex h-11 items-center rounded-full bg-[#2f7dff] px-6 text-[15px] font-semibold text-white hover:bg-[#1a6cf0]"
+                >
+                  Fortsätt handla
+                </Link>
+              </div>
+            ) : null}
+          </div>
+      </MinaSidorTabShellContent>
+    );
+  }
 
   if (isSport) {
     const statusPill = (status: string) =>
@@ -181,13 +300,6 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
         : status === "Returnerad"
           ? "bg-[#f5f5f5] text-[#111]"
           : "bg-[#dcfce7] text-[#166534]";
-
-    const tabs: Array<{ key: OrderTab; label: string }> = [
-      { key: "alla", label: "Alla" },
-      { key: "pagaende", label: "Pågående" },
-      { key: "levererade", label: "Levererade" },
-      { key: "returnerade", label: "Returnerade" },
-    ];
 
     return (
       <section className="bg-white px-6 py-10 lg:px-10">
@@ -217,7 +329,7 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
 
         {/* Status-tabs (separat sub-nav under heading) */}
         <div className="mt-6 flex flex-wrap gap-2">
-          {tabs.map((t) => {
+          {orderTabs.map((t) => {
             const active = activeTab === t.key;
             return (
               <Link

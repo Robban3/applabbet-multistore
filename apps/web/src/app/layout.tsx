@@ -8,6 +8,7 @@ import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { SiteFooter } from "@/components/site-footer";
 import { DevThemeSwitcher } from "@/components/dev-theme-switcher";
+import { isElectronicsStorefront } from "@/lib/account-context";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import "./globals.css";
@@ -81,7 +82,8 @@ export default async function RootLayout({
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const tenantSettings = tenant ? await getTenantSettings(tenant) : null;
-  const storeTheme = normalizeThemeKey(tenantSettings?.theme_key);
+  const themeKey = normalizeThemeKey(tenantSettings?.theme_key);
+  const storeTheme = isElectronicsStorefront(host, themeKey) ? "electronics" : themeKey;
 
   return (
     <html lang="sv" className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} h-full antialiased`}>

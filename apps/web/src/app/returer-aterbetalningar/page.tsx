@@ -6,6 +6,8 @@ import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorAccountPage, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
@@ -138,101 +140,235 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
     }
   }
 
-  const host = await getCurrentHost();
-  const tenant = await resolveTenantByHost(host);
-  const settings = tenant ? await getTenantSettings(tenant) : null;
-  const isSport = normalizeThemeKey(settings?.theme_key) === "sport";
+  const accountCtx = accountView ? await loadAccountContext() : null;
 
-  if (isSport) {
-    const sportInner = (
-      <>
-        {/* Steg */}
+  const createReturnHref = getCmsBlockField(
+    cms.blocks,
+    "steps",
+    "createReturnHref",
+    "/returer-aterbetalningar/skapa-retur?account=1",
+  );
+  const returnsButtonHref = getCmsBlockField(
+    cms.blocks,
+    "cards",
+    "returnsButtonHref",
+    "/returer-aterbetalningar/skapa-retur?account=1",
+  );
+
+  const sportReturnsBody = (
+    <>
+      <section className="w-full px-6 py-12 lg:px-10">
+        <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">Process</p>
+        <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
+          {getCmsBlockField(cms.blocks, "sections", "howItWorksTitle", "Så funkar en retur")}
+        </h2>
+        <div className="mt-8 grid gap-4 md:grid-cols-5">
+          {steps.map((step, idx) => (
+            <article key={step.title} className="border-2 border-[#0a0f08] bg-white p-5">
+              <span className="flex h-9 w-9 items-center justify-center bg-[#b3ff00] text-sm font-black text-[#0a0f08]">{idx + 1}</span>
+              <p className="mt-3 text-base font-black uppercase tracking-[-0.01em] text-[#0a0f08]">{step.title}</p>
+              <p className="mt-1 text-[13px] font-medium text-[#0a0f08]/60">{step.text}</p>
+            </article>
+          ))}
+        </div>
+        <Link
+          href={createReturnHref}
+          className="mt-6 inline-flex items-center gap-2 bg-[#0a0f08] px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white transition hover:bg-[#1a2113]"
+        >
+          {getCmsBlockField(cms.blocks, "steps", "createReturnLabel", "Skapa din retur")}
+          <ArrowRightIcon />
+        </Link>
+      </section>
+      <section className="w-full bg-[#0a0f08] px-6 py-12 text-white lg:px-10">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <article className="border-2 border-[#b3ff00] bg-white/5 p-6">
+            <h3 className="text-xl font-black uppercase tracking-[-0.01em] text-[#b3ff00]">
+              {getCmsBlockField(cms.blocks, "cards", "returnsTitle", "30 dagars öppet köp")}
+            </h3>
+            <p className="mt-2 text-[13px] font-medium text-white/60">
+              {getCmsBlockField(cms.blocks, "cards", "returnsText", "Du har alltid 30 dagars öppet köp från den dag du mottagit din vara.")}
+            </p>
+            <ul className="mt-4 space-y-2 text-[13px] font-medium text-white/80">
+              <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem1", "Varan är i originalskick")}</li>
+              <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem2", "Alla lappar och originalförpackning finns med")}</li>
+              <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem3", "Returkostnad: 49 kr")}</li>
+            </ul>
+            <Link
+              href={returnsButtonHref}
+              className="mt-5 inline-flex items-center gap-2 bg-[#b3ff00] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] text-[#0a0f08] transition hover:bg-[#9fe600]"
+            >
+              {getCmsBlockField(cms.blocks, "cards", "returnsButtonLabel", "Skapa en retur")}
+              <ArrowRightIcon />
+            </Link>
+          </article>
+          <article className="border-2 border-white/15 bg-white/5 p-6">
+            <h3 className="text-xl font-black uppercase tracking-[-0.01em] text-white">
+              {getCmsBlockField(cms.blocks, "cards", "refundsTitle", "Återbetalningar")}
+            </h3>
+            <p className="mt-2 text-[13px] font-medium text-white/60">
+              {getCmsBlockField(cms.blocks, "cards", "refundsText", "När vi mottagit och godkänt din retur återbetalas beloppet till samma betalningsmetod.")}
+            </p>
+            {refundRows.length > 0 ? (
+              <div className="mt-4 space-y-2 text-[13px]">
+                {refundRows.map((row, index) => (
+                  <div key={`${row.label}-${index}`} className="flex items-center justify-between border-b border-white/10 pb-1 font-medium text-white/80">
+                    <span>{row.label}</span>
+                    <span className="text-[#b3ff00]">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </article>
+        </div>
+      </section>
+      {faqItems.length > 0 ? (
         <section className="w-full px-6 py-12 lg:px-10">
-          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">Process</p>
+          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">FAQ</p>
           <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
-            {getCmsBlockField(cms.blocks, "sections", "howItWorksTitle", "Så funkar en retur")}
+            {getCmsBlockField(cms.blocks, "sections", "faqTitle", "Vanliga frågor")}
           </h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-5">
+          <div className="mt-6 grid gap-3 md:grid-cols-2">
+            {faqColumns.map((items, colIdx) => (
+              <div key={`faq-col-${colIdx}`} className="space-y-3">
+                {items.map((item) => (
+                  <details key={item.question} className="group border-2 border-[#0a0f08] bg-white">
+                    <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-bold text-[#0a0f08]">
+                      <span>{item.question}</span>
+                      <span className="text-[#4a7c00] text-lg leading-none transition group-open:rotate-45">+</span>
+                    </summary>
+                    <p className="border-t-2 border-[#0a0f08] px-4 py-3 text-[13px] font-medium text-[#0a0f08]/60">{item.answer}</p>
+                  </details>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </>
+  );
+
+  if (accountView && accountCtx && usesMinaSidorTabShell(accountCtx)) {
+    const pageTitle = getCmsBlockField(cms.blocks, "hero", "title", "Returer & återbetalningar");
+    const pageSubtitle = getCmsBlockField(
+      cms.blocks,
+      "hero",
+      "description",
+      "Vi vill att du ska vara 100 % nöjd med ditt köp. Skulle något ändå inte bli rätt har du alltid 30 dagars öppet köp och enkel retur.",
+    );
+    const electronicsBody = (
+      <>
+        <section>
+          <h2 className="text-[20px] font-bold text-[#0A2540]">
+            {getCmsBlockField(cms.blocks, "sections", "howItWorksTitle", "Så här fungerar en retur")}
+          </h2>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {steps.map((step, idx) => (
-              <article key={step.title} className="border-2 border-[#0a0f08] bg-white p-5">
-                <span className="flex h-9 w-9 items-center justify-center bg-[#b3ff00] text-sm font-black text-[#0a0f08]">{idx + 1}</span>
-                <p className="mt-3 text-base font-black uppercase tracking-[-0.01em] text-[#0a0f08]">{step.title}</p>
-                <p className="mt-1 text-[13px] font-medium text-[#0a0f08]/60">{step.text}</p>
+              <article
+                key={step.title}
+                className="rounded-[12px] border border-[#DCE6F5] bg-white p-5 shadow-[0_2px_8px_rgba(10,37,64,0.04)]"
+              >
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#EAF1FB] text-[13px] font-bold text-[#2f7dff]">
+                  {idx + 1}
+                </span>
+                <p className="mt-3 text-[15px] font-semibold text-[#0A2540]">{step.title}</p>
+                <p className="mt-1 text-[13px] text-[#0A2540]/65">{step.text}</p>
               </article>
             ))}
           </div>
-          {accountView ? (
+          <Link
+            href={createReturnHref}
+            className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-[#2f7dff] px-6 text-[14px] font-semibold text-white hover:bg-[#1a6cf0]"
+          >
+            {getCmsBlockField(cms.blocks, "steps", "createReturnLabel", "Skapa din retur")}
+            <ArrowRightIcon />
+          </Link>
+        </section>
+
+        <section className="mt-10 grid gap-6 lg:grid-cols-2">
+          <article className="rounded-[12px] border border-[#DCE6F5] bg-white p-6 shadow-[0_2px_8px_rgba(10,37,64,0.04)]">
+            <h3 className="text-[18px] font-bold text-[#0A2540]">
+              {getCmsBlockField(cms.blocks, "cards", "returnsTitle", "30 dagars öppet köp")}
+            </h3>
+            <p className="mt-2 text-[14px] text-[#0A2540]/65">
+              {getCmsBlockField(
+                cms.blocks,
+                "cards",
+                "returnsText",
+                "Du har alltid 30 dagars öppet köp från den dag du mottagit din vara.",
+              )}
+            </p>
+            <ul className="mt-4 space-y-2 text-[14px] text-[#0A2540]">
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                {getCmsBlockField(cms.blocks, "cards", "returnsItem1", "Varan är i originalskick")}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                {getCmsBlockField(cms.blocks, "cards", "returnsItem2", "Alla lappar och originalförpackning finns med")}
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                {getCmsBlockField(cms.blocks, "cards", "returnsItem3", "Returkostnad: 49 kr")}
+              </li>
+            </ul>
             <Link
-              href={getCmsBlockField(cms.blocks, "steps", "createReturnHref", "/returer-aterbetalningar/skapa-retur?account=1")}
-              className="mt-6 inline-flex items-center gap-2 bg-[#0a0f08] px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white transition hover:bg-[#1a2113]"
+              href={returnsButtonHref}
+              className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-[#2f7dff] px-5 text-[14px] font-semibold text-white hover:bg-[#1a6cf0]"
             >
-              {getCmsBlockField(cms.blocks, "steps", "createReturnLabel", "Skapa din retur")}
+              {getCmsBlockField(cms.blocks, "cards", "returnsButtonLabel", "Skapa en retur")}
               <ArrowRightIcon />
             </Link>
-          ) : null}
+          </article>
+          <article className="rounded-[12px] border border-[#DCE6F5] bg-[#EAF1FB]/40 p-6">
+            <h3 className="text-[18px] font-bold text-[#0A2540]">
+              {getCmsBlockField(cms.blocks, "cards", "refundsTitle", "Återbetalningar")}
+            </h3>
+            <p className="mt-2 text-[14px] text-[#0A2540]/65">
+              {getCmsBlockField(
+                cms.blocks,
+                "cards",
+                "refundsText",
+                "När vi har mottagit och godkänt din retur återbetalas beloppet till samma betalningsmetod som användes vid köpet.",
+              )}
+            </p>
+            {refundRows.length > 0 ? (
+              <div className="mt-4 space-y-2 text-[14px]">
+                {refundRows.map((row, index) => (
+                  <div
+                    key={`${row.label}-${index}`}
+                    className="flex items-center justify-between border-b border-[#DCE6F5] pb-2 last:border-0"
+                  >
+                    <span className="text-[#0A2540]/80">{row.label}</span>
+                    <span className="font-semibold text-[#2f7dff]">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </article>
         </section>
 
-        {/* Öppet köp + Återbetalning */}
-        <section className="w-full bg-[#0a0f08] px-6 py-12 text-white lg:px-10">
-          <div className="grid gap-5 lg:grid-cols-2">
-            <article className="border-2 border-[#b3ff00] bg-white/5 p-6">
-              <h3 className="text-xl font-black uppercase tracking-[-0.01em] text-[#b3ff00]">
-                {getCmsBlockField(cms.blocks, "cards", "returnsTitle", "30 dagars öppet köp")}
-              </h3>
-              <p className="mt-2 text-[13px] font-medium text-white/60">
-                {getCmsBlockField(cms.blocks, "cards", "returnsText", "Du har alltid 30 dagars öppet köp från den dag du mottagit din vara.")}
-              </p>
-              <ul className="mt-4 space-y-2 text-[13px] font-medium text-white/80">
-                <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem1", "Varan är i originalskick")}</li>
-                <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem2", "Alla lappar och originalförpackning finns med")}</li>
-                <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem3", "Returkostnad: 49 kr")}</li>
-              </ul>
-              <Link
-                href={getCmsBlockField(cms.blocks, "cards", "returnsButtonHref", "/returer-aterbetalningar/skapa-retur?account=1")}
-                className="mt-5 inline-flex items-center gap-2 bg-[#b3ff00] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] text-[#0a0f08] transition hover:bg-[#9fe600]"
-              >
-                {getCmsBlockField(cms.blocks, "cards", "returnsButtonLabel", "Skapa en retur")}
-                <ArrowRightIcon />
-              </Link>
-            </article>
-            <article className="border-2 border-white/15 bg-white/5 p-6">
-              <h3 className="text-xl font-black uppercase tracking-[-0.01em] text-white">
-                {getCmsBlockField(cms.blocks, "cards", "refundsTitle", "Återbetalningar")}
-              </h3>
-              <p className="mt-2 text-[13px] font-medium text-white/60">
-                {getCmsBlockField(cms.blocks, "cards", "refundsText", "När vi mottagit och godkänt din retur återbetalas beloppet till samma betalningsmetod.")}
-              </p>
-              {refundRows.length > 0 ? (
-                <div className="mt-4 space-y-2 text-[13px]">
-                  {refundRows.map((row, index) => (
-                    <div key={`${row.label}-${index}`} className="flex items-center justify-between border-b border-white/10 pb-1 font-medium text-white/80">
-                      <span>{row.label}</span>
-                      <span className="text-[#b3ff00]">{row.value}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </article>
-          </div>
-        </section>
-
-        {/* FAQ */}
         {faqItems.length > 0 ? (
-          <section className="w-full px-6 py-12 lg:px-10">
-            <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">FAQ</p>
-            <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
+          <section className="mt-10">
+            <h2 className="text-[20px] font-bold text-[#0A2540]">
               {getCmsBlockField(cms.blocks, "sections", "faqTitle", "Vanliga frågor")}
             </h2>
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
               {faqColumns.map((items, colIdx) => (
                 <div key={`faq-col-${colIdx}`} className="space-y-3">
                   {items.map((item) => (
-                    <details key={item.question} className="group border-2 border-[#0a0f08] bg-white">
-                      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-bold text-[#0a0f08]">
+                    <details
+                      key={item.question}
+                      className="group rounded-[12px] border border-[#DCE6F5] bg-white shadow-[0_2px_8px_rgba(10,37,64,0.04)]"
+                    >
+                      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-[14px] font-semibold text-[#0A2540]">
                         <span>{item.question}</span>
-                        <span className="text-[#4a7c00] text-lg leading-none transition group-open:rotate-45">+</span>
+                        <span className="text-[#2f7dff] transition group-open:rotate-180">
+                          <ChevronDownIcon />
+                        </span>
                       </summary>
-                      <p className="border-t-2 border-[#0a0f08] px-4 py-3 text-[13px] font-medium text-[#0a0f08]/60">{item.answer}</p>
+                      <p className="border-t border-[#DCE6F5] px-4 py-3 text-[13px] leading-relaxed text-[#0A2540]/65">
+                        {item.answer}
+                      </p>
                     </details>
                   ))}
                 </div>
@@ -243,6 +379,120 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
       </>
     );
 
+    const neutralReturnsBody = (
+      <>
+        <section>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            {getCmsBlockField(cms.blocks, "sections", "howItWorksTitle", "Så här fungerar en retur")}
+          </h2>
+          <div className="mt-5 grid gap-4 md:grid-cols-5">
+            {steps.map((step, idx) => (
+              <article key={step.title} className="flex flex-col items-center text-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-white">
+                  <StepIcon index={idx} />
+                </div>
+                <span className="mt-2 flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-[11px] font-semibold text-white">
+                  {idx + 1}
+                </span>
+                <p className="mt-2 text-lg font-semibold text-slate-900">{step.title}</p>
+                <p className="mx-auto max-w-[205px] text-[13px] leading-relaxed text-slate-600">{step.text}</p>
+              </article>
+            ))}
+          </div>
+          <Link
+            href={createReturnHref}
+            className="mt-5 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-[13px] font-semibold text-white hover:bg-slate-800"
+          >
+            {getCmsBlockField(cms.blocks, "steps", "createReturnLabel", "Skapa din retur")}
+            <ArrowRightIcon />
+          </Link>
+        </section>
+        <section className="mt-8 grid gap-4 lg:grid-cols-2">
+          <article className="rounded-lg border border-slate-200 bg-white p-5">
+            <h3 className="text-xl font-semibold text-slate-900">
+              {getCmsBlockField(cms.blocks, "cards", "returnsTitle", "30 dagars öppet köp")}
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">
+              {getCmsBlockField(cms.blocks, "cards", "returnsText", "Du har alltid 30 dagars öppet köp från den dag du mottagit din vara.")}
+            </p>
+            <ul className="mt-3 space-y-2 text-sm text-slate-700">
+              <li className="flex items-center gap-2"><CheckIcon />{getCmsBlockField(cms.blocks, "cards", "returnsItem1", "Varan är i originalskick")}</li>
+              <li className="flex items-center gap-2"><CheckIcon />{getCmsBlockField(cms.blocks, "cards", "returnsItem2", "Alla lappar och originalförpackning finns med")}</li>
+              <li className="flex items-center gap-2"><CheckIcon />{getCmsBlockField(cms.blocks, "cards", "returnsItem3", "Returkostnad: 49 kr")}</li>
+            </ul>
+            <Link
+              href={returnsButtonHref}
+              className="mt-4 inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-[13px] font-semibold text-white"
+            >
+              {getCmsBlockField(cms.blocks, "cards", "returnsButtonLabel", "Skapa en retur")}
+              <ArrowRightIcon />
+            </Link>
+          </article>
+          <article className="rounded-lg border border-slate-200 bg-white p-5">
+            <h3 className="text-xl font-semibold text-slate-900">
+              {getCmsBlockField(cms.blocks, "cards", "refundsTitle", "Återbetalningar")}
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">
+              {getCmsBlockField(cms.blocks, "cards", "refundsText", "När vi har mottagit och godkänt din retur återbetalas beloppet till samma betalningsmetod som användes vid köpet.")}
+            </p>
+            {refundRows.length > 0 ? (
+              <div className="mt-4 space-y-2 text-sm">
+                {refundRows.map((row, index) => (
+                  <div key={`${row.label}-${index}`} className="flex items-center justify-between border-b border-slate-100 pb-1">
+                    <span>{row.label}</span>
+                    <span className="font-medium">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </article>
+        </section>
+        {faqItems.length > 0 ? (
+          <section className="mt-8">
+            <h2 className="text-2xl font-semibold text-slate-900">
+              {getCmsBlockField(cms.blocks, "sections", "faqTitle", "Vanliga frågor")}
+            </h2>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {faqColumns.map((items, colIdx) => (
+                <div key={`faq-col-${colIdx}`} className="space-y-2">
+                  {items.map((item) => (
+                    <details key={item.question} className="group rounded-md border border-slate-200 bg-white">
+                      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-2.5 text-[13px] font-medium text-slate-900">
+                        <span>{item.question}</span>
+                        <span className="transition group-open:rotate-180">
+                          <ChevronDownIcon />
+                        </span>
+                      </summary>
+                      <p className="border-t border-slate-200 px-4 py-2.5 text-[13px] leading-relaxed text-slate-600">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </>
+    );
+
+    const tabBody = accountCtx.isElectronics
+      ? electronicsBody
+      : accountCtx.isSport
+        ? sportReturnsBody
+        : neutralReturnsBody;
+
+    return (
+      <MinaSidorAccountPage ctx={accountCtx} title={pageTitle} subtitle={pageSubtitle}>
+        {tabBody}
+      </MinaSidorAccountPage>
+    );
+  }
+
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const settings = tenant ? await getTenantSettings(tenant) : null;
+  const isSport = normalizeThemeKey(settings?.theme_key) === "sport";
+
+  if (isSport && !accountView) {
     return (
       <main style={{ background: "var(--store-footer-bg)" }}>
         <div style={{ background: "var(--store-header-gradient)" }}>
@@ -253,14 +503,7 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
             description={getCmsBlockField(cms.blocks, "hero", "description", "Inte rätt passform? 30 dagars öppet köp och smidig retur — inga krångel.")}
           />
         </div>
-        {accountView ? (
-          <div className="mx-auto grid w-full max-w-[1380px] gap-6 px-6 py-8 lg:grid-cols-[230px_1fr] lg:px-10">
-            <AccountSidebar activeHref="/returer-aterbetalningar?account=1" />
-            <div>{sportInner}</div>
-          </div>
-        ) : (
-          sportInner
-        )}
+        {sportReturnsBody}
       </main>
     );
   }
@@ -450,7 +693,7 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
   return (
     <main className="bg-white">
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        {accountView ? (
+        {accountView && accountCtx && !usesMinaSidorTabShell(accountCtx) ? (
           <div className="grid gap-5 lg:grid-cols-[230px_1fr]">
             <AccountSidebar activeHref="/returer-aterbetalningar?account=1" />
             {content}

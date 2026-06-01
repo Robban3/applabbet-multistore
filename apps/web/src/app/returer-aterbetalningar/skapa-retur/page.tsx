@@ -4,6 +4,7 @@ import { StorefrontHeader } from "@/components/storefront-header";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { loadReturerAccountContext, renderReturerAccountPage } from "@/lib/returer-account-flow";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
@@ -110,6 +111,10 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
     redirect("/konto/login?next=/returer-aterbetalningar/skapa-retur%3Faccount%3D1");
   }
 
+  const accountCtx = await loadReturerAccountContext();
+  const flowTitle = `${getCmsBlockField(cms.blocks, "flowHero", "titlePrefix", "Skapa din")} ${getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}`;
+  const flowSubtitle = `${getCmsBlockField(cms.blocks, "flowHero", "subtitleLine1", "Här kan du enkelt registrera din retur.")} ${getCmsBlockField(cms.blocks, "flowHero", "subtitleLine2", "Följ stegen så hjälper vi dig hela vägen.")}`;
+
   const steps = [1, 2, 3, 4, 5].map((index) => ({
     title: getCmsBlockField(cms.blocks, "flowStep1", `step${index}Title`, index === 1 ? "Hitta din order" : index === 2 ? "Välj produkter" : index === 3 ? "Välj returmetod" : index === 4 ? "Skicka tillbaka" : "Återbetalning"),
     text: getCmsBlockField(cms.blocks, "flowStep1", `step${index}Text`, ""),
@@ -144,50 +149,8 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
     }))
     .filter((item) => item.question.trim().length > 0);
 
-  const inner = (
+  const flowBody = (
     <>
-          <StorefrontHeader cartCount={0} />
-
-          <section className="relative overflow-hidden border-b border-white/10 px-6 py-6 text-white" style={{ background: "var(--store-header-gradient)" }}>
-            <div className="relative z-10 max-w-[540px]">
-              <p className="text-xs text-white/70">
-                <Link href="/" className="hover:text-white">Hem</Link>
-                <span className="mx-1">›</span>
-                <Link href="/returer-aterbetalningar?account=1" className="hover:text-white">
-                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
-                </Link>
-                <span className="mx-1">›</span>
-                <Link href="/returer-aterbetalningar/skapa-retur?account=1" className="text-white">
-                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbCreateReturnLabel", "Skapa din retur")}
-                </Link>
-              </p>
-              <h1 className="mt-3 text-[62px] font-semibold leading-[0.95] tracking-tight">
-                {getCmsBlockField(cms.blocks, "flowHero", "titlePrefix", "Skapa din")}{" "}
-                <span className="text-[color:var(--store-accent)]">{getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}</span>
-              </h1>
-              <p className="mt-3 text-xl leading-relaxed text-white/90">
-                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine1", "Här kan du enkelt registrera din retur.")}
-                <br />
-                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine2", "Följ stegen så hjälper vi dig hela vägen.")}
-              </p>
-            </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
-              <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[color:var(--store-accent)]/40 bg-[#231b13]/60" />
-            </div>
-            <div className="relative z-10 mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {trustItems.map((item, index) => (
-                <article key={item.title || String(index)} className="rounded-lg border border-white/10 bg-black/25 px-3 py-3">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <SmallTrustIcon index={index} />
-                  </svg>
-                  <p className="mt-2 text-sm font-semibold">{item.title}</p>
-                  <p className="text-xs text-white/75">{item.text}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
           <section className="px-6 py-7">
             <h2 className="text-center text-[48px] font-semibold leading-tight text-slate-900">
               {getCmsBlockField(cms.blocks, "flowStep1", "howItWorksTitle", "Så här skapar du din retur")}
@@ -256,6 +219,59 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
               </div>
             </section>
           </section>
+    </>
+  );
+
+  const tabShellPage = renderReturerAccountPage(accountCtx, {
+    title: flowTitle,
+    subtitle: flowSubtitle,
+    children: flowBody,
+  });
+  if (tabShellPage) return tabShellPage;
+
+  const inner = (
+    <>
+      <StorefrontHeader cartCount={0} />
+      <section className="relative overflow-hidden border-b border-white/10 px-6 py-6 text-white" style={{ background: "var(--store-header-gradient)" }}>
+        <div className="relative z-10 max-w-[540px]">
+          <p className="text-xs text-white/70">
+            <Link href="/" className="hover:text-white">Hem</Link>
+            <span className="mx-1">›</span>
+            <Link href="/returer-aterbetalningar?account=1" className="hover:text-white">
+              {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
+            </Link>
+            <span className="mx-1">›</span>
+            <Link href="/returer-aterbetalningar/skapa-retur?account=1" className="text-white">
+              {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbCreateReturnLabel", "Skapa din retur")}
+            </Link>
+          </p>
+          <h1 className="mt-3 text-[62px] font-semibold leading-[0.95] tracking-tight">
+            {getCmsBlockField(cms.blocks, "flowHero", "titlePrefix", "Skapa din")}{" "}
+            <span className="text-[color:var(--store-accent)]">{getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}</span>
+          </h1>
+          <p className="mt-3 text-xl leading-relaxed text-white/90">
+            {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine1", "Här kan du enkelt registrera din retur.")}
+            <br />
+            {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine2", "Följ stegen så hjälper vi dig hela vägen.")}
+          </p>
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
+          <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
+          <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[color:var(--store-accent)]/40 bg-[#231b13]/60" />
+        </div>
+        <div className="relative z-10 mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {trustItems.map((item, index) => (
+            <article key={item.title || String(index)} className="rounded-lg border border-white/10 bg-black/25 px-3 py-3">
+              <svg viewBox="0 0 24 24" className="h-6 w-6 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <SmallTrustIcon index={index} />
+              </svg>
+              <p className="mt-2 text-sm font-semibold">{item.title}</p>
+              <p className="text-xs text-white/75">{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      {flowBody}
     </>
   );
 

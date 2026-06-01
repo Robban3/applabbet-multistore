@@ -357,24 +357,11 @@ export default async function Home() {
     rating: 4.5,
     reviewCount: 80 + idx * 13,
   }));
-  const electronicsTopUtilityItems = [
-    "Fri frakt över 499 kr",
-    "30 dagars öppet köp",
-    "Snabba leveranser 1-2 arbetsdagar",
-  ];
   const sportTopUtilityItems = [
     "FRI FRAKT OVER 499 KR",
     "30 DAGARS OPPET KOP",
     "SNABBA LEVERANSER",
   ];
-  const electronicsTrustStrip = [
-    { title: "Fri frakt", text: "Över 499 kr" },
-    { title: "30 dagars öppet köp", text: "Enkelt & smidigt" },
-    { title: "Snabba leveranser", text: "1-2 arbetsdagar" },
-    { title: "Säkra betalningar", text: "Klarna, Swish & kort" },
-    { title: "Expertkunskap", text: "Vi hjälper dig rätt" },
-  ];
-
   const displayedCategoryCards = isBeauty || isSport ? categoryCards.slice(0, 5) : categoryCards;
 
   if (isElectronics) {
@@ -606,8 +593,8 @@ export default async function Home() {
         navItems={navItems}
         heroImageUrl={heroImageUrl}
         heroEyebrow={heroEyebrow}
-        heroTitle={readHomeField("hero", "title", isSport ? "Din träning.\nDin styrka." : isFashion ? "Klä dig med\nsjälvförtroende." : isBeauty ? "Lyft din naturliga\nskönhet" : isElectronics ? "Teknik för\nvarje dag" : isMinimal ? "Det viktigaste\nutan brus" : "Upplev kvalitet. Varje dag.")}
-        heroDescription={readHomeField("hero", "description", isSport ? "Utrustning, kläder och skor som hjälper dig att nå dina mål - oavsett nivå." : isFashion ? "Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil - för alla tillfällen." : isBeauty ? "Upptäck vårt handplockade sortiment av hudvård, smink och dofter - noggrant utvalt för att framhäva det bästa i dig." : isElectronics ? "Upptäck de senaste produkterna inom elektronik. Kvalitet, prestanda och design i perfekt kombination." : isMinimal ? "Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet." : "Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.")}
+        heroTitle={readHomeField("hero", "title", isSport ? "Din träning.\nDin styrka." : isFashion ? "Klä dig med\nsjälvförtroende." : isBeauty ? "Lyft din naturliga\nskönhet" : isMinimal ? "Det viktigaste\nutan brus" : "Upplev kvalitet. Varje dag.")}
+        heroDescription={readHomeField("hero", "description", isSport ? "Utrustning, kläder och skor som hjälper dig att nå dina mål - oavsett nivå." : isFashion ? "Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil - för alla tillfällen." : isBeauty ? "Upptäck vårt handplockade sortiment av hudvård, smink och dofter - noggrant utvalt för att framhäva det bästa i dig." : isMinimal ? "Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet." : "Noggrant utvalda produkter som kombinerar design, prestanda och hållbarhet.")}
         primaryCtaHref={primaryCtaHref}
         primaryCtaLabel={primaryCtaLabel}
         secondaryCtaHref={secondaryCtaHref}
@@ -615,11 +602,11 @@ export default async function Home() {
         isHeroContentRight={isHeroContentRight}
         isSport={isSport}
         isBeauty={isBeauty}
-        isElectronics={isElectronics}
+        isElectronics={false}
         trustCards={homeTrustCards}
-        electronicsTrustStrip={electronicsTrustStrip}
+        electronicsTrustStrip={[]}
         sportTopUtilityItems={sportTopUtilityItems}
-        electronicsTopUtilityItems={electronicsTopUtilityItems}
+        electronicsTopUtilityItems={[]}
       />
       )}
 
@@ -632,7 +619,7 @@ export default async function Home() {
       <GenericCategorySection
         title={categoriesSectionTitle}
         categories={displayedCategoryCards}
-        isElectronics={isElectronics}
+        isElectronics={false}
         isBeauty={isBeauty}
         isSport={isSport}
       />

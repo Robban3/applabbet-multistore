@@ -4,6 +4,8 @@ import { AddToCartControl } from "@/components/add-to-cart-control";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { formatMinorPrice } from "@/lib/format";
@@ -46,6 +48,78 @@ export default async function MinaFavoriterPage() {
     .filter((product) => product.status === "published");
   const favoriteIds = new Set(products.map((product) => product.id));
 
+  const ctx = await loadAccountContext();
+  const pageTitle = getCmsBlockField(cms.blocks, "hero", "title", "Favoriter");
+  const pageSubtitle = getCmsBlockField(
+    cms.blocks,
+    "hero",
+    "subtitle",
+    "Här hittar du alla produkter du har sparat som favoriter.",
+  );
+
+  const favoritesBody = (
+    <>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-medium text-[#0A2540]/70">
+          {products.length} {getCmsBlockField(cms.blocks, "favorites", "countSuffix", "produkter")}
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {products.map((product) => (
+          <article
+            key={product.id}
+            className="group overflow-hidden rounded-[12px] border border-[#DCE6F5] bg-white shadow-[0_2px_8px_rgba(10,37,64,0.04)] transition hover:border-[#2f7dff]/40"
+          >
+            <div className="relative h-40 overflow-hidden bg-[#F4F7FC]">
+              <Link href={`/products/${product.slug}`} className="absolute inset-0" aria-label={`Visa ${product.title}`} />
+              <FavoriteToggle
+                productId={product.id}
+                initialFavorited={favoriteIds.has(product.id)}
+                className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#DCE6F5] bg-white/90"
+              />
+              <AddToCartControl
+                productId={product.id}
+                title={product.title}
+                priceMinor={product.price_minor}
+                currency={product.currency}
+                preventDefault
+                className="absolute inset-x-2 bottom-2 z-10 rounded-full bg-[#2f7dff] px-3 py-2 text-sm font-semibold text-white hover:bg-[#1a6cf0]"
+                ariaLabel={`Lägg ${product.title} i varukorgen`}
+              >
+                Lägg i varukorgen
+              </AddToCartControl>
+            </div>
+            <div className="p-3">
+              <Link href={`/products/${product.slug}`} className="line-clamp-1 text-sm font-semibold text-[#0A2540] hover:text-[#2f7dff]">
+                {product.title}
+              </Link>
+              <p className="mt-1 line-clamp-1 text-xs text-[#0A2540]/55">{product.description || "Produkt"}</p>
+              <p className="mt-2 text-xl font-bold text-[#0A2540]">{formatMinorPrice(product.price_minor, product.currency)}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+      {products.length === 0 ? (
+        <p className="rounded-[12px] border border-[#DCE6F5] bg-white px-4 py-8 text-center text-sm text-[#0A2540]/65">
+          {getCmsBlockField(
+            cms.blocks,
+            "favorites",
+            "emptyState",
+            "Du har inga favoriter ännu. Klicka på hjärtat på en produkt för att spara den här.",
+          )}
+        </p>
+      ) : null}
+    </>
+  );
+
+  if (usesMinaSidorTabShell(ctx)) {
+    return (
+      <MinaSidorTabShellContent ctx={ctx} title={pageTitle} subtitle={pageSubtitle}>
+        {favoritesBody}
+      </MinaSidorTabShellContent>
+    );
+  }
+
   return (
     <main className="bg-[#f6f3ee]">
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
@@ -61,68 +135,12 @@ export default async function MinaFavoriterPage() {
               {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Favoriter")}
             </Link>
           </p>
-          <h1 className="mt-2 text-5xl font-semibold tracking-tight text-slate-900">
-            {getCmsBlockField(cms.blocks, "hero", "title", "Favoriter")}
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {getCmsBlockField(cms.blocks, "hero", "subtitle", "Här hittar du alla produkter du har sparat som favoriter.")}
-          </p>
+          <h1 className="mt-2 text-5xl font-semibold tracking-tight text-slate-900">{pageTitle}</h1>
+          <p className="mt-1 text-sm text-slate-600">{pageSubtitle}</p>
 
           <div className="mt-5 grid gap-5 lg:grid-cols-[230px_1fr]">
             <AccountSidebar activeHref="/mina-sidor/favoriter" />
-
-            <section>
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-700">
-                  {products.length} {getCmsBlockField(cms.blocks, "favorites", "countSuffix", "produkter")}
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {products.map((product) => (
-                  <article
-                    key={product.id}
-                    className="group overflow-hidden rounded-xl border border-[#e5dbcf] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <div className="relative h-40 overflow-hidden bg-gradient-to-br from-[#30261c] via-[#1a150f] to-[#0f0d0b]">
-                      <Link href={`/products/${product.slug}`} className="absolute inset-0" aria-label={`Visa ${product.title}`} />
-                      <FavoriteToggle
-                        productId={product.id}
-                        initialFavorited={favoriteIds.has(product.id)}
-                        className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
-                      />
-                      <AddToCartControl
-                        productId={product.id}
-                        title={product.title}
-                        priceMinor={product.price_minor}
-                        currency={product.currency}
-                        preventDefault
-                        className="absolute inset-x-2 bottom-2 z-10 rounded-md bg-black/85 px-3 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-black"
-                        ariaLabel={`Lägg ${product.title} i varukorgen`}
-                      >
-                        Lägg i varukorgen
-                      </AddToCartControl>
-                    </div>
-                    <div className="p-3">
-                      <Link href={`/products/${product.slug}`} className="line-clamp-1 text-sm font-semibold text-slate-900 hover:underline">
-                        {product.title}
-                      </Link>
-                      <p className="mt-1 line-clamp-1 text-xs text-slate-500">{product.description || "Premiumprodukt"}</p>
-                      <p className="mt-2 text-2xl font-semibold text-slate-900">{formatMinorPrice(product.price_minor, product.currency)}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-              {products.length === 0 ? (
-                <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                  {getCmsBlockField(
-                    cms.blocks,
-                    "favorites",
-                    "emptyState",
-                    "Du har inga favoriter ännu. Klicka på hjärtat på en produkt för att spara den här.",
-                  )}
-                </p>
-              ) : null}
-            </section>
+            <section>{favoritesBody}</section>
           </div>
           </div>
         </div>

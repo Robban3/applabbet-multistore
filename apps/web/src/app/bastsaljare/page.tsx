@@ -8,7 +8,7 @@ import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
 import { PriceRangeFilter } from "@/components/price-range-filter";
 import { CatalogFilterSidebar } from "@/components/catalog-filter-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
+import { SportCatalogPage } from "@/components/storefront/sport/sport-catalog-page";
 import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
 import { ElectronicsPageHero } from "@/components/storefront/electronics";
@@ -182,46 +182,36 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
   }
 
   if (isSport) {
+    const activeCat =
+      query.categories.length === 1
+        ? (visibleCategories.find(
+            (c) =>
+              c.slug.toLowerCase() === query.categories[0].toLowerCase() ||
+              c.name.toLowerCase() === query.categories[0].toLowerCase(),
+          )?.name ?? null)
+        : null;
     return (
-      <main style={{ background: "var(--store-footer-bg)" }}>
-        <div style={{ background: "var(--store-header-gradient)" }}>
-          <StorefrontHeader activeNav="Bästsäljare" cartCount={2} />
-          <SportPageHero
-            eyebrow={getCmsBlockField(cms.blocks, "hero", "eyebrow", "Toppval")}
-            title={getCmsBlockField(cms.blocks, "hero", "title", "Mest populärt just nu")}
-            description={getCmsBlockField(cms.blocks, "hero", "description", "De produkter våra kunder älskar mest — utvalda för prestation och hållbarhet.")}
-          />
-        </div>
-        <section className="w-full px-6 py-10 lg:px-10">
-          <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
-            <CatalogFilterSidebar
-              themeKey="sport"
-              actionPath="/bastsaljare"
-              query={query}
-              categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
-              brands={catalog.availableBrands}
-              maxPriceBound={100000}
-            />
-            <section>
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-[12px] font-bold uppercase tracking-wide text-[#0a0f08]/60">{resultLabel}</p>
-                <form method="GET" action="/bastsaljare" className="flex items-center gap-2">
-                  {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
-                  {query.brands.map((b) => <input key={b} type="hidden" name="brand" value={b} />)}
-                  <select name="sort" defaultValue={query.sort} className="border border-[#dce9cf] bg-white px-3 py-1.5 text-[11px] font-bold uppercase text-[#0a0f08]">
-                    <option value="bestsellers">Populärast</option>
-                    <option value="price_asc">Pris stigande</option>
-                    <option value="price_desc">Pris fallande</option>
-                  </select>
-                  <button type="submit" className="bg-[#b3ff00] px-4 py-1.5 text-[11px] font-black uppercase text-black transition hover:bg-white">Visa</button>
-                </form>
-              </div>
-              <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} badgeLabel={badgeLabel} cardVariant="sport" />
-              <CatalogPagination actionPath="/bastsaljare" query={query} totalPages={catalog.totalPages} />
-            </section>
-          </div>
-        </section>
-      </main>
+      <SportCatalogPage
+        actionPath="/bastsaljare"
+        activeNav="Utvalda"
+        breadcrumbLabel="Utvalda"
+        title="Utvalda"
+        activeCategoryName={activeCat}
+        totalCount={catalog.total}
+        navCategories={visibleCategories.map((c) => ({ name: c.name, slug: c.slug }))}
+        filterCategories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+        brandFilterOptions={catalog.availableBrands}
+        query={query}
+        items={catalog.items}
+        favoriteProductIds={favoriteProductIds}
+        totalPages={catalog.totalPages}
+        badgeLabel={badgeLabel}
+        sortOptions={[
+          { value: "bestsellers", label: "Populärast" },
+          { value: "price_asc", label: "Pris stigande" },
+          { value: "price_desc", label: "Pris fallande" },
+        ]}
+      />
     );
   }
 

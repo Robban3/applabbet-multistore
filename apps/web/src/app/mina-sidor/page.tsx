@@ -2,12 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountSidebar, buildAccountSidebarItems } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { SportAccountShell } from "@/components/storefront/sport/sport-account-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { formatMinorPrice } from "@/lib/format";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
+import { getTenantSettings } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 
 const trustCards = [
@@ -15,6 +18,13 @@ const trustCards = [
   { title: "30 dagars öppet köp", text: "Enkelt att returnera" },
   { title: "Premium kvalitet", text: "Utvalt med omsorg" },
   { title: "Säker betalning", text: "Tryggt & säkert" },
+];
+
+const electronicsTrustCards = [
+  { title: "Fri frakt över 499 kr", text: "Snabb & spårbar leverans" },
+  { title: "30 dagars öppet köp", text: "Enkelt att returnera" },
+  { title: "Snabb leverans", text: "1–2 arbetsdagar" },
+  { title: "Expertkunskap", text: "Vi hjälper dig rätt" },
 ];
 
 function ArrowRightIcon() {
@@ -81,9 +91,188 @@ export default async function MinaSidorPage() {
     greetingName = fallbackName;
   }
 
-  const themeKey = normalizeThemeKey(settings?.theme_key);
-  const isSport = themeKey === "sport";
-  const isLuxury = themeKey === "luxury";
+  const accountCtx = await loadAccountContext();
+  const isSport = accountCtx.isSport;
+  const isElectronics = accountCtx.isElectronics;
+
+  let orderCount = 0;
+  let activeDeliveryCount = 0;
+  const recentOrderPreviews: Array<{ id: string; title: string; quantity: number; price: string }> = [];
+
+  if (tenant && user.email) {
+    const { data: ordersData } = await supabase
+      .from("orders")
+      .select("id, status, fulfillment_status, total_minor, currency, created_at")
+      .eq("tenant_id", tenant.id)
+      .eq("customer_email", user.email)
+      .order("created_at", { ascending: false })
+      .limit(8);
+
+    const orders = ordersData || [];
+    orderCount = orders.length;
+    activeDeliveryCount = orders.filter(
+      (o) => o.fulfillment_status !== "delivered" && o.status !== "refunded",
+    ).length;
+
+    const orderIds = orders.slice(0, 4).map((o) => o.id);
+    const { data: itemsData } = orderIds.length
+      ? await supabase.from("order_items").select("order_id, product_title, quantity").in("order_id", orderIds)
+      : { data: [] as Array<{ order_id: string; product_title: string; quantity: number }> };
+
+    const firstItemByOrder = new Map<string, { product_title: string; quantity: number }>();
+    for (const item of itemsData || []) {
+      if (!firstItemByOrder.has(item.order_id)) {
+        firstItemByOrder.set(item.order_id, {
+          product_title: item.product_title,
+          quantity: item.quantity,
+        });
+      }
+    }
+
+    for (const order of orders.slice(0, 4)) {
+      const item = firstItemByOrder.get(order.id);
+      recentOrderPreviews.push({
+        id: order.id.slice(0, 8).toUpperCase(),
+        title: item?.product_title || "Beställning",
+        quantity: item?.quantity || 1,
+        price: formatMinorPrice(order.total_minor, order.currency),
+      });
+    }
+  }
+
+  const electronicsTopCards = [
+    { title: "Mina ordrar", value: String(orderCount), action: "Visa alla ordrar", href: "/mina-sidor/ordrar" },
+    {
+      title: "Aktiva leveranser",
+      value: String(activeDeliveryCount),
+      action: "Se leveransstatus",
+      href: "/mina-sidor/ordrar?tab=pagaende",
+    },
+    { title: "Returer", value: "0", action: "Starta retur", href: "/returer-aterbetalningar?account=1" },
+    ...(loyaltyProgramEnabled
+      ? [{ title: "Poängsaldo", value: "120 p", action: "Se dina förmåner", href: "/mina-sidor/poang" }]
+      : []),
+  ];
+
+  if (isElectronics) {
+    return (
+      <MinaSidorTabShellContent
+        ctx={accountCtx}
+        title={getCmsBlockField(cms.blocks, "overview", "title", "Översikt")}
+        subtitle={getCmsBlockField(cms.blocks, "overview", "subtitle", "Här är en sammanfattning av ditt konto.")}
+      >
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {electronicsTopCards.map((card) => (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="group flex flex-col justify-between rounded-[12px] border border-[#DCE6F5] bg-white p-5 shadow-[0_2px_8px_rgba(10,37,64,0.04)] transition hover:border-[#2f7dff]/40 hover:shadow-[0_4px_16px_rgba(47,125,255,0.12)]"
+              >
+                <p className="text-[13px] font-medium text-[#0A2540]/65">{card.title}</p>
+                <p className="mt-3 text-[32px] font-bold text-[#0A2540]">{card.value}</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-[#2f7dff] group-hover:underline">
+                  {card.action}
+                  <ArrowRightIcon />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_1fr]">
+            <article className="rounded-[12px] border border-[#DCE6F5] bg-white p-5 shadow-[0_2px_8px_rgba(10,37,64,0.04)]">
+              <div className="flex items-end justify-between">
+                <h2 className="text-[20px] font-bold text-[#0A2540]">Senaste ordrar</h2>
+                <Link
+                  href="/mina-sidor/ordrar"
+                  className="text-[14px] font-semibold text-[#2f7dff] hover:underline"
+                >
+                  Visa alla →
+                </Link>
+              </div>
+              <div className="mt-4 divide-y divide-[#DCE6F5]">
+                {recentOrderPreviews.length > 0 ? (
+                  recentOrderPreviews.map((order) => (
+                    <div key={order.id} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                      <div className="h-14 w-14 shrink-0 rounded-[10px] bg-[#F4F7FC]" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-semibold text-[#0A2540]">Order #{order.id}</p>
+                        <p className="text-[13px] text-[#0A2540]/55">
+                          {order.quantity} produkt{order.quantity === 1 ? "" : "er"} · {order.title}
+                        </p>
+                      </div>
+                      <p className="text-[15px] font-bold text-[#0A2540]">{order.price}</p>
+                      <Link
+                        href="/mina-sidor/ordrar"
+                        className="shrink-0 text-[13px] font-semibold text-[#2f7dff] hover:underline"
+                      >
+                        Detaljer
+                      </Link>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center">
+                    <p className="text-[14px] text-[#0A2540]/65">Du har inga ordrar ännu.</p>
+                    <Link
+                      href="/products"
+                      className="mt-4 inline-flex h-10 items-center rounded-full bg-[#2f7dff] px-5 text-[14px] font-semibold text-white hover:bg-[#1a6cf0]"
+                    >
+                      Börja handla
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </article>
+
+            <div className="space-y-6">
+              <article className="rounded-[12px] border border-[#DCE6F5] bg-white p-5 shadow-[0_2px_8px_rgba(10,37,64,0.04)]">
+                <div className="flex items-end justify-between">
+                  <h2 className="text-[20px] font-bold text-[#0A2540]">Mina favoriter</h2>
+                  <Link
+                    href="/mina-sidor/favoriter"
+                    className="text-[14px] font-semibold text-[#2f7dff] hover:underline"
+                  >
+                    Visa alla →
+                  </Link>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[1, 2, 3, 4].map((n) => (
+                    <div key={n} className="space-y-2">
+                      <div className="aspect-square rounded-[10px] bg-[#F4F7FC]" />
+                      <p className="line-clamp-2 text-[12px] font-medium text-[#0A2540]/55">Sparad produkt</p>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="rounded-[12px] border border-[#DCE6F5] bg-[#EAF1FB] p-6">
+                <h3 className="text-[18px] font-bold text-[#0A2540]">Behöver du hjälp?</h3>
+                <p className="mt-1 text-[14px] text-[#0A2540]/65">
+                  Våra teknikexperter finns här för dig — före, under och efter köpet.
+                </p>
+                <Link
+                  href="/kundservice"
+                  className="mt-4 inline-flex h-11 items-center rounded-full bg-[#2f7dff] px-6 text-[14px] font-semibold text-white hover:bg-[#1a6cf0]"
+                >
+                  Kontakta kundservice
+                </Link>
+              </article>
+            </div>
+          </div>
+
+          <section className="mt-8 grid overflow-hidden rounded-[12px] border border-[#DCE6F5] bg-white sm:grid-cols-2 lg:grid-cols-4">
+            {electronicsTrustCards.map((item) => (
+              <article
+                key={item.title}
+                className="flex min-h-[74px] flex-col justify-center border-t border-[#DCE6F5] px-5 py-4 lg:border-l lg:border-t-0 lg:first:border-l-0"
+              >
+                <p className="text-[13px] font-semibold text-[#0A2540]">{item.title}</p>
+                <p className="text-[12px] text-[#0A2540]/55">{item.text}</p>
+              </article>
+            ))}
+          </section>
+      </MinaSidorTabShellContent>
+    );
+  }
 
   if (isSport) {
     // Layout (mina-sidor/layout.tsx) renderar header + Hej + tabs.

@@ -1,14 +1,21 @@
+import { cache } from "react";
 import { buildAccountSidebarItems } from "@/components/account-sidebar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
+
+const ELECTRONICS_DEV_HOSTS = new Set(["electronics.localhost"]);
+
+export function isElectronicsStorefront(host: string, themeKey: string): boolean {
+  return themeKey === "electronics" || ELECTRONICS_DEV_HOSTS.has(host);
+}
 
 /**
  * Server-side helper för alla /mina-sidor/*-sidor.
  * Returnerar tema, sidebar-items och inloggad användarens namn.
  * Anropare gör själv redirect till /konto/login om user saknas.
  */
-export async function loadAccountContext() {
+export const loadAccountContext = cache(async function loadAccountContext() {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -19,6 +26,7 @@ export async function loadAccountContext() {
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const themeKey = normalizeThemeKey(settings?.theme_key);
   const isSport = themeKey === "sport";
+  const isElectronics = isElectronicsStorefront(host, themeKey);
   const loyaltyEnabled = settings?.loyalty_program_enabled ?? false;
   const sidebarItems = buildAccountSidebarItems(loyaltyEnabled);
 
@@ -46,8 +54,9 @@ export async function loadAccountContext() {
     settings,
     themeKey,
     isSport,
+    isElectronics,
     loyaltyEnabled,
     sidebarItems,
     greetingName,
   };
-}
+});

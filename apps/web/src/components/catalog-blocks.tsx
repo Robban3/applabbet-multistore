@@ -297,9 +297,9 @@ export function CatalogResultsGrid({
     return (
       <div className="grid gap-x-3 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
-          <article key={product.id} className="group flex flex-col">
+          <article key={product.id} className="group relative flex flex-col">
             <Link href={`/products/${product.slug}`} className="block">
-              <div className="relative aspect-[4/5] overflow-hidden bg-[#F5F1EA]">
+              <div className="relative aspect-square overflow-hidden bg-[#F5F1EA]">
                 {product.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -308,11 +308,6 @@ export function CatalogResultsGrid({
                     className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
                   />
                 ) : null}
-                <FavoriteToggle
-                  productId={product.id}
-                  initialFavorited={favoriteIds.has(product.id)}
-                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white/85 text-[#1A1A1A] backdrop-blur-sm transition hover:bg-white"
-                />
                 {badgeLabel ? (
                   <span className="absolute left-3 top-3 bg-[#1A1A1A] px-2.5 py-1 text-[10px] tracking-[0.2em] uppercase text-[#FAF9F6]">
                     {badgeLabel}
@@ -320,6 +315,13 @@ export function CatalogResultsGrid({
                 ) : null}
               </div>
             </Link>
+            <FavoriteToggle
+              productId={product.id}
+              initialFavorited={favoriteIds.has(product.id)}
+              className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center bg-white/85 backdrop-blur-sm transition hover:bg-white"
+              inactiveClassName="text-[#1A1A1A]"
+              activeClassName="text-[#1A1A1A]"
+            />
             <div className="mt-4">
               <Link href={`/products/${product.slug}`}>
                 <p className="text-[14px] tracking-[0.02em] text-[#1A1A1A]">{product.title}</p>
@@ -330,6 +332,16 @@ export function CatalogResultsGrid({
               <p className="mt-1.5 text-[14px] text-[#1A1A1A]">
                 {formatMinorPrice(product.price_minor, product.currency)}
               </p>
+              <AddToCartControl
+                productId={product.id}
+                title={product.title}
+                priceMinor={product.price_minor}
+                currency={product.currency}
+                className="mt-3 inline-flex h-11 w-full items-center justify-center border border-[#1A1A1A] px-5 text-[12px] uppercase tracking-[0.18em] text-[#1A1A1A] transition hover:bg-[#1A1A1A] hover:text-[#FAF9F6]"
+                ariaLabel={`Lägg ${product.title} i varukorgen`}
+              >
+                Lägg i varukorg
+              </AddToCartControl>
             </div>
           </article>
         ))}
@@ -343,7 +355,7 @@ export function CatalogResultsGrid({
     return (
       <div className="grid gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
-          <article key={product.id} className="group flex flex-col">
+          <article key={product.id} className="group relative flex flex-col">
             <Link href={`/products/${product.slug}`} className="block">
               <div className="relative aspect-square overflow-hidden bg-[#f5f5f5]">
                 {product.image_url ? (
@@ -354,11 +366,6 @@ export function CatalogResultsGrid({
                     className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
                   />
                 ) : null}
-                <FavoriteToggle
-                  productId={product.id}
-                  initialFavorited={favoriteIds.has(product.id)}
-                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#111] shadow-sm transition hover:bg-[#f5f5f5]"
-                />
                 {badgeLabel ? (
                   <span className="absolute left-3 top-3 text-[13px] font-medium text-[#f5402c]">
                     {badgeLabel}
@@ -366,6 +373,13 @@ export function CatalogResultsGrid({
                 ) : null}
               </div>
             </Link>
+            <FavoriteToggle
+              productId={product.id}
+              initialFavorited={favoriteIds.has(product.id)}
+              className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:bg-[#f5f5f5]"
+              inactiveClassName="text-[#111]"
+              activeClassName="text-[#111]"
+            />
             <div className="mt-3">
               <Link href={`/products/${product.slug}`}>
                 <p className="text-[15px] font-medium text-[#111]">{product.title}</p>
@@ -376,6 +390,16 @@ export function CatalogResultsGrid({
               <p className="mt-1.5 text-[15px] font-medium text-[#111]">
                 {formatMinorPrice(product.price_minor, product.currency)}
               </p>
+              <AddToCartControl
+                productId={product.id}
+                title={product.title}
+                priceMinor={product.price_minor}
+                currency={product.currency}
+                className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#111] px-5 text-[14px] font-medium text-white transition hover:bg-black"
+                ariaLabel={`Lägg ${product.title} i varukorgen`}
+              >
+                Lägg i varukorg
+              </AddToCartControl>
             </div>
           </article>
         ))}
@@ -387,14 +411,13 @@ export function CatalogResultsGrid({
     return (
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {products.map((product, idx) => (
-          <article key={product.id} className="group">
+          <article key={product.id} className="group relative">
             <Link href={`/products/${product.slug}`} className="block">
-              <div className="relative overflow-hidden bg-[#F5F0E8]" style={{ aspectRatio: "3/4" }}>
+              <div className="relative aspect-square overflow-hidden bg-[#F5F0E8]">
                 {product.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                 ) : null}
-                <FavoriteToggle productId={product.id} initialFavorited={favoriteIds.has(product.id)} className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white" />
                 {badgeLabel ? (
                   <span className="absolute left-3 top-3 bg-[#C41E3A] px-2.5 py-1 text-[9px] font-light tracking-[0.25em] uppercase text-white">{badgeLabel}</span>
                 ) : idx === 0 ? (
@@ -402,16 +425,19 @@ export function CatalogResultsGrid({
                 ) : null}
               </div>
             </Link>
-            <div className="mt-4">
+            <FavoriteToggle productId={product.id} initialFavorited={favoriteIds.has(product.id)} className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white" inactiveClassName="text-[#17120d]" activeClassName="text-[#C41E3A]" />
+            <div className="mt-4 text-center">
               <Link href={`/products/${product.slug}`}>
-                <p className="text-[12px] font-light tracking-[0.05em] text-[#17120d] transition group-hover:text-[#C41E3A] line-clamp-2">{product.title}</p>
+                <p className="text-[14px] font-light tracking-[0.08em] text-[#17120d] transition group-hover:text-[#C41E3A] line-clamp-2">{product.title}</p>
               </Link>
-              <div className="mt-2 flex items-center justify-between">
-                <p className="text-[13px] font-light text-[#5f4a3a]">{formatMinorPrice(product.price_minor, product.currency)}</p>
-                <AddToCartControl productId={product.id} title={product.title} priceMinor={product.price_minor} currency={product.currency} className="inline-flex h-7 w-7 items-center justify-center border border-[#17120d]/20 text-[#17120d] transition hover:border-[#C41E3A] hover:text-[#C41E3A]" ariaLabel={`Lägg ${product.title} i varukorgen`}>
-                  <MiniCartIcon />
-                </AddToCartControl>
-              </div>
+              {product.brand?.trim() ? (
+                <p className="mt-1 text-[11px] font-light uppercase tracking-[0.2em] text-[#5f4a3a]/70">{product.brand}</p>
+              ) : null}
+              <p className="mt-2 text-[13px] font-light tracking-[0.05em] text-[#5f4a3a]">{formatMinorPrice(product.price_minor, product.currency)}</p>
+              <AddToCartControl productId={product.id} title={product.title} priceMinor={product.price_minor} currency={product.currency} className="mt-3 inline-flex h-10 items-center justify-center gap-2 border border-[#17120d]/25 px-5 text-[10px] font-light uppercase tracking-[0.25em] text-[#17120d] transition hover:border-[#C41E3A] hover:text-[#C41E3A]" ariaLabel={`Lägg ${product.title} i varukorgen`}>
+                <MiniCartIcon />
+                Lägg i varukorg
+              </AddToCartControl>
             </div>
           </article>
         ))}
@@ -424,7 +450,7 @@ export function CatalogResultsGrid({
       {products.map((product, idx) => (
         <article
           key={product.id}
-          className={`group flex h-full flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+          className={`group relative flex h-full flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
             isFashion
               ? "border-[#e8e2d8]"
               : isBeauty
@@ -438,7 +464,7 @@ export function CatalogResultsGrid({
         >
           <Link href={`/products/${product.slug}`} className="block">
             <div
-              className={`relative ${isFashion || isBeauty || isElectronics || isSport ? "h-52" : "h-40"} ${
+              className={`relative ${isFashion || isBeauty || isElectronics || isSport ? "aspect-square" : "h-40"} ${
                 isBeauty
                   ? beautyImageSurface
                   : isElectronics
@@ -452,19 +478,6 @@ export function CatalogResultsGrid({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
               ) : null}
-              <FavoriteToggle
-                productId={product.id}
-                initialFavorited={favoriteIds.has(product.id)}
-                className={`absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full ${
-                  isBeauty
-                    ? "border-[#f3dbe4] bg-white text-[#8b5c6f]"
-                    : isElectronics
-                      ? "border-white/25 bg-black/25 text-white"
-                      : isSport
-                        ? "border-white/20 bg-black/25 text-white"
-                      : "border-white/20 bg-black/30"
-                }`}
-              />
               {badgeLabel ? (
                 <span
                   className={`absolute left-2 top-2 rounded px-2 py-0.5 text-[10px] font-bold ${
@@ -484,6 +497,21 @@ export function CatalogResultsGrid({
               ) : null}
             </div>
           </Link>
+          <FavoriteToggle
+            productId={product.id}
+            initialFavorited={favoriteIds.has(product.id)}
+            className={`absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full ${
+              isBeauty
+                ? "border-[#f3dbe4] bg-white"
+                : isElectronics
+                  ? "border-white/25 bg-black/25"
+                  : isSport
+                    ? "border-white/20 bg-black/25"
+                  : "border-white/20 bg-black/30"
+            }`}
+            inactiveClassName={isBeauty ? "text-[#8b5c6f]" : "text-white"}
+            activeClassName={isBeauty ? "text-[#c4486b]" : "text-rose-400"}
+          />
           <div className={`flex flex-1 flex-col ${isFashion || isBeauty || isElectronics || isSport ? "space-y-1 p-2.5" : "p-3"}`}>
             {isFashion || isBeauty || isElectronics || isSport ? (
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">

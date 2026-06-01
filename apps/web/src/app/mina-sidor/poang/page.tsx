@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountSidebar, buildAccountSidebarItems } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -219,33 +221,17 @@ export default async function MinaPoangPage() {
     },
   ].filter((item) => item.question.trim().length > 0);
 
-  return (
-    <main style={{ background: "var(--store-footer-bg)" }}>
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div
-          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
-          style={{ borderColor: "var(--store-footer-border)" }}
-        >
-          <StorefrontHeader cartCount={0} />
-          <div className="px-6 py-5">
-            <p className="text-xs text-slate-500">
-              <Link href="/" className="hover:text-slate-700">
-                Hem
-              </Link>
-              <span className="mx-1">&gt;</span>
-              <Link href="/mina-sidor" className="hover:text-slate-700">
-                Mina sidor
-              </Link>
-              <span className="mx-1">&gt;</span>
-              <Link href="/mina-sidor/poang" className="hover:text-slate-700">
-                {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Mina poäng")}
-              </Link>
-            </p>
+  const accountCtx = await loadAccountContext();
+  const pageTitle = getCmsBlockField(cms.blocks, "hero", "title", "Loyalty Club");
+  const pageSubtitle = getCmsBlockField(
+    cms.blocks,
+    "hero",
+    "subtitle",
+    "Förmåner, erbjudanden och exklusiva upplevelser - bara för våra medlemmar.",
+  );
 
-            <div className="mt-5 grid gap-5 lg:grid-cols-[230px_1fr]">
-              <AccountSidebar activeHref="/mina-sidor/poang" items={sidebarItems} />
-
-              <section className="space-y-6">
+  const pointsBody = (
+    <section className="space-y-6">
                 <section className="overflow-hidden rounded-2xl p-6 text-white" style={{ background: "var(--store-header-gradient)" }}>
                   <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--store-accent)]">Loyalty</p>
                   <h1 className="mt-2 text-5xl font-semibold tracking-tight">
@@ -382,7 +368,39 @@ export default async function MinaPoangPage() {
                     {getCmsBlockField(cms.blocks, "support", "ctaLabel", "Kontakta oss")}
                   </Link>
                 </section>
-              </section>
+    </section>
+  );
+
+  if (usesMinaSidorTabShell(accountCtx)) {
+    return (
+      <MinaSidorTabShellContent ctx={accountCtx} title={pageTitle} subtitle={pageSubtitle}>
+        {pointsBody}
+      </MinaSidorTabShellContent>
+    );
+  }
+
+  return (
+    <main style={{ background: "var(--store-footer-bg)" }}>
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
+          <StorefrontHeader cartCount={0} />
+          <div className="px-6 py-5">
+            <p className="text-xs text-slate-500">
+              <Link href="/" className="hover:text-slate-700">Hem</Link>
+              <span className="mx-1">&gt;</span>
+              <Link href="/mina-sidor" className="hover:text-slate-700">Mina sidor</Link>
+              <span className="mx-1">&gt;</span>
+              <Link href="/mina-sidor/poang" className="hover:text-slate-700">
+                {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Mina poäng")}
+              </Link>
+            </p>
+
+            <div className="mt-5 grid gap-5 lg:grid-cols-[230px_1fr]">
+              <AccountSidebar activeHref="/mina-sidor/poang" items={sidebarItems} />
+              {pointsBody}
             </div>
           </div>
         </div>

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -217,57 +219,27 @@ export default async function MinaAdresserPage({ searchParams }: MinaAdresserPag
 
   const addresses = (data || []) as CustomerAddress[];
 
-  return (
-    <main style={{ background: "var(--store-footer-bg)" }}>
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div
-          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
-          style={{ borderColor: "var(--store-footer-border)" }}
-        >
-          <StorefrontHeader cartCount={0} />
-          <div className="px-6 py-5">
-            <p className="text-xs text-slate-500">
-              <Link href="/" className="hover:text-slate-700">Hem</Link>
-              <span className="mx-1">&gt;</span>
-              <Link href="/mina-sidor" className="hover:text-slate-700">Mina sidor</Link>
-              <span className="mx-1">&gt;</span>
-              <Link href="/mina-sidor/adresser" className="hover:text-slate-700">
-                {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Mina adresser")}
-              </Link>
-              {showAddForm ? (
-                <>
-                  <span className="mx-1">&gt;</span>
-                  <span className="text-slate-700">Lägg till ny adress</span>
-                </>
-              ) : null}
-            </p>
-            <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h1 className="text-5xl font-semibold tracking-tight text-slate-900">
-                  {showAddForm ? "Lägg till adress" : getCmsBlockField(cms.blocks, "hero", "title", "Mina adresser")}
-                </h1>
-                <p className="mt-1 text-sm text-slate-600">
-                  {showAddForm
-                    ? "Fyll i uppgifterna nedan för att spara din adress."
-                    : getCmsBlockField(cms.blocks, "hero", "subtitle", "Här kan du lägga till, redigera och ta bort dina adresser.")}
-                </p>
-              </div>
-              <Link
-                href={showAddForm ? "/mina-sidor/adresser" : "/mina-sidor/adresser?mode=add"}
-                className={`inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold ${
-                  showAddForm
-                    ? "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
-                    : "bg-[color:var(--store-accent)] text-slate-900 hover:brightness-105"
-                }`}
-              >
-                {showAddForm ? "Avbryt" : "Lägg till adress"}
-              </Link>
-            </div>
+  const accountCtx = await loadAccountContext();
+  const pageTitle = showAddForm ? "Lägg till adress" : getCmsBlockField(cms.blocks, "hero", "title", "Mina adresser");
+  const pageSubtitle = showAddForm
+    ? "Fyll i uppgifterna nedan för att spara din adress."
+    : getCmsBlockField(cms.blocks, "hero", "subtitle", "Här kan du lägga till, redigera och ta bort dina adresser.");
 
-            <div className="mt-5 grid gap-5 lg:grid-cols-[230px_1fr]">
-              <AccountSidebar activeHref="/mina-sidor/adresser" withIcons />
+  const addAddressControl = (
+    <Link
+      href={showAddForm ? "/mina-sidor/adresser" : "/mina-sidor/adresser?mode=add"}
+      className={`inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold ${
+        showAddForm
+          ? "border border-[#DCE6F5] bg-white text-[#0A2540] hover:border-[#2f7dff]"
+          : "bg-[#2f7dff] text-white hover:bg-[#1a6cf0]"
+      }`}
+    >
+      {showAddForm ? "Avbryt" : "Lägg till adress"}
+    </Link>
+  );
 
-              <section className="space-y-3">
+  const addressesBody = (
+    <section className="space-y-3">
                 {showAddForm ? (
                   <form action={addAddressAction} className="rounded-xl border bg-white p-5" style={{ borderColor: "var(--store-card-border)" }}>
                     <div className="grid gap-4">
@@ -422,7 +394,55 @@ export default async function MinaAdresserPage({ searchParams }: MinaAdresserPag
                     {getCmsBlockField(cms.blocks, "addresses", "emptyState", "Du har inga sparade adresser ännu.")}
                   </p>
                 ) : null}
-              </section>
+    </section>
+  );
+
+  if (usesMinaSidorTabShell(accountCtx)) {
+    return (
+      <MinaSidorTabShellContent ctx={accountCtx} title={pageTitle} subtitle={pageSubtitle} headerExtra={addAddressControl}>
+        {addressesBody}
+      </MinaSidorTabShellContent>
+    );
+  }
+
+  return (
+    <main style={{ background: "var(--store-footer-bg)" }}>
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
+          <StorefrontHeader cartCount={0} />
+          <div className="px-6 py-5">
+            <p className="text-xs text-slate-500">
+              <Link href="/" className="hover:text-slate-700">Hem</Link>
+              <span className="mx-1">&gt;</span>
+              <Link href="/mina-sidor" className="hover:text-slate-700">Mina sidor</Link>
+              <span className="mx-1">&gt;</span>
+              <Link href="/mina-sidor/adresser" className="hover:text-slate-700">
+                {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Mina adresser")}
+              </Link>
+            </p>
+            <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h1 className="text-5xl font-semibold tracking-tight text-slate-900">{pageTitle}</h1>
+                <p className="mt-1 text-sm text-slate-600">{pageSubtitle}</p>
+              </div>
+              <Link
+                href={showAddForm ? "/mina-sidor/adresser" : "/mina-sidor/adresser?mode=add"}
+                className={`inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold ${
+                  showAddForm
+                    ? "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
+                    : "bg-[color:var(--store-accent)] text-slate-900 hover:brightness-105"
+                }`}
+              >
+                {showAddForm ? "Avbryt" : "Lägg till adress"}
+              </Link>
+            </div>
+
+            <div className="mt-5 grid gap-5 lg:grid-cols-[230px_1fr]">
+              <AccountSidebar activeHref="/mina-sidor/adresser" withIcons />
+              {addressesBody}
             </div>
           </div>
         </div>
