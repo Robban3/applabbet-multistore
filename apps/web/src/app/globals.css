@@ -1022,6 +1022,24 @@ body[data-store-theme="minimal"] .shadow-2xl {
   box-shadow: 0 4px 24px rgba(0,0,0,0.06) !important;
 }
 
+/* Främmande guld/brun-accent (från classic-renderade innehållssidor som
+   om-oss, kundservice, sök) → Apple-blå, så hela temat blir konsekvent. */
+body[data-store-theme="minimal"] .text-\[\#b88f50\],
+body[data-store-theme="minimal"] .text-\[\#8a6a44\],
+body[data-store-theme="minimal"] .text-\[\#c9973d\],
+body[data-store-theme="minimal"] .text-\[\#B8963E\],
+body[data-store-theme="minimal"] svg.text-\[\#b88f50\] { color: #0071E3 !important; }
+body[data-store-theme="minimal"] .bg-\[\#b88f50\] { background-color: #0071E3 !important; }
+
+/* Slate-ytor → Apple ljusgrå; slate-text → Apple-grått (globalt, alla sidor) */
+body[data-store-theme="minimal"] .bg-slate-50,
+body[data-store-theme="minimal"] .bg-slate-100 { background-color: #F5F5F7 !important; }
+body[data-store-theme="minimal"] .text-slate-900,
+body[data-store-theme="minimal"] .text-slate-800 { color: #1D1D1F !important; }
+body[data-store-theme="minimal"] .text-slate-700,
+body[data-store-theme="minimal"] .text-slate-600,
+body[data-store-theme="minimal"] .text-slate-500 { color: #6E6E73 !important; }
+
 /* Boxade sidor → full-bredd */
 body[data-store-theme="minimal"] .overflow-hidden.rounded-\[18px\].border.bg-white,
 body[data-store-theme="minimal"] .overflow-hidden.rounded-\[18px\].border.bg-\[color\:var\(--store-shell-surface\)\] {
