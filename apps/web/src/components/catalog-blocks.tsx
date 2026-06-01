@@ -189,7 +189,7 @@ export function CatalogResultsGrid({
   products: Product[];
   favoriteProductIds?: string[];
   badgeLabel?: string;
-  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport" | "luxury";
+  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport" | "luxury" | "minimal";
 }) {
   const favoriteIds = new Set(favoriteProductIds);
   const isFashion = cardVariant === "fashion";
@@ -197,6 +197,7 @@ export function CatalogResultsGrid({
   const isElectronics = cardVariant === "electronics";
   const isSport = cardVariant === "sport";
   const isLuxury = cardVariant === "luxury";
+  const isMinimal = cardVariant === "minimal";
   const beautyCardBorder = "border-[#ecd8df]";
   const beautyImageSurface = "bg-gradient-to-br from-[#fdf3f6] via-[#f8e8ee] to-[#f3dde6]";
 
@@ -218,6 +219,91 @@ export function CatalogResultsGrid({
       brun: "#7c4a2d",
     };
     return map[normalized] || "#111827";
+  }
+
+  if (isMinimal) {
+    // Apple-stil: vita kort, centrerad produktbild på ljusgrå, blå Köp-pill
+    return (
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <article key={product.id} className="flex flex-col items-center rounded-[18px] bg-[#F5F5F7] p-6 text-center">
+            <Link href={`/products/${product.slug}`} className="block w-full">
+              <div className="relative aspect-square w-full">
+                {product.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-contain" />
+                ) : null}
+              </div>
+            </Link>
+            {badgeLabel ? (
+              <p className="mt-3 text-[12px] font-semibold uppercase tracking-wide text-[#0066CC]">{badgeLabel}</p>
+            ) : null}
+            <Link href={`/products/${product.slug}`} className="mt-3 block">
+              <p className="text-[17px] font-semibold tracking-[-0.01em] text-[#1D1D1F]">{product.title}</p>
+            </Link>
+            {product.description ? (
+              <p className="mt-1 text-[13px] text-[#6E6E73] line-clamp-1">{product.description}</p>
+            ) : null}
+            <p className="mt-2 text-[15px] text-[#1D1D1F]">{formatMinorPrice(product.price_minor, product.currency)}</p>
+            <AddToCartControl
+              productId={product.id}
+              title={product.title}
+              priceMinor={product.price_minor}
+              currency={product.currency}
+              className="mt-4 inline-flex h-9 items-center rounded-full bg-[#0071E3] px-5 text-[14px] font-normal text-white transition hover:bg-[#0077ED]"
+              ariaLabel={`Köp ${product.title}`}
+            >
+              Köp
+            </AddToCartControl>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  if (isFashion) {
+    // Filippa K-stil: cream bakgrund, 4:5 portrait-bilder, light typografi
+    return (
+      <div className="grid gap-x-3 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <article key={product.id} className="group flex flex-col">
+            <Link href={`/products/${product.slug}`} className="block">
+              <div className="relative aspect-[4/5] overflow-hidden bg-[#F5F1EA]">
+                {product.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={product.image_url}
+                    alt={product.title}
+                    className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
+                  />
+                ) : null}
+                <FavoriteToggle
+                  productId={product.id}
+                  initialFavorited={favoriteIds.has(product.id)}
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center bg-white/85 text-[#1A1A1A] backdrop-blur-sm transition hover:bg-white"
+                />
+                {badgeLabel ? (
+                  <span className="absolute left-3 top-3 bg-[#1A1A1A] px-2.5 py-1 text-[10px] tracking-[0.2em] uppercase text-[#FAF9F6]">
+                    {badgeLabel}
+                  </span>
+                ) : null}
+              </div>
+            </Link>
+            <div className="mt-4">
+              <Link href={`/products/${product.slug}`}>
+                <p className="text-[14px] tracking-[0.02em] text-[#1A1A1A]">{product.title}</p>
+              </Link>
+              {product.brand?.trim() ? (
+                <p className="mt-0.5 text-[12px] text-[#1A1A1A]/55">{product.brand}</p>
+              ) : null}
+              <p className="mt-1.5 text-[14px] text-[#1A1A1A]">
+                {formatMinorPrice(product.price_minor, product.currency)}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
   }
 
   if (isSport) {

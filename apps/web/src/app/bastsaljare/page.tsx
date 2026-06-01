@@ -9,6 +9,8 @@ import { PriceRangeFilter } from "@/components/price-range-filter";
 import { CatalogFilterSidebar } from "@/components/catalog-filter-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
+import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
+import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
@@ -79,6 +81,78 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
     ? resultLabelTemplate.replace("{count}", String(catalog.total))
     : `${catalog.total} produkter`;
   const badgeLabel = getCmsBlockField(cms.blocks, "listing", "badgeLabel", "EXKLUSIV");
+
+  if (themeKey === "minimal") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader activeNav="Populärt" cartCount={2} />
+        <MinimalPageHero
+          eyebrow="Populärt"
+          title={getCmsBlockField(cms.blocks, "hero", "title", "Mest populärt just nu")}
+          description={getCmsBlockField(cms.blocks, "hero", "description", "Produkterna våra kunder älskar mest.")}
+        />
+        <section className="bg-[#F5F5F7] px-6 py-12">
+          <div className="mx-auto max-w-[1100px]">
+            <div className="mb-8 flex items-center justify-between">
+              <p className="text-[15px] text-[#6E6E73]">{resultLabel}</p>
+              <form method="GET" action="/bastsaljare" className="flex items-center gap-2">
+                {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+                <select name="sort" defaultValue={query.sort} className="rounded-full border border-[#D2D2D7] bg-white px-4 py-2 text-[13px] text-[#1D1D1F] focus:outline-none">
+                  <option value="bestsellers">Populärast</option>
+                  <option value="price_asc">Lägsta pris</option>
+                  <option value="price_desc">Högsta pris</option>
+                </select>
+              </form>
+            </div>
+            <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} badgeLabel="POPULÄR" cardVariant="minimal" />
+            <CatalogPagination actionPath="/bastsaljare" query={query} totalPages={catalog.totalPages} />
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (isFashion) {
+    return (
+      <main className="bg-[#FAF9F6]">
+        <StorefrontHeader activeNav="Bästsäljare" cartCount={2} />
+        <FashionPageHero
+          eyebrow="Bestsellers"
+          title={getCmsBlockField(cms.blocks, "hero", "title", "Most wanted")}
+          description={getCmsBlockField(cms.blocks, "hero", "description", "Plaggen våra kunder älskar mest — tidlösa favoriter.")}
+        />
+        <section className="bg-[#FAF9F6] px-8 py-10 lg:px-14">
+          <div className="grid gap-10 lg:grid-cols-[220px_1fr]">
+            <CatalogFilterSidebar
+              themeKey="fashion"
+              actionPath="/bastsaljare"
+              query={query}
+              categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+              brands={catalog.availableBrands}
+              maxPriceBound={1000000}
+            />
+            <section>
+              <div className="mb-6 flex items-center justify-between border-b border-[#E5E1DC] pb-4">
+                <p className="text-[13px] tracking-[0.02em] text-[#1A1A1A]/70">{resultLabel}</p>
+                <form method="GET" action="/bastsaljare" className="flex items-center gap-3">
+                  {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+                  {query.brands.map((b) => <input key={b} type="hidden" name="brand" value={b} />)}
+                  <span className="text-[11px] tracking-[0.2em] uppercase text-[#1A1A1A]/55">Sort</span>
+                  <select name="sort" defaultValue={query.sort} className="border-0 bg-transparent text-[13px] text-[#1A1A1A] focus:outline-none">
+                    <option value="bestsellers">Featured</option>
+                    <option value="price_asc">Lägsta pris</option>
+                    <option value="price_desc">Högsta pris</option>
+                  </select>
+                </form>
+              </div>
+              <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} badgeLabel="BESTSELLER" cardVariant="fashion" />
+              <CatalogPagination actionPath="/bastsaljare" query={query} totalPages={catalog.totalPages} />
+            </section>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (isSport) {
     return (

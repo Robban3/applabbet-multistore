@@ -1,6 +1,8 @@
 import { CheckoutClient } from "@/components/checkout-client";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { SportCart } from "@/components/storefront/sport/sport-cart";
+import { FashionCart } from "@/components/storefront/fashion";
+import { MinimalCart } from "@/components/storefront/minimal";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getStoreBrandName } from "@/lib/store-brand";
@@ -23,6 +25,26 @@ export default async function CartPage() {
       <main className="bg-white">
         <StorefrontHeader cartCount={0} brandName={brandName} />
         <SportCart heading={getCmsBlockField(cms.blocks, "summary", "title", "Bag")} />
+      </main>
+    );
+  }
+
+  // ── Fashion: Filippa K-stil cart ─────────────────────────────
+  if (themeKey === "fashion") {
+    return (
+      <main className="bg-[#FAF9F6]">
+        <StorefrontHeader cartCount={0} brandName={brandName} />
+        <FashionCart heading={getCmsBlockField(cms.blocks, "summary", "title", "Shopping Bag")} />
+      </main>
+    );
+  }
+
+  // ── Minimal: Apple-stil cart ─────────────────────────────────
+  if (themeKey === "minimal") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader cartCount={0} brandName={brandName} />
+        <MinimalCart heading={getCmsBlockField(cms.blocks, "summary", "title", "Din väska")} />
       </main>
     );
   }

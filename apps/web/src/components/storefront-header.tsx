@@ -3,6 +3,8 @@ import { CartCountBadge } from "@/components/cart-count-badge";
 import { TopTrustStrip } from "@/components/top-trust-strip";
 import { LuxuryHeader } from "@/components/storefront/luxury/luxury-header";
 import { SportHeader } from "@/components/storefront/sport/sport-header";
+import { FashionHeader } from "@/components/storefront/fashion/fashion-header";
+import { MinimalHeader } from "@/components/storefront/minimal/minimal-header";
 import {
   defaultNavigationMenu,
   defaultTrustBadges,
@@ -89,6 +91,32 @@ export async function StorefrontHeader({
   if (themeKey === "sport") {
     return (
       <SportHeader
+        brandName={brandName}
+        links={links}
+        cartInitialCount={cartCount}
+        activeNav={activeNav}
+        isLoggedIn={isLoggedIn}
+      />
+    );
+  }
+
+  // ── Fashion-tema (Filippa K): eget header ────────────────────
+  if (themeKey === "fashion") {
+    return (
+      <FashionHeader
+        brandName={brandName}
+        links={links}
+        cartInitialCount={cartCount}
+        activeNav={activeNav}
+        isLoggedIn={isLoggedIn}
+      />
+    );
+  }
+
+  // ── Minimal-tema (Apple): eget header ────────────────────────
+  if (themeKey === "minimal") {
+    return (
+      <MinimalHeader
         brandName={brandName}
         links={links}
         cartInitialCount={cartCount}

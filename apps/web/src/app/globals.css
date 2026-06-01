@@ -129,17 +129,18 @@ body[data-store-theme="sport"] {
 }
 
 body[data-store-theme="fashion"] {
-  --store-accent: #c7a16b;
-  --store-header-gradient: linear-gradient(to bottom, #0b1516, #0d1919, #0a1414);
-  --store-trust-gradient: linear-gradient(to right, #f7f3ea, #f2ecdf);
-  --store-footer-surface: #0d1716;
-  --store-footer-bg: #f5f1e8;
-  --store-footer-border: #ded6c8;
+  --store-accent: #1A1A1A;
+  --store-accent-fg: #FAF9F6;
+  --store-header-gradient: #FAF9F6;
+  --store-trust-gradient: linear-gradient(to right, #F5F1EA, #EDE7DC);
+  --store-footer-surface: #1A1A1A;
+  --store-footer-bg: #FAF9F6;
+  --store-footer-border: #E5E1DC;
   --store-shell-surface: #ffffff;
-  --store-soft-surface: #f8f3ea;
-  --store-card-border: #e8e2d8;
-  --store-media-gradient: linear-gradient(135deg, #2f2922 0%, #201b17 50%, #151210 100%);
-  --store-header-overlay-surface: #12110f;
+  --store-soft-surface: #F5F2ED;
+  --store-card-border: #E5E1DC;
+  --store-media-gradient: linear-gradient(135deg, #EFEAE3 0%, #E0D6C6 100%);
+  --store-header-overlay-surface: #1A1A1A;
 }
 
 body[data-store-theme="beauty"] {
@@ -172,18 +173,18 @@ body[data-store-theme="electronics"] {
 }
 
 body[data-store-theme="minimal"] {
-  --store-accent: #1f2937;
+  --store-accent: #0071E3;
   --store-accent-fg: #ffffff;
-  --store-header-gradient: linear-gradient(to bottom, #1f2937, #111827, #0b1220);
-  --store-trust-gradient: linear-gradient(to right, #111827, #1f2937);
-  --store-footer-surface: #111827;
-  --store-footer-bg: #f3f4f6;
-  --store-footer-border: #d1d5db;
+  --store-header-gradient: #ffffff;
+  --store-trust-gradient: linear-gradient(to right, #F5F5F7, #F5F5F7);
+  --store-footer-surface: #F5F5F7;
+  --store-footer-bg: #ffffff;
+  --store-footer-border: #D2D2D7;
   --store-shell-surface: #ffffff;
-  --store-soft-surface: #f9fafb;
-  --store-card-border: #d7dee8;
-  --store-media-gradient: linear-gradient(135deg, #1f2937 0%, #111827 50%, #0b1220 100%);
-  --store-header-overlay-surface: #111827;
+  --store-soft-surface: #F5F5F7;
+  --store-card-border: #D2D2D7;
+  --store-media-gradient: linear-gradient(135deg, #F5F5F7 0%, #ECECEE 100%);
+  --store-header-overlay-surface: #ffffff;
 }
 
 body[data-store-theme="luxury"] {
@@ -563,36 +564,38 @@ body[data-store-theme="sport"] .bg-\[color\:var\(--store-accent\)\] {
   font-weight: 700;
 }
 
-/* ── /mina-sidor/* sport: dölj gamla undersidors shell ────────
+/* ── /mina-sidor/* sport+fashion: dölj gamla undersidors shell ─
    Layouten (mina-sidor/layout.tsx) ger header + tabs. Undersidornas
    egna <main>, breadcrumb, AccountSidebar och boxade kort blir
    redundanta — vi gömmer dem så bara content syns under tabsen. */
-body[data-store-theme="sport"] [data-mina-sidor-sport] > main {
-  background: #fff !important;
+[data-mina-sidor-sport] > main {
   padding: 0 !important;
 }
-body[data-store-theme="sport"] [data-mina-sidor-sport] > main > section {
+body[data-store-theme="sport"] [data-mina-sidor-sport] > main { background: #fff !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] > main { background: #FAF9F6 !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] > main { background: #fff !important; }
+[data-mina-sidor-sport] > main > section {
   max-width: none !important;
   padding: 0 !important;
 }
-body[data-store-theme="sport"] [data-mina-sidor-sport] > main > section > div {
+[data-mina-sidor-sport] > main > section > div {
   border-radius: 0 !important;
   border: none !important;
   box-shadow: none !important;
 }
 /* Dölj StorefrontHeader inuti undersidorna (layouten har en redan) */
-body[data-store-theme="sport"] [data-mina-sidor-sport] header {
+[data-mina-sidor-sport] header {
   display: none !important;
 }
 /* Dölj sidans interna AccountSidebar (tabs ovanför täcker behovet) */
-body[data-store-theme="sport"] [data-mina-sidor-sport] aside.space-y-3,
-body[data-store-theme="sport"] [data-mina-sidor-sport] [data-account-sidebar] {
+[data-mina-sidor-sport] aside.space-y-3,
+[data-mina-sidor-sport] [data-account-sidebar] {
   display: none !important;
 }
 /* Single-column-layout istället för sidebar+content */
-body[data-store-theme="sport"] [data-mina-sidor-sport] .lg\:grid-cols-\[230px_1fr\],
-body[data-store-theme="sport"] [data-mina-sidor-sport] .lg\:grid-cols-\[260px_1fr\],
-body[data-store-theme="sport"] [data-mina-sidor-sport] .lg\:grid-cols-\[270px_1fr\] {
+[data-mina-sidor-sport] .lg\:grid-cols-\[230px_1fr\],
+[data-mina-sidor-sport] .lg\:grid-cols-\[260px_1fr\],
+[data-mina-sidor-sport] .lg\:grid-cols-\[270px_1fr\] {
   display: block !important;
 }
 
@@ -801,4 +804,122 @@ body[data-store-theme="fashion"] svg.text-\[\#8a6a44\],
 body[data-store-theme="fashion"] svg.text-\[\#c9973d\],
 body[data-store-theme="fashion"] svg.text-\[\#B8963E\] {
   color: #1A1A1A !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MINIMAL THEME (Apple.com-inspirerat) — Global overrides
+   ═══════════════════════════════════════════════════════════ */
+
+body[data-store-theme="minimal"] {
+  background: #ffffff;
+  color: #1D1D1F;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+body[data-store-theme="minimal"] h1,
+body[data-store-theme="minimal"] h2,
+body[data-store-theme="minimal"] h3 {
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  color: #1D1D1F;
+}
+
+/* Stora rundade hörn (Apple-kort) */
+body[data-store-theme="minimal"] .rounded-md,
+body[data-store-theme="minimal"] .rounded-lg,
+body[data-store-theme="minimal"] .rounded-xl,
+body[data-store-theme="minimal"] .rounded-\[14px\],
+body[data-store-theme="minimal"] .rounded-\[18px\] {
+  border-radius: 18px !important;
+}
+body[data-store-theme="minimal"] .rounded-2xl,
+body[data-store-theme="minimal"] .rounded-3xl {
+  border-radius: 22px !important;
+}
+body[data-store-theme="minimal"] .rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Primärknappar → Apple-blå pill */
+body[data-store-theme="minimal"] .bg-black,
+body[data-store-theme="minimal"] .bg-\[color\:var\(--store-accent\)\] {
+  background-color: #0071E3 !important;
+  color: #fff !important;
+  border-radius: 9999px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  font-size: 15px !important;
+}
+body[data-store-theme="minimal"] .bg-black:hover,
+body[data-store-theme="minimal"] .bg-\[color\:var\(--store-accent\)\]:hover {
+  background-color: #0077ED !important;
+}
+
+/* Länkar i Apple-blå */
+body[data-store-theme="minimal"] a.text-\[color\:var\(--store-accent\)\] {
+  color: #0066CC !important;
+}
+
+/* Inputs → rundade, ljusgrå, blå focus */
+body[data-store-theme="minimal"] input[type="text"],
+body[data-store-theme="minimal"] input[type="email"],
+body[data-store-theme="minimal"] input[type="password"],
+body[data-store-theme="minimal"] input[type="tel"],
+body[data-store-theme="minimal"] input[type="number"],
+body[data-store-theme="minimal"] textarea,
+body[data-store-theme="minimal"] select {
+  border-radius: 12px !important;
+  border-color: #D2D2D7 !important;
+  background: #fff !important;
+}
+body[data-store-theme="minimal"] input:focus,
+body[data-store-theme="minimal"] textarea:focus,
+body[data-store-theme="minimal"] select:focus {
+  border-color: #0071E3 !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.15) !important;
+}
+body[data-store-theme="minimal"] input[type="checkbox"],
+body[data-store-theme="minimal"] input[type="radio"] {
+  accent-color: #0071E3;
+}
+
+/* Borders → Apple-grå */
+body[data-store-theme="minimal"] .border-slate-200,
+body[data-store-theme="minimal"] .border-slate-300,
+body[data-store-theme="minimal"] .border-\[color\:var\(--store-card-border\)\],
+body[data-store-theme="minimal"] .border-\[color\:var\(--store-footer-border\)\] {
+  border-color: #D2D2D7 !important;
+}
+
+/* Diskreta skuggor */
+body[data-store-theme="minimal"] .shadow-md,
+body[data-store-theme="minimal"] .shadow-lg,
+body[data-store-theme="minimal"] .shadow-xl,
+body[data-store-theme="minimal"] .shadow-2xl {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06) !important;
+}
+
+/* Boxade sidor → full-bredd */
+body[data-store-theme="minimal"] .overflow-hidden.rounded-\[18px\].border.bg-white,
+body[data-store-theme="minimal"] .overflow-hidden.rounded-\[18px\].border.bg-\[color\:var\(--store-shell-surface\)\] {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Footer full-bredd */
+body[data-store-theme="minimal"] footer > div { max-width: 100% !important; }
+body[data-store-theme="minimal"] footer .grid,
+body[data-store-theme="minimal"] footer .border-t.px-6 {
+  padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important;
+}
+
+/* Guld/brun-ikoner → graphite */
+body[data-store-theme="minimal"] svg.text-\[\#8a6a44\],
+body[data-store-theme="minimal"] svg.text-\[\#c9973d\],
+body[data-store-theme="minimal"] svg.text-\[\#B8963E\] {
+  color: #1D1D1F !important;
 }

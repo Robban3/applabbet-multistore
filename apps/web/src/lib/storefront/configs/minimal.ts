@@ -2,12 +2,12 @@ import type { StorefrontThemeConfig } from '../types';
 
 export const minimalThemeConfig: StorefrontThemeConfig = {
   key: 'minimal',
-  categoriesTitle: 'Kategorier',
-  bestSellersTitle: 'Bästsäljare',
-  brandsTitle: 'Utvalda varumärken',
+  categoriesTitle: 'Utforska sortimentet',
+  bestSellersTitle: 'Populärt just nu',
+  brandsTitle: 'Designad för det viktigaste',
   hero: {
-    title: 'Det viktigaste\nutan brus',
-    description: 'Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet.'
+    title: 'Phone Pro.',
+    description: 'Kraftfull. Elegant. Gjord för att hålla.'
   },
   navItems: [
     { label: 'Hem', href: '/' },
@@ -17,41 +17,31 @@ export const minimalThemeConfig: StorefrontThemeConfig = {
     { label: 'Om oss', href: '/om-oss' },
     { label: 'Support', href: '/kundservice' }
   ],
+  // Matchar minimal-demo tenantens DB-kategorier
   categoryCards: [
-    { title: 'Basprodukter', accent: 'from-[#293545]' },
-    { title: 'Hem', accent: 'from-[#243243]' },
-    { title: 'Kontor', accent: 'from-[#233041]' },
-    { title: 'Teknik', accent: 'from-[#202b39]' },
-    { title: 'Accessoarer', accent: 'from-[#1f2935]' },
-    { title: 'Nyheter', accent: 'from-[#2b3748]' }
+    { title: 'Telefoner', accent: 'from-[#F5F5F7]', imageUrl: '/images/minimal-categories/minimal-telefoner.svg' },
+    { title: 'Datorer',   accent: 'from-[#F5F5F7]', imageUrl: '/images/minimal-categories/minimal-datorer.svg' },
+    { title: 'Ljud',      accent: 'from-[#F5F5F7]', imageUrl: '/images/minimal-categories/minimal-ljud.svg' },
+    { title: 'Tillbehör', accent: 'from-[#F5F5F7]', imageUrl: '/images/minimal-categories/minimal-tillbehor.svg' }
   ],
   trustCards: [
-    { title: 'Fri frakt', text: 'Över 499 kr', icon: 'truck' },
-    { title: '30 dagars öppet köp', text: 'Enkelt & smidigt', icon: 'shield' },
-    { title: 'Snabb leverans', text: '1-2 arbetsdagar', icon: 'star' },
-    { title: 'Trygg support', text: 'Vi hjälper dig snabbt', icon: 'headset' }
+    { title: 'Fri frakt',           text: 'På alla beställningar', icon: 'truck' },
+    { title: '14 dagars ångerrätt', text: 'Enkelt & smidigt',      icon: 'shield' },
+    { title: 'Premium support',     text: 'Vi hjälper dig',        icon: 'headset' },
+    { title: 'Säker betalning',     text: 'Tryggt & krypterat',    icon: 'star' }
   ],
-  brandLogos: ['MUJI', 'UNIQLO', 'Aarke', 'BOSE', 'SONOS', 'HAY', 'IKEA'],
+  brandLogos: ['DESIGN', 'PRECISION', 'CRAFTED', 'PURE', 'ESSENTIAL'],
   valueCards: [
-    {
-      title: 'Mindre brus',
-      text: 'Vi fokuserar på produkter som gör vardagen enklare.'
-    },
-    {
-      title: 'Kvalitet först',
-      text: 'Noggrant utvalda produkter med hög kvalitet och lång livslängd.'
-    },
-    {
-      title: 'Snabb support',
-      text: 'Personlig hjälp när du behöver den.'
-    }
+    { title: 'Enkelhet', text: 'Vi tar bort det överflödiga så att bara det väsentliga återstår.' },
+    { title: 'Kvalitet', text: 'Material och detaljer valda med omsorg — byggt för att hålla.' },
+    { title: 'Omtanke',  text: 'Hållbara val genom hela kedjan, från design till leverans.' }
   ],
   products: [
-    { title: 'Aesop Rind Concentrate Body Balm', priceMinor: 49900, currency: 'SEK' },
-    { title: 'Aarke Carbonator Pro', priceMinor: 129900, currency: 'SEK' },
-    { title: 'Moleskine Classic Anteckningsbok', priceMinor: 24900, currency: 'SEK' },
-    { title: 'HAY Soft Brick Kuddset', priceMinor: 59900, currency: 'SEK' },
-    { title: 'Moment Ryggsäck 21L', priceMinor: 149900, currency: 'SEK' },
-    { title: 'Lexon Mino Bluetooth-högtalare', priceMinor: 39900, currency: 'SEK' }
+    { title: 'Phone Pro',      priceMinor: 1499000, currency: 'SEK' },
+    { title: 'Book Pro 14',    priceMinor: 2499000, currency: 'SEK' },
+    { title: 'Pods Pro',       priceMinor:  299000, currency: 'SEK' },
+    { title: 'Tab Pro 11',     priceMinor:  999000, currency: 'SEK' },
+    { title: 'Watch Series',   priceMinor:  499000, currency: 'SEK' },
+    { title: 'Magic Keyboard', priceMinor:  149000, currency: 'SEK' }
   ]
 };

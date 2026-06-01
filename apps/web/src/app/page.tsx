@@ -35,6 +35,22 @@ import { SportHero } from "@/components/storefront/sport/sport-hero";
 import { SportTrustStrip } from "@/components/storefront/sport/sport-trust-strip";
 import { SportCategoryGrid } from "@/components/storefront/sport/sport-category-grid";
 import { SportBestSellers } from "@/components/storefront/sport/sport-best-sellers";
+import {
+  FashionHeader,
+  FashionHero,
+  FashionCategoryGrid,
+  FashionBestSellers,
+  FashionBrands,
+  FashionValueCards,
+} from "@/components/storefront/fashion";
+import {
+  MinimalHeader,
+  MinimalHero,
+  MinimalCategoryGrid,
+  MinimalBestSellers,
+  MinimalBrands,
+  MinimalValueCards,
+} from "@/components/storefront/minimal";
 import { SportBrands } from "@/components/storefront/sport/sport-brands";
 import { SportValueCards } from "@/components/storefront/sport/sport-value-cards";
 
@@ -154,6 +170,7 @@ export default async function Home() {
   const isLuxury = themeKey === "luxury";
   const isSport = themeKey === "sport";
   const isFashion = themeKey === "fashion";
+  const isMinimalTheme = themeKey === "minimal";
   const isBeauty = themeKey === "beauty";
   const isElectronics = themeKey === "electronics";
   const isMinimal = themeKey === "minimal";
@@ -349,6 +366,82 @@ export default async function Home() {
   ];
 
   const displayedCategoryCards = isBeauty || isSport ? categoryCards.slice(0, 5) : categoryCards;
+
+  if (isMinimalTheme) {
+    const minimalCategories = categoryCards.map((c) => ({
+      title: c.title,
+      href: `/products?category=${encodeURIComponent(c.title.toLowerCase())}`,
+      imageUrl: c.imageUrl,
+    }));
+    const minimalProducts = classicBestSellerProducts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      priceMinor: p.priceMinor,
+      currency: p.currency,
+      href: p.href,
+      imageUrl: p.imageUrl,
+      badge: p.badge,
+      favorited: p.favorited,
+      subtitle: p.subtitle,
+    }));
+    return (
+      <main className="bg-white">
+        <MinimalHeader brandName={brandName} links={navItems} />
+        <MinimalHero
+          eyebrow={heroEyebrow}
+          title={getCmsBlockField(cms.blocks, "hero", "title", "Phone Pro.")}
+          description={getCmsBlockField(cms.blocks, "hero", "description", "Kraftfull. Elegant. Gjord för att hålla.")}
+          primaryCtaHref={primaryCtaHref}
+          primaryCtaLabel={primaryCtaLabel}
+          secondaryCtaHref={secondaryCtaHref}
+          secondaryCtaLabel={secondaryCtaLabel}
+          heroImageUrl={heroImageUrl || undefined}
+        />
+        <MinimalCategoryGrid title={categoriesSectionTitle} categories={minimalCategories} />
+        <MinimalBestSellers title={bestSellersTitle} viewAllLabel={bestSellersViewAllLabel} products={minimalProducts} />
+        <MinimalBrands title={brandsTitle} brands={brandLogos} />
+        <MinimalValueCards cards={valueCards} />
+      </main>
+    );
+  }
+
+  if (isFashion) {
+    const fashionCategories = categoryCards.map((c) => ({
+      title: c.title,
+      href: `/products?category=${encodeURIComponent(c.title.toLowerCase())}`,
+      imageUrl: c.imageUrl,
+    }));
+    const fashionProducts = classicBestSellerProducts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      priceMinor: p.priceMinor,
+      currency: p.currency,
+      href: p.href,
+      imageUrl: p.imageUrl,
+      badge: p.badge,
+      favorited: p.favorited,
+      subtitle: p.subtitle,
+    }));
+    return (
+      <main className="bg-[#FAF9F6]">
+        <FashionHeader brandName={brandName} links={navItems} />
+        <FashionHero
+          eyebrow={heroEyebrow}
+          title={getCmsBlockField(cms.blocks, "hero", "title", "The new\nessentials.")}
+          description={getCmsBlockField(cms.blocks, "hero", "description", "A modern wardrobe — designed to last, made to be worn.")}
+          primaryCtaHref={primaryCtaHref}
+          primaryCtaLabel={primaryCtaLabel}
+          secondaryCtaHref={secondaryCtaHref}
+          secondaryCtaLabel={secondaryCtaLabel}
+          heroImageUrl={heroImageUrl || undefined}
+        />
+        <FashionCategoryGrid title={categoriesSectionTitle} categories={fashionCategories} />
+        <FashionBestSellers title={bestSellersTitle} viewAllLabel={bestSellersViewAllLabel} products={fashionProducts} />
+        <FashionBrands title={brandsTitle} brands={brandLogos} />
+        <FashionValueCards cards={valueCards} />
+      </main>
+    );
+  }
 
   if (isSport) {
     const sportCategories = displayedCategoryCards.map((c) => ({

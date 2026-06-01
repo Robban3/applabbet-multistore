@@ -4,6 +4,8 @@ import { FavoriteToggle } from "@/components/favorite-toggle";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { ProductImageGallery } from "@/components/product-image-gallery";
 import { SportProductGallery } from "@/components/storefront/sport/sport-product-gallery";
+import { FashionProductGallery } from "@/components/storefront/fashion/fashion-product-gallery";
+import { MinimalProductGallery } from "@/components/storefront/minimal/minimal-product-gallery";
 import { ProductDetailTabs } from "@/components/product-detail-tabs";
 import { ProductPurchaseControls } from "@/components/product-purchase-controls";
 import { formatMinorPrice } from "@/lib/format";
@@ -80,7 +82,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const isElectronics = themeKey === "electronics";
   const isLuxury = themeKey === "luxury";
   const isSport = themeKey === "sport";
-  const isFullPage = isLuxury || isSport;
+  const isFashion = themeKey === "fashion";
+  const isMinimalTheme = themeKey === "minimal";
+  const isFullPage = isLuxury || isSport || isFashion || isMinimalTheme;
 
   const supabase = createSupabaseAdminClient();
   const { data: productWithTabs, error: productWithTabsError } = await supabase
@@ -313,6 +317,202 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </section>
           </div>
   );
+
+  if (isMinimalTheme) {
+    // Apple-stil produktdetalj: centrerad layout, stor produktbild, blå köp-knapp
+    return (
+      <main className="bg-white">
+        <StorefrontHeader brandName={brandName} cartCount={2} />
+
+        {/* Centrerad rubrik */}
+        <section className="bg-white px-6 pt-14 text-center">
+          <p className="text-[19px] font-semibold text-[#0066CC]">Nyhet</p>
+          <h1 className="mx-auto mt-1 max-w-[800px] text-[40px] font-semibold tracking-[-0.03em] text-[#1D1D1F] lg:text-[56px]" style={{ lineHeight: 1.05 }}>
+            {product.title}
+          </h1>
+          {product.description ? (
+            <p className="mx-auto mt-3 max-w-[600px] text-[21px] tracking-[-0.01em] text-[#6E6E73]">{product.description}</p>
+          ) : null}
+          <p className="mt-4 text-[17px] text-[#1D1D1F]">Från {formatMinorPrice(product.price_minor, product.currency)}</p>
+        </section>
+
+        {/* Galleri + köp */}
+        <section className="mx-auto w-full max-w-[1100px] px-6 py-12">
+          <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
+            <MinimalProductGallery title={product.title} images={orderedImages} />
+
+            <aside className="lg:sticky lg:top-20 lg:self-start">
+              <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-[#1D1D1F]">Köp {product.title}</h2>
+              <p className="mt-2 text-[17px] text-[#1D1D1F]">{formatMinorPrice(product.price_minor, product.currency)}</p>
+
+              <div className="mt-8">
+                <ProductPurchaseControls
+                  productId={product.id}
+                  title={product.title}
+                  priceMinor={product.price_minor}
+                  currency={product.currency}
+                  productColors={product.product_colors}
+                  productMaterials={product.product_materials}
+                  productSizes={product.product_sizes}
+                  availableStock={availableStock}
+                />
+              </div>
+
+              <div className="mt-10 space-y-5 border-t border-[#D2D2D7] pt-8">
+                <div>
+                  <h3 className="text-[17px] font-semibold text-[#1D1D1F]">Översikt</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-[#6E6E73]">{detailDescriptionIntro}</p>
+                  {detailDescriptionBullets.length > 0 ? (
+                    <ul className="mt-3 space-y-1.5 text-[15px] text-[#6E6E73]">
+                      {detailDescriptionBullets.map((b, i) => (
+                        <li key={i} className="flex gap-2"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#86868B]" />{b}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+                <details className="border-t border-[#D2D2D7] pt-5">
+                  <summary className="cursor-pointer list-none text-[17px] font-semibold text-[#1D1D1F]">Leverans & retur</summary>
+                  <p className="mt-2 text-[15px] leading-relaxed text-[#6E6E73]">{detailShippingReturns}</p>
+                </details>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        {/* Relaterat */}
+        <section className="bg-[#F5F5F7] px-6 py-16">
+          <div className="mx-auto max-w-[1100px]">
+            <h2 className="mb-8 text-center text-[32px] font-semibold tracking-[-0.02em] text-[#1D1D1F]">Du kanske också gillar</h2>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {relatedProducts.map((item) => (
+                <Link key={item.id} href={`/products/${item.slug}`} className="flex flex-col items-center rounded-[18px] bg-white p-6 text-center">
+                  <div className="relative aspect-square w-full">
+                    {item.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={resolveProductImageUrl(item.image_url) ?? ""} alt={item.title} className="absolute inset-0 h-full w-full object-contain" />
+                    ) : null}
+                  </div>
+                  <p className="mt-3 text-[17px] font-semibold text-[#1D1D1F]">{item.title}</p>
+                  <p className="mt-1 text-[15px] text-[#1D1D1F]">{formatMinorPrice(item.price_minor, item.currency)}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (isFashion) {
+    // Filippa K-stil produktdetalj
+    return (
+      <main className="bg-[#FAF9F6]">
+        <StorefrontHeader brandName={brandName} cartCount={2} />
+        <section className="mx-auto w-full max-w-[1480px] px-8 pt-8 lg:px-14">
+          <nav className="text-[11px] tracking-[0.15em] uppercase text-[#1A1A1A]/55">
+            <Link href="/" className="hover:underline">Hem</Link>
+            <span className="mx-2">/</span>
+            <Link href="/products" className="hover:underline">Kollektioner</Link>
+            <span className="mx-2">/</span>
+            <span className="text-[#1A1A1A]">{product.title}</span>
+          </nav>
+
+          <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_400px] lg:gap-14">
+            <FashionProductGallery title={product.title} images={orderedImages} />
+
+            <aside className="lg:sticky lg:top-6 lg:self-start lg:pt-2">
+              <h1 className="text-[24px] font-light tracking-[0.01em] leading-tight text-[#1A1A1A] lg:text-[28px]">
+                {product.title}
+              </h1>
+              {product.description ? (
+                <p className="mt-2 text-[14px] text-[#1A1A1A]/65">{product.description}</p>
+              ) : null}
+
+              <p className="mt-5 text-[18px] tracking-[0.02em] text-[#1A1A1A]">
+                {formatMinorPrice(product.price_minor, product.currency)}
+              </p>
+
+              <div className="mt-7">
+                <ProductPurchaseControls
+                  productId={product.id}
+                  title={product.title}
+                  priceMinor={product.price_minor}
+                  currency={product.currency}
+                  productColors={product.product_colors}
+                  productMaterials={product.product_materials}
+                  productSizes={product.product_sizes}
+                  availableStock={availableStock}
+                />
+              </div>
+
+              <div className="mt-5 flex justify-center">
+                <FavoriteToggle
+                  productId={product.id}
+                  initialFavorited={favoriteIds.has(product.id)}
+                  label="Add to wishlist"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 border border-[#1A1A1A] text-[12px] tracking-[0.2em] uppercase text-[#1A1A1A] transition hover:bg-[#1A1A1A] hover:text-[#FAF9F6]"
+                  activeClassName="bg-[#1A1A1A] text-[#FAF9F6]"
+                  inactiveClassName="text-[#1A1A1A]"
+                />
+              </div>
+
+              <div className="mt-10 space-y-0 border-t border-[#E5E1DC]">
+                <details open className="group border-b border-[#E5E1DC] py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[13px] tracking-[0.15em] uppercase text-[#1A1A1A]">
+                    {detailTabLabels.description}
+                    <span className="text-[16px] text-[#1A1A1A]/55 transition group-open:rotate-45">+</span>
+                  </summary>
+                  <div className="mt-4 text-[14px] leading-relaxed text-[#1A1A1A]/75">
+                    <p>{detailDescriptionIntro}</p>
+                    {detailDescriptionBullets.length > 0 ? (
+                      <ul className="mt-3 list-inside list-disc space-y-1">
+                        {detailDescriptionBullets.map((b, i) => <li key={i}>{b}</li>)}
+                      </ul>
+                    ) : null}
+                  </div>
+                </details>
+                <details className="group border-b border-[#E5E1DC] py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[13px] tracking-[0.15em] uppercase text-[#1A1A1A]">
+                    Material & specifikationer
+                    <span className="text-[16px] text-[#1A1A1A]/55 transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="mt-4 text-[14px] leading-relaxed text-[#1A1A1A]/75">{detailSpecifications}</p>
+                </details>
+                <details className="group border-b border-[#E5E1DC] py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[13px] tracking-[0.15em] uppercase text-[#1A1A1A]">
+                    Leverans & retur
+                    <span className="text-[16px] text-[#1A1A1A]/55 transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="mt-4 text-[14px] leading-relaxed text-[#1A1A1A]/75">{detailShippingReturns}</p>
+                </details>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        {/* Du kanske gillar */}
+        <section className="mx-auto w-full max-w-[1480px] border-t border-[#E5E1DC] px-8 py-16 lg:px-14">
+          <h2 className="text-[22px] font-light tracking-[-0.01em] text-[#1A1A1A] lg:text-[28px]">You may also like</h2>
+          <div className="mt-8 grid gap-x-3 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedProducts.map((item) => (
+              <Link key={item.id} href={`/products/${item.slug}`} className="group flex flex-col">
+                <div className="relative aspect-[4/5] overflow-hidden bg-[#F5F1EA]">
+                  {item.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={resolveProductImageUrl(item.image_url) ?? ""} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]" />
+                  ) : null}
+                </div>
+                <div className="mt-4">
+                  <p className="text-[14px] tracking-[0.02em] text-[#1A1A1A]">{item.title}</p>
+                  <p className="mt-1 text-[14px] text-[#1A1A1A]">{formatMinorPrice(item.price_minor, item.currency)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (isSport) {
     // Nike.com-stil produktdetalj: stor bild vänster, ren info höger,
