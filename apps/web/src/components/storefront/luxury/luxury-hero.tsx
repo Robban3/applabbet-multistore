@@ -11,6 +11,7 @@ type LuxuryHeroProps = {
   heroImageUrl?: string;
 };
 
+/** Cartier-stil hero: full-bleed bakgrundsbild med textoverlay. */
 export function LuxuryHero({
   eyebrow, title, description,
   primaryCtaHref, primaryCtaLabel,
@@ -18,52 +19,32 @@ export function LuxuryHero({
   heroImageUrl,
 }: LuxuryHeroProps) {
   return (
-    <div className="relative flex min-h-[560px] lg:min-h-[620px]">
-      {/* Vänster: text */}
-      <div className="relative z-10 flex w-full flex-col justify-center px-8 py-16 lg:w-1/2 lg:px-14 lg:py-20">
-        <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">
-          {eyebrow}
-        </p>
-
-        <h1 className="mt-6 whitespace-pre-line leading-[1.05] text-white"
-          style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontSize: "clamp(52px, 5.5vw, 90px)", fontWeight: 300, letterSpacing: "0.01em", fontStyle: "italic" }}>
-          {title}
-        </h1>
-
-        <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
-
-        <p className="mt-6 max-w-[400px] text-[15px] font-light leading-relaxed text-white/60">
-          {description}
-        </p>
-
-        <div className="mt-10 flex flex-wrap items-center gap-5">
-          <Link
-            href={primaryCtaHref}
-            className="inline-flex items-center gap-3 border border-[#C41E3A] bg-[#C41E3A] px-8 py-3.5 text-[11px] font-light tracking-[0.3em] uppercase text-white transition hover:bg-[#a01830]"
-          >
-            {primaryCtaLabel}
-          </Link>
-          <Link
-            href={secondaryCtaHref}
-            className="inline-flex items-center gap-3 border border-white/25 px-8 py-3.5 text-[11px] font-light tracking-[0.3em] uppercase text-white/70 transition hover:border-white hover:text-white"
-          >
-            {secondaryCtaLabel}
-          </Link>
+    <section className="relative min-h-[560px] overflow-hidden bg-[#0c0a08] lg:min-h-[640px]">
+      {heroImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={heroImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a0d0d] via-[#120908] to-[#0c0806]" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0c0a08]/85 via-[#0c0a08]/45 to-transparent" />
+      <div className="relative mx-auto flex min-h-[560px] max-w-[1320px] flex-col justify-center px-8 py-16 lg:min-h-[640px] lg:px-14">
+        <div className="max-w-[560px]">
+          <p className="text-[10px] font-light tracking-[0.5em] uppercase text-[#C41E3A]">{eyebrow}</p>
+          <h1 className="mt-6 whitespace-pre-line leading-[1.05] text-white" style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontSize: "clamp(52px, 5.5vw, 90px)", fontWeight: 300, letterSpacing: "0.01em", fontStyle: "italic" }}>
+            {title}
+          </h1>
+          <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
+          <p className="mt-6 max-w-[420px] text-[15px] font-light leading-relaxed text-white/70">{description}</p>
+          <div className="mt-10 flex flex-wrap items-center gap-5">
+            <Link href={primaryCtaHref} className="inline-flex items-center border border-[#C41E3A] bg-[#C41E3A] px-8 py-3.5 text-[11px] font-light tracking-[0.3em] uppercase text-white transition hover:bg-[#a01830]">
+              {primaryCtaLabel}
+            </Link>
+            <Link href={secondaryCtaHref} className="inline-flex items-center border border-white/30 px-8 py-3.5 text-[11px] font-light tracking-[0.3em] uppercase text-white/80 transition hover:border-white hover:text-white">
+              {secondaryCtaLabel}
+            </Link>
+          </div>
         </div>
       </div>
-
-      {/* Höger: bild */}
-      <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block">
-        {heroImageUrl ? (
-          <img src={heroImageUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-[#1a0d0d] via-[#120908] to-[#0c0806]">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_40%,rgba(196,30,58,0.12),transparent_60%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_40%_70%,rgba(184,150,62,0.08),transparent_50%)]" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0c0a08] via-[#0c0a08]/30 to-transparent" />
-      </div>
-    </div>
+    </section>
   );
 }
