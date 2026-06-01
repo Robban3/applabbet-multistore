@@ -21,7 +21,7 @@ function getParams(value: string | string[] | undefined) {
 
 function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.2">
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="white" strokeWidth="2.2">
       <path d="m5 12 4 4 10-10" />
     </svg>
   );
@@ -96,7 +96,7 @@ export default async function ReturnStepThreePage({ searchParams }: ReturnStepTh
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
                 </Link>
                 <span className="mx-1">›</span>
-                <Link href={`/returer-aterbetalningar/skapa-retur/registrera/steg-3?account=1&orderId=${encodeURIComponent(orderId)}`} className="text-[#d7ad62]">
+                <Link href={`/returer-aterbetalningar/skapa-retur/registrera/steg-3?account=1&orderId=${encodeURIComponent(orderId)}`} className="text-[color:var(--store-accent)]">
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbStep3Label", "Steg 3")}
                 </Link>
               </p>
@@ -111,7 +111,7 @@ export default async function ReturnStepThreePage({ searchParams }: ReturnStepTh
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
               <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[#c8a164]/40 bg-[#231b13]/60" />
+              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
             </div>
           </section>
 
@@ -127,12 +127,12 @@ export default async function ReturnStepThreePage({ searchParams }: ReturnStepTh
                 <article key={step} className="text-center">
                   <span
                     className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                      idx < 2 ? "bg-black text-white" : idx === 2 ? "bg-[#d7ad62] text-slate-900" : "bg-[#f2eee7] text-slate-900"
+                      idx < 2 ? "bg-[#16a34a] text-white" : idx === 2 ? "bg-[#0f0d0a] text-white" : "border-2 border-slate-200 bg-white text-slate-400"
                     }`}
                   >
                     {idx < 2 ? <CheckIcon /> : idx + 1}
                   </span>
-                  <p className={`mt-2 text-sm font-semibold ${idx === 2 ? "text-[#d39d3d]" : "text-slate-700"}`}>{step}</p>
+                  <p className={`mt-2 text-sm font-semibold ${idx === 2 ? "text-slate-900" : "text-slate-700"}`}>{step}</p>
                 </article>
               ))}
             </div>
@@ -155,9 +155,9 @@ export default async function ReturnStepThreePage({ searchParams }: ReturnStepTh
                 ))}
 
                 <div className="grid gap-3 lg:grid-cols-2">
-                  <label className="grid cursor-pointer gap-3 rounded-xl border border-[#d7ad62] bg-white px-4 py-4">
+                  <label className="grid cursor-pointer gap-3 rounded-xl border border-[var(--store-accent)] bg-white px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <input type="radio" name="returnMethod" value="post" defaultChecked className="h-4 w-4 accent-[#d7ad62]" />
+                      <input type="radio" name="returnMethod" value="post" defaultChecked className="h-4 w-4 accent-[var(--store-accent)]" />
                       <p className="text-[26px] font-semibold text-slate-900">
                         {getCmsBlockField(cms.blocks, "flowStep3", "methodPostTitle", "Skicka med post (rekommenderas)")}
                       </p>
@@ -175,7 +175,7 @@ export default async function ReturnStepThreePage({ searchParams }: ReturnStepTh
 
                   <label className="grid cursor-pointer gap-3 rounded-xl border border-[#e9dfd1] bg-white px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <input type="radio" name="returnMethod" value="store" className="h-4 w-4 accent-[#d7ad62]" />
+                      <input type="radio" name="returnMethod" value="store" className="h-4 w-4 accent-[var(--store-accent)]" />
                       <p className="text-[26px] font-semibold text-slate-900">
                         {getCmsBlockField(cms.blocks, "flowStep3", "methodStoreTitle", "Lämna in i butik")}
                       </p>
@@ -209,7 +209,7 @@ export default async function ReturnStepThreePage({ searchParams }: ReturnStepTh
                     </svg>
                     {getCmsBlockField(cms.blocks, "flowStep3", "backButtonLabel", "Tillbaka till steg 2")}
                   </Link>
-                  <button className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]">
+                  <button className="inline-flex items-center gap-2 rounded-full bg-[color:var(--store-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--store-accent-fg)] hover:bg-[color:var(--store-accent)]">
                     {getCmsBlockField(cms.blocks, "flowStep3", "nextButtonLabel", "Fortsätt till steg 4")}
                     <ArrowRightIcon />
                   </button>

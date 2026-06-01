@@ -1,6 +1,6 @@
 export function LuxuryBrands({ title, brands }: { title: string; brands: string[] }) {
   return (
-    <section className="mx-auto w-full max-w-[1380px] px-8 pb-16 sm:px-12 lg:px-14">
+    <section className="w-full px-8 pb-16 sm:px-12 lg:px-14">
       <div className="border border-[#EDE5DC] px-10 py-12">
         <p className="text-center text-[10px] font-light tracking-[0.5em] uppercase text-[#5f4a3a]">
           {title}

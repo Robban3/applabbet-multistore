@@ -6,8 +6,15 @@ import {
 } from "@/components/catalog-blocks";
 import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
 import { PriceRangeFilter } from "@/components/price-range-filter";
+import { CatalogFilterSidebar } from "@/components/catalog-filter-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
+import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
+import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
 import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
+import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
+import { applyThemeScopeToCatalogQuery } from "@/lib/storefront/theme-catalog-scope";
 import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
@@ -18,6 +25,7 @@ type BastsaljarePageProps = {
 };
 
 export default async function BastsaljarePage({ searchParams }: BastsaljarePageProps) {
+  const definition = getCmsPage("bastsaljare");
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   if (!tenant) {
@@ -35,6 +43,9 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
   const isLuxury = themeKey === "luxury";
+  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
+  const fallbackBlocks = applyThemePlaceholdersToDefaults("bastsaljare", themeKey, rawFallback);
+  const cms = await getPublishedPageContent("bastsaljare", { blocks: fallbackBlocks });
   const isFashion = themeKey === "fashion";
   const isBeauty = themeKey === "beauty";
   const isElectronics = themeKey === "electronics";
@@ -51,9 +62,67 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
           ? "border-[#bed2f4] bg-[#edf4ff]"
           : "border-[color:var(--store-card-border)] bg-[color:var(--store-soft-surface)]";
   const cardVariant = isLuxury ? "luxury" : themeKey === "fashion" ? "fashion" : themeKey === "sport" ? "sport" : themeKey === "beauty" ? "beauty" : isElectronics ? "electronics" : "default";
-  const catalog = await getCatalogData(supabase, tenant.id, query, { onlyBestSellers: true });
+  const scopedQuery = await applyThemeScopeToCatalogQuery(supabase, tenant.id, themeKey, query);
+  const catalog = await getCatalogData(supabase, tenant.id, scopedQuery, { onlyBestSellers: true });
   const favoriteProductIds = await getFavoriteProductIdsForCurrentUser(tenant.id);
-  const resultLabel = `${catalog.total} produkter`;
+
+  // Tema-relevanta kategorier (samma logik som /products)
+  const themeConfigCats = new Set(
+    getStorefrontConfig(themeKey).categoryCards.map((c) => c.title.trim().toLowerCase()),
+  );
+  const filteredCats = themeConfigCats.size > 0
+    ? catalog.availableCategories.filter((c) => themeConfigCats.has(c.name.trim().toLowerCase()))
+    : catalog.availableCategories;
+  const visibleCategories = filteredCats.length > 0 ? filteredCats : catalog.availableCategories;
+  const resultLabelTemplate = getCmsBlockField(cms.blocks, "listing", "resultLabel", "{count} produkter");
+  const resultLabel = resultLabelTemplate.includes("{count}")
+    ? resultLabelTemplate.replace("{count}", String(catalog.total))
+    : `${catalog.total} produkter`;
+  const badgeLabel = getCmsBlockField(cms.blocks, "listing", "badgeLabel", "EXKLUSIV");
+
+  if (isSport) {
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div style={{ background: "var(--store-header-gradient)" }}>
+          <StorefrontHeader activeNav="Bästsäljare" cartCount={2} />
+          <SportPageHero
+            eyebrow={getCmsBlockField(cms.blocks, "hero", "eyebrow", "Toppval")}
+            title={getCmsBlockField(cms.blocks, "hero", "title", "Mest populärt just nu")}
+            description={getCmsBlockField(cms.blocks, "hero", "description", "De produkter våra kunder älskar mest — utvalda för prestation och hållbarhet.")}
+          />
+        </div>
+        <section className="w-full px-6 py-10 lg:px-10">
+          <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
+            <CatalogFilterSidebar
+              themeKey="sport"
+              actionPath="/bastsaljare"
+              query={query}
+              categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+              brands={catalog.availableBrands}
+              maxPriceBound={100000}
+            />
+            <section>
+              <div className="mb-5 flex items-center justify-between">
+                <p className="text-[12px] font-bold uppercase tracking-wide text-[#0a0f08]/60">{resultLabel}</p>
+                <form method="GET" action="/bastsaljare" className="flex items-center gap-2">
+                  {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+                  {query.brands.map((b) => <input key={b} type="hidden" name="brand" value={b} />)}
+                  <select name="sort" defaultValue={query.sort} className="border border-[#dce9cf] bg-white px-3 py-1.5 text-[11px] font-bold uppercase text-[#0a0f08]">
+                    <option value="bestsellers">Populärast</option>
+                    <option value="price_asc">Pris stigande</option>
+                    <option value="price_desc">Pris fallande</option>
+                  </select>
+                  <button type="submit" className="bg-[#b3ff00] px-4 py-1.5 text-[11px] font-black uppercase text-black transition hover:bg-white">Visa</button>
+                </form>
+              </div>
+              <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} badgeLabel={badgeLabel} cardVariant="sport" />
+              <CatalogPagination actionPath="/bastsaljare" query={query} totalPages={catalog.totalPages} />
+            </section>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (isLuxury) {
     return (
@@ -61,48 +130,22 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
         <div style={{ background: "var(--store-header-gradient)" }}>
           <StorefrontHeader activeNav="Bästsäljare" cartCount={2} />
           <div className="px-8 py-16 sm:px-12 lg:px-14 lg:py-20 border-b border-white/8">
-            <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">Sélection</p>
-            <h1 className="mt-4 font-light text-white" style={{ fontSize: "clamp(36px, 4vw, 64px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}>Pièces d'exception</h1>
-            <p className="mt-4 max-w-[500px] text-[14px] font-light leading-relaxed text-white/55">Noggrant kuraterade pjäser — de mest eftertraktade i vår kollektion.</p>
+            <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">{getCmsBlockField(cms.blocks, "hero", "eyebrow", "Sélection")}</p>
+            <h1 className="mt-4 text-white" style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontSize: "clamp(40px, 4.5vw, 72px)", fontWeight: 300, fontStyle: "italic", letterSpacing: "0.01em", lineHeight: 1.05 }}>{getCmsBlockField(cms.blocks, "hero", "title", "Pièces d'exception")}</h1>
+            <p className="mt-4 max-w-[500px] text-[14px] font-light leading-relaxed text-white/55">{getCmsBlockField(cms.blocks, "hero", "description", "Noggrant kuraterade pjäser — de mest eftertraktade i vår kollektion.")}</p>
             <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
           </div>
         </div>
-        <section className="mx-auto w-full max-w-[1380px] px-8 py-10 sm:px-12 lg:px-14">
+        <section className="w-full px-8 py-10 sm:px-12 lg:px-14">
           <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
-            <aside className={`border p-5 ${filterShellClass}`}>
-              <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-[11px] font-light tracking-[0.3em] uppercase text-[#17120d]">Filter</h2>
-                <Link href="/bastsaljare" className="text-[10px] tracking-[0.1em] text-[#C41E3A] hover:underline">Rensa</Link>
-              </div>
-              <AutoSubmitFilterForm action="/bastsaljare" className="space-y-5 text-sm text-[#5f4a3a]">
-                <div>
-                  <p className="mb-3 text-[10px] font-light tracking-[0.3em] uppercase text-[#5f4a3a]">Kategori</p>
-                  <div className="space-y-2">
-                    {catalog.availableCategories.map((cat) => (
-                      <label key={cat.id} className="flex items-center gap-2 text-[12px]">
-                        <input type="checkbox" name="category" value={cat.slug} defaultChecked={query.categories.includes(cat.slug)} className="accent-[#C41E3A]" />
-                        {cat.name}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-3 text-[10px] font-light tracking-[0.3em] uppercase text-[#5f4a3a]">Varumärke</p>
-                  <div className="space-y-2">
-                    {catalog.availableBrands.map((brand) => (
-                      <label key={brand} className="flex items-center gap-2 text-[12px]">
-                        <input type="checkbox" name="brand" value={brand} defaultChecked={query.brands.includes(brand)} className="accent-[#C41E3A]" />
-                        {brand}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-3 text-[10px] font-light tracking-[0.3em] uppercase text-[#5f4a3a]">Pris</p>
-                  <PriceRangeFilter minBound={0} maxBound={100000} initialMin={query.minPrice} initialMax={query.maxPrice} />
-                </div>
-              </AutoSubmitFilterForm>
-            </aside>
+            <CatalogFilterSidebar
+              themeKey="luxury"
+              actionPath="/bastsaljare"
+              query={query}
+              categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+              brands={catalog.availableBrands}
+              maxPriceBound={100000}
+            />
             <section>
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-[12px] font-light tracking-[0.05em] text-[#5f4a3a]">{resultLabel}</p>
@@ -117,7 +160,7 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
                   <button type="submit" className="border border-[#EDE5DC] bg-white px-3 py-1.5 text-[11px] font-light text-[#5f4a3a] hover:bg-[#FAF8F5]">Visa</button>
                 </form>
               </div>
-              <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} badgeLabel="EXKLUSIV" cardVariant="luxury" />
+              <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} badgeLabel={badgeLabel} cardVariant="luxury" />
               <CatalogPagination actionPath="/bastsaljare" query={query} totalPages={catalog.totalPages} />
             </section>
           </div>
@@ -156,88 +199,14 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
 
           <section className="px-5 py-5">
             <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-              <aside
-                className={`rounded-xl border p-4 ${filterShellClass}`}
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-slate-900">Filter</h2>
-                  <Link href="/bastsaljare" className="text-xs text-slate-500 hover:text-slate-700">
-                    Rensa alla
-                  </Link>
-                </div>
-
-                <AutoSubmitFilterForm action="/bastsaljare" className="space-y-5 text-sm text-slate-700">
-                  <div>
-                    <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Kategori</p>
-                    <div className="space-y-2">
-                      {catalog.availableCategories.map((category) => (
-                        <label key={category.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            name="category"
-                            value={category.slug}
-                            defaultChecked={query.categories.includes(category.slug)}
-                            className="accent-[color:var(--store-accent)]"
-                          />
-                          {category.name}
-                        </label>
-                      ))}
-                      {catalog.availableCategories.length === 0 ? (
-                        <p className="text-xs text-slate-500">Inga kategorier tillgängliga ännu.</p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Varumärke</p>
-                    <div className="space-y-2">
-                      {catalog.availableBrands.map((brand) => (
-                        <label key={brand} className="flex items-center gap-2">
-                          <input type="checkbox" name="brand" value={brand} defaultChecked={query.brands.includes(brand)} className="accent-[color:var(--store-accent)]" />
-                          {brand}
-                        </label>
-                      ))}
-                      {catalog.availableBrands.length === 0 ? (
-                        <p className="text-xs text-slate-500">Inga varumärken tillgängliga ännu.</p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Pris</p>
-                    <PriceRangeFilter
-                      minBound={0}
-                      maxBound={10000}
-                      initialMin={query.minPrice}
-                      initialMax={query.maxPrice}
-                    />
-                  </div>
-
-                  <div>
-                    <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Egenskaper</p>
-                    <div className="space-y-2">
-                      {catalog.availableFeatures.map((feature) => (
-                        <label key={feature} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            name="feature"
-                            value={feature}
-                            defaultChecked={query.features.includes(feature)}
-                            className="accent-[color:var(--store-accent)]"
-                          />
-                          {feature}
-                        </label>
-                      ))}
-                      {catalog.availableFeatures.length === 0 ? (
-                        <p className="text-xs text-slate-500">Inga egenskaper tillgängliga ännu.</p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  {query.q ? <input type="hidden" name="q" value={query.q} /> : null}
-                  {query.sort !== "relevance" ? <input type="hidden" name="sort" value={query.sort} /> : null}
-                </AutoSubmitFilterForm>
-              </aside>
+              <CatalogFilterSidebar
+                themeKey={themeKey}
+                actionPath="/bastsaljare"
+                query={query}
+                categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+                brands={catalog.availableBrands}
+                features={catalog.availableFeatures}
+              />
 
               <section>
                 <div className="mb-3 space-y-3">

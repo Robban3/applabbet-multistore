@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CartCountBadge } from "@/components/cart-count-badge";
 import { formatMinorPrice } from "@/lib/format";
-import type { PaymentMethods } from "@/lib/tenant-settings";
+import type { PaymentMethods } from "@/lib/tenant-settings-shared";
 
 type CartItem = {
   productId: string;
@@ -182,13 +182,18 @@ export function KassaClient({
           </div>
         </header>
 
-        <div className="grid px-6 py-2 text-white/90 md:grid-cols-4" style={{ background: "var(--store-header-gradient)" }}>
+        <div className="flex items-center px-6 py-3 text-white/90" style={{ background: "var(--store-header-gradient)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           {["Varukorg", "Leverans", "Betalning", "Bekräftelse"].map((step, idx) => (
-            <div key={step} className="flex items-center gap-2 text-sm">
-              <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border text-xs ${idx === 1 ? "border-[color:var(--store-accent)] bg-[color:var(--store-accent)] text-black" : "border-white/35 text-white/90"}`}>
+            <div key={step} className="flex flex-1 items-center gap-2">
+              <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold transition ${
+                idx === 1
+                  ? "border-[color:var(--store-accent)] bg-[color:var(--store-accent)] text-[color:var(--store-accent-fg)]"
+                  : "border-white/25 text-white/50"
+              }`}>
                 {idx + 1}
               </span>
-              <span>{step}</span>
+              <span className={`text-[11px] font-medium tracking-wide ${idx === 1 ? "text-white" : "text-white/40"}`}>{step}</span>
+              {idx < 3 && <div className="mx-2 flex-1 h-px bg-white/15" />}
             </div>
           ))}
         </div>

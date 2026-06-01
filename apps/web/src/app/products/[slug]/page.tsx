@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CartCountBadge } from "@/components/cart-count-badge";
 import { FavoriteToggle } from "@/components/favorite-toggle";
+import { StorefrontHeader } from "@/components/storefront-header";
 import { ProductImageGallery } from "@/components/product-image-gallery";
+import { SportProductGallery } from "@/components/storefront/sport/sport-product-gallery";
 import { ProductDetailTabs } from "@/components/product-detail-tabs";
 import { ProductPurchaseControls } from "@/components/product-purchase-controls";
 import { formatMinorPrice } from "@/lib/format";
@@ -52,6 +53,8 @@ function resolveProductImageUrl(input: string | null | undefined) {
   const value = String(input || "").trim();
   if (!value) return null;
   if (/^https?:\/\//i.test(value)) return value;
+  // Lokala public-bilder (t.ex. mock-bilder) serveras direkt.
+  if (value.startsWith("/images/")) return value;
   const admin = createSupabaseAdminClient();
   const { data } = admin.storage.from(PRODUCT_IMAGE_BUCKET).getPublicUrl(value.replace(/^\/+/, ""));
   return data.publicUrl || null;
@@ -75,6 +78,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
   const isElectronics = themeKey === "electronics";
+  const isLuxury = themeKey === "luxury";
+  const isSport = themeKey === "sport";
+  const isFullPage = isLuxury || isSport;
 
   const supabase = createSupabaseAdminClient();
   const { data: productWithTabs, error: productWithTabsError } = await supabase
@@ -185,65 +191,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const shellCardBorder = "var(--store-card-border)";
   const shellSoftSurface = "var(--store-soft-surface)";
 
-  return (
-    <main style={{ background: shellBackground }}>
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div
-          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
-          style={{ borderColor: shellBorder }}
-        >
-          <header
-            className="relative flex items-center justify-between px-4 py-3 text-white sm:px-6"
-            style={{ background: "var(--store-header-gradient)" }}
-          >
-            <p className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</p>
-            <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 xl:flex">
-              {navItems.map((item, idx) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={idx === 0 ? "border-b border-[color:var(--store-accent)] pb-1 text-white" : "hover:text-[color:var(--store-accent)]"}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="flex items-center gap-2 text-white/85">
-              <details className="relative xl:hidden">
-                <summary className="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/20 bg-white/5">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <path d="M4 7h16M4 12h16M4 17h16" />
-                  </svg>
-                </summary>
-                <div
-                  className="fixed inset-x-3 top-16 z-[120] max-h-[70vh] overflow-auto rounded-lg border border-white/15 p-2 shadow-xl sm:inset-x-auto sm:right-4 sm:min-w-[260px]"
-                  style={{ background: "var(--store-header-overlay-surface)" }}
-                >
-                  {navItems.map((item, idx) => (
-                    <Link
-                      key={`mobile-${item.label}`}
-                      href={item.href}
-                      className={`block rounded-md px-3 py-2 text-sm ${
-                        idx === 0 ? "bg-white/10 text-white" : "text-white/90 hover:bg-white/10"
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </details>
-              <Link href="/sok" aria-label="Sök" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="11" cy="11" r="7" /><path d="M20 20L16.65 16.65" /></svg>
-              </Link>
-              <Link href="/mina-sidor" aria-label="Konto" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="12" cy="8" r="3.5" /><path d="M4 20C5.8 16.8 8.6 15.2 12 15.2C15.4 15.2 18.2 16.8 20 20" /></svg>
-              </Link>
-              <Link href="/cart" aria-label="Varukorg" className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="9" cy="20" r="1.5" /><circle cx="17" cy="20" r="1.5" /><path d="M3 4H5L7.2 15H18.2L20.5 7.5H6.3" /></svg>
-                <CartCountBadge initialCount={2} />
-              </Link>
-            </div>
-          </header>
+  const productContent = (
 
           <div className="px-6 py-5">
             <div className="mb-4 flex items-center gap-2 text-xs text-slate-500">
@@ -364,6 +312,153 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               </div>
             </section>
           </div>
+  );
+
+  if (isSport) {
+    // Nike.com-stil produktdetalj: stor bild vänster, ren info höger,
+    // rundade pill-knappar, ramlöst, vit bakgrund, ljusgrå bildyta.
+    const categoryLabel = relatedProducts[0]?.description?.split("—")[0]?.trim() ?? "";
+    return (
+      <main className="bg-white">
+        <StorefrontHeader brandName={brandName} cartCount={2} />
+
+        <section className="mx-auto w-full max-w-[1480px] px-6 pt-6 lg:px-10">
+          {/* Breadcrumb */}
+          <nav className="text-[12px] text-[#757575]">
+            <Link href="/" className="hover:underline">Hem</Link>
+            <span className="mx-2">/</span>
+            <Link href="/products" className="hover:underline">Produkter</Link>
+            <span className="mx-2">/</span>
+            <span className="text-[#111]">{product.title}</span>
+          </nav>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[60%_40%] lg:gap-10">
+            {/* Vänster: stort 2-cols bildgalleri (Nike-stil) */}
+            <SportProductGallery title={product.title} images={orderedImages} />
+
+            {/* Höger: STICKY produktinfo (Nike-pattern) */}
+            <aside className="lg:sticky lg:top-6 lg:self-start lg:pt-2">
+              {categoryLabel ? (
+                <p className="text-[15px] text-[#f5402c]">{categoryLabel}</p>
+              ) : null}
+              <h1 className="mt-1 text-[24px] font-medium leading-tight text-[#111] lg:text-[28px]">
+                {product.title}
+              </h1>
+              {product.description ? (
+                <p className="mt-1 text-[15px] text-[#757575]">{product.description}</p>
+              ) : null}
+
+              <p className="mt-5 text-[18px] font-medium text-[#111]">
+                {formatMinorPrice(product.price_minor, product.currency)}
+              </p>
+
+              <div className="mt-6">
+                <ProductPurchaseControls
+                  productId={product.id}
+                  title={product.title}
+                  priceMinor={product.price_minor}
+                  currency={product.currency}
+                  productColors={product.product_colors}
+                  productMaterials={product.product_materials}
+                  productSizes={product.product_sizes}
+                  availableStock={availableStock}
+                />
+              </div>
+
+              <div className="mt-4 flex justify-center">
+                <FavoriteToggle
+                  productId={product.id}
+                  initialFavorited={favoriteIds.has(product.id)}
+                  label="Lägg till i favoriter"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full border border-[#111] text-[15px] font-medium text-[#111] transition hover:bg-[#f5f5f5]"
+                  activeClassName="text-[#f5402c]"
+                  inactiveClassName="text-[#111]"
+                />
+              </div>
+
+              {/* Beskrivning */}
+              <div className="mt-10 space-y-6 border-t border-[#e5e5e5] pt-8">
+                <div>
+                  <h2 className="text-[18px] font-medium text-[#111]">{detailTabLabels.description}</h2>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[#111]">{detailDescriptionIntro}</p>
+                  <ul className="mt-4 space-y-2 text-[15px] text-[#111]">
+                    {detailDescriptionBullets.map((bullet, i) => (
+                      <li key={i} className="flex gap-2"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#111]" />{bullet}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <details className="border-t border-[#e5e5e5] pt-6">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[18px] font-medium text-[#111]">
+                    {detailTabLabels.shipping}
+                    <span className="text-[24px] text-[#757575]">+</span>
+                  </summary>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[#111]">{detailShippingReturns}</p>
+                </details>
+
+                <details className="border-t border-[#e5e5e5] pt-6">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[18px] font-medium text-[#111]">
+                    {detailTabLabels.reviews}
+                    <span className="text-[24px] text-[#757575]">+</span>
+                  </summary>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[#111]">{detailReviews}</p>
+                </details>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        {/* Du kanske också gillar */}
+        <section className="mx-auto w-full max-w-[1480px] border-t border-[#e5e5e5] px-6 py-14 lg:px-10">
+          <h2 className="text-[22px] font-medium text-[#111] lg:text-[26px]">Du kanske också gillar</h2>
+          <div className="mt-6 grid gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedProducts.map((item) => (
+              <Link key={item.id} href={`/products/${item.slug}`} className="group flex flex-col">
+                <div className="relative aspect-square overflow-hidden bg-[#f5f5f5]">
+                  {item.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={resolveProductImageUrl(item.image_url) ?? ""} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
+                  ) : null}
+                  <FavoriteToggle
+                    productId={item.id}
+                    initialFavorited={favoriteIds.has(item.id)}
+                    className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#111] shadow-sm transition hover:bg-[#f5f5f5]"
+                  />
+                </div>
+                <div className="mt-3">
+                  <p className="text-[15px] font-medium text-[#111]">{item.title}</p>
+                  <p className="mt-1 text-[15px] font-medium text-[#111]">
+                    {formatMinorPrice(item.price_minor, item.currency)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (isFullPage) {
+    return (
+      <main style={{ background: shellBackground }}>
+        <StorefrontHeader brandName={brandName} cartCount={2} />
+        <div className="mx-auto w-full max-w-[1380px] px-4 py-6 sm:px-6">
+          {productContent}
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main style={{ background: shellBackground }}>
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: shellBorder }}
+        >
+          <StorefrontHeader brandName={brandName} cartCount={2} />
+          {productContent}
         </div>
       </section>
     </main>

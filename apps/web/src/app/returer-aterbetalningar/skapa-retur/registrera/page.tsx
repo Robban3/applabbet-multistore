@@ -160,7 +160,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
                 </Link>
                 <span className="mx-1">›</span>
-                <Link href="/returer-aterbetalningar/skapa-retur?account=1" className="text-[#d7ad62]">
+                <Link href="/returer-aterbetalningar/skapa-retur?account=1" className="text-[color:var(--store-accent)]">
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbCreateReturnLabel", "Skapa din retur")}
                 </Link>
               </p>
@@ -175,7 +175,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
               <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[#c8a164]/40 bg-[#231b13]/60" />
+              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
             </div>
           </section>
 
@@ -189,10 +189,10 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                 getCmsBlockField(cms.blocks, "flowNavigation", "step5Label", "Bekräfta & skicka"),
               ].map((step, idx) => (
                 <article key={step} className="text-center">
-                  <span className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${idx === 0 ? "bg-black text-white" : "bg-[#f2eee7] text-slate-900"}`}>
+                  <span className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${idx === 0 ? "bg-[#0f0d0a] text-white" : "border-2 border-slate-200 bg-white text-slate-400"}`}>
                     {idx + 1}
                   </span>
-                  <p className={`mt-2 text-sm font-semibold ${idx === 0 ? "text-[#d39d3d]" : "text-slate-700"}`}>{step}</p>
+                  <p className={`mt-2 text-[12px] font-semibold ${idx === 0 ? "text-slate-900" : "text-slate-400"}`}>{step}</p>
                 </article>
               ))}
             </div>
@@ -222,7 +222,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                   <article
                     key={order.id}
                     className={`rounded-xl border bg-white px-4 py-3 ${
-                      highlightedOrderId === order.id ? "border-[#d7ad62]" : "border-[#e9dfd1]"
+                      highlightedOrderId === order.id ? "border-[var(--store-accent)]" : "border-[#e9dfd1]"
                     }`}
                   >
                     <div className="grid items-center gap-3 md:grid-cols-[24px_1fr_auto]">
@@ -231,7 +231,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                         name="orderId"
                         value={order.id}
                         defaultChecked={highlightedOrderId === order.id}
-                        className="h-4 w-4 accent-[#d7ad62]"
+                        className="h-4 w-4 accent-[var(--store-accent)]"
                         id={`order-${order.id}`}
                       />
                       <label htmlFor={`order-${order.id}`} className="flex cursor-pointer flex-wrap items-center gap-4">
@@ -245,7 +245,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                       </label>
                       <Link
                         href={`/returer-aterbetalningar/skapa-retur/registrera?account=1&orderId=${encodeURIComponent(order.id)}`}
-                        className="text-sm font-semibold text-slate-700 hover:text-[#b88f50]"
+                        className="text-sm font-semibold text-slate-700 hover:text-[color:var(--store-accent)]"
                       >
                         {getCmsBlockField(cms.blocks, "flowStep1", "orderDetailsLabel", "Visa detaljer")}
                       </Link>
@@ -279,7 +279,7 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                 ))}
 
                 <div className="pt-1 text-right">
-                  <button className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]">
+                  <button className="inline-flex items-center gap-2 rounded-full bg-[color:var(--store-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--store-accent-fg)] hover:bg-[color:var(--store-accent)]">
                     {getCmsBlockField(cms.blocks, "flowStep1", "nextButtonLabel", "Fortsätt till steg 2")}
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
                       <path d="M5 12h14" />

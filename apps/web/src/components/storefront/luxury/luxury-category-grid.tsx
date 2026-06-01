@@ -4,7 +4,7 @@ type CategoryItem = { title: string; href?: string; imageUrl?: string; accent?: 
 
 export function LuxuryCategoryGrid({ title, categories }: { title: string; categories: CategoryItem[] }) {
   return (
-    <section className="mx-auto w-full max-w-[1380px] px-8 py-16 sm:px-12 lg:px-14">
+    <section className="w-full px-8 py-16 sm:px-12 lg:px-14">
       <div className="mb-10 flex items-end justify-between">
         <div>
           <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">Collections</p>

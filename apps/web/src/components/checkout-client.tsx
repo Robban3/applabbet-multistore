@@ -6,7 +6,7 @@ import { CartCountBadge } from "@/components/cart-count-badge";
 import { TopTrustStrip } from "@/components/top-trust-strip";
 import { readCart, writeCart } from "@/lib/cart-storage";
 import { formatMinorPrice } from "@/lib/format";
-import { defaultTrustBadges, type TrustBadge } from "@/lib/tenant-settings";
+import { defaultTrustBadges, type TrustBadge } from "@/lib/tenant-settings-shared";
 
 type CartItem = {
   productId: string;

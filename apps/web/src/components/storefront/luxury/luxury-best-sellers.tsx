@@ -22,7 +22,7 @@ export type LuxuryBestSellersProps = {
 
 export function LuxuryBestSellers({ title, viewAllLabel, products }: LuxuryBestSellersProps) {
   return (
-    <section className="mx-auto w-full max-w-[1380px] px-8 pb-16 sm:px-12 lg:px-14">
+    <section className="w-full px-8 pb-16 sm:px-12 lg:px-14">
       <div className="mb-10 flex items-end justify-between">
         <div>
           <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">Sélection</p>

@@ -15,3 +15,7 @@ pnpm-debug.log*
 
 # Supabase local
 supabase/.temp
+
+# Stora zip-filer
+multistore.zip
+*.zip

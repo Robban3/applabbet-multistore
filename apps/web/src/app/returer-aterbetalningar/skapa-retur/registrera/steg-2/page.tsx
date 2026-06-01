@@ -15,6 +15,14 @@ function getParam(value: string | string[] | undefined) {
   return value || "";
 }
 
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="white" strokeWidth="2.5">
+      <path d="m5 12 4 4 10-10" />
+    </svg>
+  );
+}
+
 function formatKr(minor: number) {
   return `${Math.round(minor / 100).toLocaleString("sv-SE")} kr`;
 }
@@ -60,7 +68,6 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
     ? await supabase
         .from("order_items")
         .select("id, product_title, quantity, unit_price_minor")
-        .eq("tenant_id", tenant.id)
         .eq("order_id", order.id)
     : { data: [] };
 
@@ -76,6 +83,7 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
       : [
           { id: "f1", title: "Premium Hörlurar Pro", quantity: 1, priceLabel: "1 199 kr", variant: "Svart" },
           { id: "f2", title: "Chrome Elite Klocka", quantity: 1, priceLabel: "599 kr", variant: "Svart / Stål" },
+          { id: "f3", title: "Aviator Solglasögon", quantity: 1, priceLabel: "199 kr", variant: "Guld / Brun" },
         ];
 
   const orderLabel = order ? `Order #${String(order.id).slice(0, 5).toUpperCase()}` : "Order #10245";
@@ -95,7 +103,7 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
                 </Link>
                 <span className="mx-1">›</span>
-                <Link href={`/returer-aterbetalningar/skapa-retur/registrera?account=1&orderId=${encodeURIComponent(selectedOrder)}`} className="text-[#d7ad62]">
+                <Link href={`/returer-aterbetalningar/skapa-retur/registrera?account=1&orderId=${encodeURIComponent(selectedOrder)}`} className="text-[color:var(--store-accent)]">
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbStep2Label", "Steg 2")}
                 </Link>
               </p>
@@ -110,7 +118,7 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
               <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[#c8a164]/40 bg-[#231b13]/60" />
+              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
             </div>
           </section>
 
@@ -124,10 +132,10 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
                 getCmsBlockField(cms.blocks, "flowNavigation", "step5Label", "Bekräfta & skicka"),
               ].map((step, idx) => (
                 <article key={step} className="text-center">
-                  <span className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${idx === 1 ? "bg-black text-white" : "bg-[#f2eee7] text-slate-900"}`}>
-                    {idx + 1}
+                  <span className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${idx < 1 ? "bg-[#16a34a] text-white" : idx === 1 ? "bg-[#0f0d0a] text-white" : "border-2 border-slate-200 bg-white text-slate-400"}`}>
+                    {idx < 1 ? <CheckIcon /> : idx + 1}
                   </span>
-                  <p className={`mt-2 text-sm font-semibold ${idx === 1 ? "text-[#d39d3d]" : "text-slate-700"}`}>{step}</p>
+                  <p className={`mt-2 text-[12px] font-semibold ${idx === 1 ? "text-slate-900" : idx < 1 ? "text-[#16a34a]" : "text-slate-400"}`}>{step}</p>
                 </article>
               ))}
             </div>
@@ -161,7 +169,7 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
                       name="itemId"
                       value={item.id}
                       defaultChecked
-                      className="h-4 w-4 accent-[#d7ad62]"
+                      className="h-4 w-4 accent-[var(--store-accent)]"
                     />
                     <div className="h-14 rounded-md bg-gradient-to-br from-[#2a2118] via-[#17120e] to-[#0d0b09]" />
                     <div>
@@ -180,7 +188,7 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
                   >
                     {getCmsBlockField(cms.blocks, "flowStep2", "backButtonLabel", "Tillbaka till steg 1")}
                   </Link>
-                  <button className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]">
+                  <button className="inline-flex items-center gap-2 rounded-full bg-[color:var(--store-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--store-accent-fg)] hover:bg-[color:var(--store-accent)]">
                     {getCmsBlockField(cms.blocks, "flowStep2", "nextButtonLabel", "Fortsätt till steg 3")}
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
                       <path d="M5 12h14" />

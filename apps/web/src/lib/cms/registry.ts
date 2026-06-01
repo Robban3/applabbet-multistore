@@ -157,6 +157,33 @@ export const CMS_PAGES: CmsPageDefinition[] = [
     ],
   },
   {
+    key: "bastsaljare",
+    title: "Bästsäljare",
+    route: "/bastsaljare",
+    blocks: [
+      {
+        key: "hero",
+        title: "Hero",
+        fields: [
+          { key: "eyebrow", label: "Eyebrow-text", type: "text", defaultValue: "Sélection" },
+          { key: "title", label: "Rubrik", type: "text", defaultValue: "Pièces d'exception" },
+          { key: "description", label: "Beskrivning", type: "textarea", defaultValue: "Noggrant kuraterade pjäser — de mest eftertraktade i vår kollektion." },
+        ],
+      },
+      {
+        key: "listing",
+        title: "Produktlista",
+        fields: [
+          { key: "resultLabel", label: "Resultattext", type: "text", defaultValue: "{count} produkter" },
+          { key: "sortPopular", label: "Sortering: Populärast", type: "text", defaultValue: "Populärast" },
+          { key: "sortPriceAsc", label: "Sortering: Pris stigande", type: "text", defaultValue: "Pris stigande" },
+          { key: "sortPriceDesc", label: "Sortering: Pris fallande", type: "text", defaultValue: "Pris fallande" },
+          { key: "badgeLabel", label: "Produktmärke", type: "text", defaultValue: "EXKLUSIV" },
+        ],
+      },
+    ],
+  },
+  {
     key: "nyheter",
     title: "Nyheter",
     route: "/nyheter",

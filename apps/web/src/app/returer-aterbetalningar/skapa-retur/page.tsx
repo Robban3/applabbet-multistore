@@ -4,6 +4,8 @@ import { StorefrontHeader } from "@/components/storefront-header";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
 type CreateReturnPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -26,7 +28,7 @@ function ArrowRightIcon() {
 function StepIcon({ index }: { index: number }) {
   if (index === 0 || index === 2) {
     return (
-      <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-900" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="5" y="3.5" width="14" height="17" rx="2" />
         <path d="M8 8h8M8 12h6M8 16h5" />
       </svg>
@@ -34,7 +36,7 @@ function StepIcon({ index }: { index: number }) {
   }
   if (index === 1) {
     return (
-      <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-900" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M4 8l8-4 8 4-8 4-8-4Z" />
         <path d="M4 8v8l8 4 8-4V8" />
       </svg>
@@ -42,7 +44,7 @@ function StepIcon({ index }: { index: number }) {
   }
   if (index === 3) {
     return (
-      <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-900" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="2" y="8" width="11" height="8" rx="1.5" />
         <path d="M13 10h4l3 3v3h-7z" />
         <circle cx="7" cy="17" r="1.4" />
@@ -51,7 +53,7 @@ function StepIcon({ index }: { index: number }) {
     );
   }
   return (
-    <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-900" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg viewBox="0 0 24 24" className="h-7 w-7 text-slate-600" fill="none" stroke="currentColor" strokeWidth="1.8">
       <rect x="3" y="6" width="18" height="12" rx="2" />
       <path d="M3 10h18" />
       <circle cx="8" cy="14" r="1" />
@@ -89,6 +91,11 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
   const definition = getCmsPage("returer-aterbetalningar");
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
   const cms = await getPublishedPageContent("returer-aterbetalningar", { blocks: fallbackBlocks });
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const settings = tenant ? await getTenantSettings(tenant) : null;
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isFullPage = themeKey === "luxury" || themeKey === "sport";
   const params = await searchParams;
   const accountView = getParam(params.account) === "1";
   if (!accountView) {
@@ -137,13 +144,11 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
     }))
     .filter((item) => item.question.trim().length > 0);
 
-  return (
-    <main className="bg-white">
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+  const inner = (
+    <>
           <StorefrontHeader cartCount={0} />
 
-          <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
+          <section className="relative overflow-hidden border-b border-white/10 px-6 py-6 text-white" style={{ background: "var(--store-header-gradient)" }}>
             <div className="relative z-10 max-w-[540px]">
               <p className="text-xs text-white/70">
                 <Link href="/" className="hover:text-white">Hem</Link>
@@ -158,7 +163,7 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
               </p>
               <h1 className="mt-3 text-[62px] font-semibold leading-[0.95] tracking-tight">
                 {getCmsBlockField(cms.blocks, "flowHero", "titlePrefix", "Skapa din")}{" "}
-                <span className="text-[#c8a164]">{getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}</span>
+                <span className="text-[color:var(--store-accent)]">{getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}</span>
               </h1>
               <p className="mt-3 text-xl leading-relaxed text-white/90">
                 {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine1", "Här kan du enkelt registrera din retur.")}
@@ -168,12 +173,12 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
               <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[#c8a164]/40 bg-[#231b13]/60" />
+              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[color:var(--store-accent)]/40 bg-[#231b13]/60" />
             </div>
             <div className="relative z-10 mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {trustItems.map((item, index) => (
                 <article key={item.title || String(index)} className="rounded-lg border border-white/10 bg-black/25 px-3 py-3">
-                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-[#c8a164]" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6 text-[color:var(--store-accent)]" fill="none" stroke="currentColor" strokeWidth="1.8">
                     <SmallTrustIcon index={index} />
                   </svg>
                   <p className="mt-2 text-sm font-semibold">{item.title}</p>
@@ -187,14 +192,14 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
             <h2 className="text-center text-[48px] font-semibold leading-tight text-slate-900">
               {getCmsBlockField(cms.blocks, "flowStep1", "howItWorksTitle", "Så här skapar du din retur")}
             </h2>
-            <div className="mx-auto mt-2 h-[2px] w-24 rounded-full bg-[#c8a164]" />
+            <div className="mx-auto mt-2 h-[2px] w-24 rounded-full bg-[color:var(--store-accent)]" />
             <div className="mt-6 grid gap-3 md:grid-cols-5">
               {steps.map((step, idx) => (
                 <article key={step.title} className="flex flex-col items-center text-center">
                   <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[#e8e2d7] bg-[#fbf7f1]">
                     <StepIcon index={idx} />
                   </div>
-                  <span className="mt-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#c8a164] text-[11px] font-semibold text-slate-900">
+                  <span className="mt-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--store-accent)] text-[11px] font-semibold text-[color:var(--store-accent-fg)]">
                     {idx + 1}
                   </span>
                   <p className="mt-2 text-[25px] font-semibold text-slate-900">{step.title}</p>
@@ -210,7 +215,7 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
               </div>
               <Link
                 href="/returer-aterbetalningar/skapa-retur/registrera?account=1"
-                className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]"
+                className="inline-flex items-center gap-2 rounded-full bg-[color:var(--store-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--store-accent-fg)] hover:opacity-90"
               >
                 {getCmsBlockField(cms.blocks, "flowStep1", "ctaButtonLabel", "Skapa din retur")}
                 <ArrowRightIcon />
@@ -222,7 +227,7 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
                 <article key={card.title} className="rounded-lg border border-[#ebe5da] bg-[#faf7f2] px-4 py-4">
                   <p className="text-[27px] font-semibold">{card.title}</p>
                   <p className="mt-1 text-[13px] leading-relaxed text-slate-600">{card.text}</p>
-                  <Link href={card.href} className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-900 hover:text-[#b88f50]">
+                  <Link href={card.href} className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-900 hover:text-[color:var(--store-accent)]">
                     {card.cta}
                     <ArrowRightIcon />
                   </Link>
@@ -251,6 +256,24 @@ export default async function SkapaReturPage({ searchParams }: CreateReturnPageP
               </div>
             </section>
           </section>
+    </>
+  );
+
+  if (isFullPage) {
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div className="mx-auto w-full max-w-[1380px] px-4 py-2 sm:px-5">
+          {inner}
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main style={{ background: "var(--store-footer-bg)" }}>
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]" style={{ borderColor: "var(--store-footer-border)" }}>
+          {inner}
         </div>
       </section>
     </main>

@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getStoreBrandName } from "@/lib/store-brand";
+import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
 const fallbackTrustBottom = [
   { title: "Snabb hjälp", text: "Vi svarar snabbt och löser ditt ärende effektivt." },
@@ -64,6 +67,11 @@ export default async function KundservicePage() {
   const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
   const cms = await getPublishedPageContent("kundservice", { blocks: fallbackBlocks });
   const brandName = await getStoreBrandName();
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const settings = tenant ? await getTenantSettings(tenant) : null;
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isSport = themeKey === "sport";
   const fallbackContactCards = [
     {
       title: "Livechat",
@@ -113,6 +121,101 @@ export default async function KundservicePage() {
     faqItems.slice(0, Math.ceil(faqItems.length / 2)),
     faqItems.slice(Math.ceil(faqItems.length / 2)),
   ];
+
+  if (isSport) {
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div style={{ background: "var(--store-header-gradient)" }}>
+          <StorefrontHeader activeNav="Kundservice" cartCount={3} brandName={brandName} />
+          <SportPageHero
+            eyebrow={getCmsBlockField(cms.blocks, "hero", "eyebrow", "Support")}
+            title={getCmsBlockField(cms.blocks, "hero", "title", "Vi har\ndin rygg.")}
+            description={getCmsBlockField(cms.blocks, "hero", "description", "Frågor om order, leverans eller retur? Vårt team löser det snabbt — så du kan fokusera på träningen.")}
+          />
+        </div>
+
+        {/* Kontaktkort */}
+        <section className="w-full px-6 py-12 lg:px-10">
+          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">Kontakt</p>
+          <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
+            {getCmsBlockField(cms.blocks, "contact", "title", "Hör av dig")}
+          </h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {contactCards.map((card) => (
+              <article key={card.title} className="border-2 border-[#0a0f08] bg-white p-5">
+                <p className="text-lg font-black uppercase tracking-[-0.01em] text-[#0a0f08]">{card.title}</p>
+                <p className="mt-2 whitespace-pre-line text-sm font-medium text-[#0a0f08]/70">{card.text}</p>
+                {card.action ? (
+                  <button
+                    type="button"
+                    data-live-chat-trigger={card.title === "Livechat" ? "true" : undefined}
+                    className="mt-4 bg-[#b3ff00] px-4 py-2 text-[11px] font-black uppercase tracking-[0.15em] text-[#0a0f08] transition hover:bg-[#9fe600]"
+                  >
+                    {card.action}
+                  </button>
+                ) : null}
+                {card.footer ? <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0a0f08]/45">{card.footer}</p> : null}
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="w-full bg-[#0a0f08] px-6 py-12 text-white lg:px-10">
+          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#b3ff00]">FAQ</p>
+          <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] lg:text-4xl">
+            {getCmsBlockField(cms.blocks, "faq", "title", "Vanliga frågor")}
+          </h2>
+          <div className="mt-6 grid gap-3 md:grid-cols-2">
+            {faqColumns.map((items, colIdx) => (
+              <div key={`faq-col-${colIdx}`} className="space-y-3">
+                {items.map((item) => (
+                  <details key={item.question} className="group border border-white/15 bg-white/5">
+                    <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-bold text-white">
+                      <span>{item.question}</span>
+                      <span className="text-[#b3ff00] transition group-open:rotate-45 text-lg leading-none">+</span>
+                    </summary>
+                    <p className="border-t border-white/10 px-4 py-3 text-sm font-medium text-white/60">{item.answer}</p>
+                  </details>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Retur-CTA */}
+        <section className="w-full px-6 py-12 lg:px-10">
+          <div className="flex flex-col items-start justify-between gap-5 border-2 border-[#0a0f08] bg-[#b3ff00] p-7 md:flex-row md:items-center">
+            <div>
+              <p className="text-2xl font-black uppercase tracking-[-0.02em] text-[#0a0f08]">
+                {getCmsBlockField(cms.blocks, "returnsCta", "title", "30 dagars öppet köp")}
+              </p>
+              <p className="mt-1 text-sm font-medium text-[#0a0f08]/70">
+                {getCmsBlockField(cms.blocks, "returnsCta", "text", "Inte nöjd? Inga problem. Enkel retur, alltid.")}
+              </p>
+            </div>
+            <Link
+              href={getCmsBlockField(cms.blocks, "returnsCta", "buttonHref", "/returer-aterbetalningar")}
+              className="inline-flex items-center gap-2 bg-[#0a0f08] px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white transition hover:bg-[#1a2113]"
+            >
+              {getCmsBlockField(cms.blocks, "returnsCta", "buttonLabel", "Till returer")}
+              <ArrowRightIcon />
+            </Link>
+          </div>
+        </section>
+
+        {/* Trust strip */}
+        <section className="grid w-full border-t border-[#dce9cf] sm:grid-cols-2 lg:grid-cols-4">
+          {trustBottom.map((item) => (
+            <article key={item.title} className="flex min-h-[88px] flex-col justify-center border-b border-[#dce9cf] bg-[#eef5e7] px-6 py-4 lg:border-b-0 lg:border-l lg:first:border-l-0">
+              <p className="text-sm font-black uppercase tracking-[-0.01em] text-[#0a0f08]">{item.title}</p>
+              <p className="mt-1 text-xs font-medium text-[#0a0f08]/60">{item.text}</p>
+            </article>
+          ))}
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="bg-[#f6f3ee]">

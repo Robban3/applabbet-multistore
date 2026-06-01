@@ -220,6 +220,52 @@ export function CatalogResultsGrid({
     return map[normalized] || "#111827";
   }
 
+  if (isSport) {
+    // Nike-stil: vit bakgrund, ramlöst kort, fyrkantig ljusgrå bildyta,
+    // fet svart namn, grå kategori, svart pris. Hover-zoom på bild.
+    return (
+      <div className="grid gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <article key={product.id} className="group flex flex-col">
+            <Link href={`/products/${product.slug}`} className="block">
+              <div className="relative aspect-square overflow-hidden bg-[#f5f5f5]">
+                {product.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={product.image_url}
+                    alt={product.title}
+                    className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                  />
+                ) : null}
+                <FavoriteToggle
+                  productId={product.id}
+                  initialFavorited={favoriteIds.has(product.id)}
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#111] shadow-sm transition hover:bg-[#f5f5f5]"
+                />
+                {badgeLabel ? (
+                  <span className="absolute left-3 top-3 text-[13px] font-medium text-[#f5402c]">
+                    {badgeLabel}
+                  </span>
+                ) : null}
+              </div>
+            </Link>
+            <div className="mt-3">
+              <Link href={`/products/${product.slug}`}>
+                <p className="text-[15px] font-medium text-[#111]">{product.title}</p>
+              </Link>
+              <p className="mt-0.5 text-[15px] text-[#757575]">
+                {product.brand?.trim() || (product.description ? product.description.split("—")[0]?.trim() : "")}
+              </p>
+              <p className="mt-1.5 text-[15px] font-medium text-[#111]">
+                {formatMinorPrice(product.price_minor, product.currency)}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
   if (isLuxury) {
     return (
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -227,6 +273,10 @@ export function CatalogResultsGrid({
           <article key={product.id} className="group">
             <Link href={`/products/${product.slug}`} className="block">
               <div className="relative overflow-hidden bg-[#F5F0E8]" style={{ aspectRatio: "3/4" }}>
+                {product.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                ) : null}
                 <FavoriteToggle productId={product.id} initialFavorited={favoriteIds.has(product.id)} className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center bg-white/80 backdrop-blur-sm transition hover:bg-white" />
                 {badgeLabel ? (
                   <span className="absolute left-3 top-3 bg-[#C41E3A] px-2.5 py-1 text-[9px] font-light tracking-[0.25em] uppercase text-white">{badgeLabel}</span>
@@ -281,6 +331,10 @@ export function CatalogResultsGrid({
                       : "bg-[image:var(--store-media-gradient)]"
               }`}
             >
+              {product.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={product.image_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+              ) : null}
               <FavoriteToggle
                 productId={product.id}
                 initialFavorited={favoriteIds.has(product.id)}

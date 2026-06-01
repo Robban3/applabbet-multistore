@@ -2,56 +2,57 @@ import type { StorefrontThemeConfig } from '../types';
 
 export const fashionThemeConfig: StorefrontThemeConfig = {
   key: 'fashion',
-  categoriesTitle: 'Upptäck våra kollektioner',
-  bestSellersTitle: 'Bästsäljare',
-  brandsTitle: 'Betrodd av tusentals nöjda kunder',
+  categoriesTitle: 'New In',
+  bestSellersTitle: 'Bestsellers',
+  brandsTitle: 'A timeless approach to dressing',
   hero: {
-    title: 'Klä dig med självförtroende.',
-    description: 'Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil.'
+    title: 'The new\nessentials.',
+    description: 'A modern wardrobe — designed to last, made to be worn.'
   },
   navItems: [
     { label: 'Hem', href: '/' },
-    { label: 'Herr', href: '/products?category=herr' },
-    { label: 'Dam', href: '/products?category=dam' },
-    { label: 'Ytterkläder', href: '/products?category=ytterklader' },
-    { label: 'Nyheter', href: '/nyheter' },
-    { label: 'Varumärken', href: '/products?sort=relevance' }
+    { label: 'New In', href: '/nyheter' },
+    { label: 'Kollektioner', href: '/products' },
+    { label: 'Bästsäljare', href: '/bastsaljare' },
+    { label: 'Om oss', href: '/om-oss' },
+    { label: 'Kundservice', href: '/kundservice' }
   ],
+  // Matchar fashion-demo tenantens DB-kategorier exakt (case-insensitive)
   categoryCards: [
-    { title: 'Herr', accent: 'from-[#2f2922]' },
-    { title: 'Dam', accent: 'from-[#3a332b]' },
-    { title: 'Ytterkläder', accent: 'from-[#2a241f]' },
-    { title: 'Tröjor', accent: 'from-[#383027]' },
-    { title: 'Byxor & Jeans', accent: 'from-[#2f2922]' },
-    { title: 'Accessoarer', accent: 'from-[#2b2520]' }
+    { title: 'Klänningar',  accent: 'from-[#FAF9F6]', imageUrl: '/images/fashion-categories/fashion-klanningar.svg' },
+    { title: 'Tröjor',      accent: 'from-[#F5F1EA]', imageUrl: '/images/fashion-categories/fashion-trojor.svg' },
+    { title: 'Byxor',       accent: 'from-[#F0EAE0]', imageUrl: '/images/fashion-categories/fashion-byxor.svg' },
+    { title: 'Ytterkläder', accent: 'from-[#EDE7DC]', imageUrl: '/images/fashion-categories/fashion-ytterklader.svg' },
+    { title: 'Skjortor',    accent: 'from-[#F5F0E8]', imageUrl: '/images/fashion-categories/fashion-skjortor.svg' },
+    { title: 'Accessoarer', accent: 'from-[#F5F1EA]', imageUrl: '/images/fashion-categories/fashion-accessoarer.svg' }
   ],
   trustCards: [
-    { title: 'Fri frakt', text: 'Vid köp över 499 kr', icon: 'truck' },
-    { title: '30 dagars öppet köp', text: 'Enkelt & smidigt', icon: 'shield' },
-    { title: 'Premium kvalitet', text: 'Noggrant utvalt sortiment', icon: 'star' },
-    { title: 'Säkra betalningar', text: 'Tryggt & säkert', icon: 'headset' }
+    { title: 'Fri frakt',         text: 'Vid köp över 999 kr',  icon: 'truck' },
+    { title: '30 dagars retur',   text: 'Smidigt & kostnadsfritt', icon: 'shield' },
+    { title: 'Premium material',  text: 'Noggrant utvalt',       icon: 'star' },
+    { title: 'Personlig service', text: 'Vi finns här för dig',  icon: 'headset' }
   ],
-  brandLogos: ['BOSS', 'ZARA', "LEVI'S", 'J.LINDEBERG', 'CALVIN KLEIN', 'NIKE', 'ARKET'],
+  brandLogos: ['FILIPPA K', 'TOTEME', 'ACNE', 'COS', 'GANNI', 'AMI'],
   valueCards: [
     {
-      title: 'Hållbart i fokus',
-      text: 'Vi väljer material och samarbeten med omtanke om miljön.'
+      title: 'Made to last',
+      text: 'Plagg utformade med tidlös design för att bli en del av din garderob i många år.'
     },
     {
-      title: 'Kundservice i världsklass',
-      text: 'Vi finns här för dig - snabbt, personligt och engagerat.'
+      title: 'Considered materials',
+      text: 'Vi väljer material och tillverkningsmetoder med omtanke om miljön.'
     },
     {
-      title: 'Enkla returer',
-      text: '30 dagars öppet köp och smidiga returer.'
+      title: 'Quiet luxury',
+      text: 'Subtila detaljer och premium-finish — utan att skrika om det.'
     }
   ],
   products: [
-    { title: 'Iconic Bomber Jacket', priceMinor: 149700, currency: 'SEK' },
-    { title: 'Luxe Merino Sweater', priceMinor: 69900, currency: 'SEK' },
-    { title: 'Slim Fit Jeans', priceMinor: 79900, currency: 'SEK' },
-    { title: 'Essential Hoodie', priceMinor: 59900, currency: 'SEK' },
-    { title: 'Wool Blend Coat', priceMinor: 229900, currency: 'SEK' },
-    { title: 'Classic Sunglasses', priceMinor: 39900, currency: 'SEK' }
+    { title: 'Silk Slip Dress',        priceMinor: 339000, currency: 'SEK' },
+    { title: 'Cashmere Crew Neck',     priceMinor: 199000, currency: 'SEK' },
+    { title: 'Tailored Wide Trousers', priceMinor: 219000, currency: 'SEK' },
+    { title: 'Wool Coat Classic',      priceMinor: 549000, currency: 'SEK' },
+    { title: 'Poplin Shirt White',     priceMinor:  99000, currency: 'SEK' },
+    { title: 'Leather Tote Mini',      priceMinor: 389000, currency: 'SEK' }
   ]
 };

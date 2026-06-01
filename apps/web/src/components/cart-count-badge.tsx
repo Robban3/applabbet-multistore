@@ -25,8 +25,13 @@ export function CartCountBadge({ initialCount = 0 }: CartCountBadgeProps) {
     };
   }, []);
 
+  if (count === 0) return null;
+
   return (
-    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#c8a164] px-1 text-[10px] font-semibold text-slate-900">
+    <span
+      suppressHydrationWarning
+      className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[color:var(--store-accent)] px-1 text-[10px] font-semibold text-[color:var(--store-accent-fg)]"
+    >
       {count}
     </span>
   );

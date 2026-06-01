@@ -341,7 +341,7 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
                 <div>
                   <h3 className="text-4xl font-semibold tracking-tight">Tack för att du handlar hos oss!</h3>
                   <p className="mt-1 text-sm text-white/75">Som tack får du 100 bonuspoäng till ditt konto när din order är levererad.</p>
-                  <Link href="/mina-sidor" className="mt-3 inline-flex rounded-md bg-[color:var(--store-accent)] px-4 py-2 text-sm font-semibold text-slate-900">Till mina sidor</Link>
+                  <Link href="/mina-sidor" className="mt-3 inline-flex rounded-md bg-[color:var(--store-accent)] px-4 py-2 text-sm font-semibold text-[color:var(--store-accent-fg)]">Till mina sidor</Link>
                 </div>
                 {bottomHighlights.map((item) => (
                   <article key={item.title} className="flex min-h-[78px] items-center gap-3 border-l border-white/15 pl-4">

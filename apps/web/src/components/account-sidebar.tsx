@@ -52,14 +52,14 @@ async function getDefaultSidebarItems() {
   const tenant = await resolveTenantByHost(host);
   if (!tenant) return accountSidebarItems;
   const settings = await getTenantSettings(tenant);
-  return buildAccountSidebarItems(settings.loyalty_program_enabled ?? false);
+  return buildAccountSidebarItems(settings?.loyalty_program_enabled ?? false);
 }
 
 export async function AccountSidebar({ activeHref, withIcons = false, items }: AccountSidebarProps) {
   const resolvedItems = items ?? (await getDefaultSidebarItems());
 
   return (
-    <aside className="space-y-1 rounded-xl border bg-white p-3" style={{ borderColor: "var(--store-card-border)" }}>
+    <aside data-account-sidebar className="space-y-1 rounded-xl border bg-white p-3" style={{ borderColor: "var(--store-card-border)" }}>
       {resolvedItems.map((item) => {
         const isLogout = item.href === "/mina-sidor/logga-ut";
         const isActive = item.href === activeHref;

@@ -41,7 +41,7 @@ function buildReturnId(orderId: string) {
 
 function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.2">
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="white" strokeWidth="2.2">
       <path d="m5 12 4 4 10-10" />
     </svg>
   );
@@ -216,7 +216,7 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
                 </Link>
                 <span className="mx-1">›</span>
-                <Link href={`/returer-aterbetalningar/skapa-retur/registrera/steg-5?account=1&orderId=${encodeURIComponent(orderId)}`} className="text-[#d7ad62]">
+                <Link href={`/returer-aterbetalningar/skapa-retur/registrera/steg-5?account=1&orderId=${encodeURIComponent(orderId)}`} className="text-[color:var(--store-accent)]">
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbStep5Label", "Steg 5")}
                 </Link>
               </p>
@@ -231,7 +231,7 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
               <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[#c8a164]/40 bg-[#231b13]/60" />
+              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
             </div>
           </section>
 
@@ -244,13 +244,13 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
                       idx < (isCompleted ? 5 : 4)
                         ? "bg-black text-white"
                         : idx === (isCompleted ? 5 : 4)
-                          ? "bg-[#d7ad62] text-slate-900"
-                          : "bg-[#f2eee7] text-slate-900"
+                          ? "bg-[#16a34a] text-white"
+                          : "border-2 border-slate-200 bg-white text-slate-400"
                     }`}
                   >
                     {idx < (isCompleted ? 5 : 4) ? <CheckIcon /> : idx + 1}
                   </span>
-                  <p className={`mt-2 text-sm font-semibold ${idx === (isCompleted ? 5 : 4) ? "text-[#d39d3d]" : "text-slate-700"}`}>{step}</p>
+                  <p className={`mt-2 text-sm font-semibold ${idx === (isCompleted ? 5 : 4) ? "text-[color:var(--store-accent)]" : "text-slate-700"}`}>{step}</p>
                 </article>
               ))}
             </div>
@@ -333,7 +333,7 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
                   </Link>
                   <Link
                     href={getCmsBlockField(cms.blocks, "flowStep6", "doneHref", "/returer-aterbetalningar?account=1")}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]"
+                    className="inline-flex items-center gap-2 rounded-full bg-[color:var(--store-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--store-accent-fg)] hover:bg-[color:var(--store-accent)]"
                   >
                     {getCmsBlockField(cms.blocks, "flowStep6", "doneLabel", "Klart")}
                     <ArrowRightIcon />
@@ -423,7 +423,7 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
               </div>
 
               <label className="flex items-center gap-2 rounded-md border border-[#ece5d9] bg-white px-3 py-2 text-sm">
-                <input type="checkbox" name="accept_terms" className="h-4 w-4 accent-[#d7ad62]" />
+                <input type="checkbox" name="accept_terms" className="h-4 w-4 accent-[var(--store-accent)]" />
                 <span>
                   {getCmsBlockField(cms.blocks, "flowStep5", "termsLabel", "Jag har läst och godkänner villkoren för retur")}{" "}
                   <Link href="/kopvillkor" className="font-semibold underline underline-offset-2">
@@ -443,7 +443,7 @@ export default async function ReturnStepFivePage({ searchParams }: ReturnStepFiv
                   </svg>
                   {getCmsBlockField(cms.blocks, "flowStep5", "backButtonLabel", "Tillbaka till steg 4")}
                 </Link>
-                <button className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]">
+                <button className="inline-flex items-center gap-2 rounded-full bg-[color:var(--store-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--store-accent-fg)] hover:bg-[color:var(--store-accent)]">
                   {getCmsBlockField(cms.blocks, "flowStep5", "submitButtonLabel", "Skicka in retur")}
                   <ArrowRightIcon />
                 </button>

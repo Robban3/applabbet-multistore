@@ -25,8 +25,8 @@ export function LuxuryHero({
           {eyebrow}
         </p>
 
-        <h1 className="mt-6 whitespace-pre-line font-light leading-[1.08] text-white"
-          style={{ fontSize: "clamp(48px, 5vw, 80px)", letterSpacing: "-0.02em" }}>
+        <h1 className="mt-6 whitespace-pre-line leading-[1.05] text-white"
+          style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontSize: "clamp(52px, 5.5vw, 90px)", fontWeight: 300, letterSpacing: "0.01em", fontStyle: "italic" }}>
           {title}
         </h1>
 

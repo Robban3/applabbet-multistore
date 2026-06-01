@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CartCountBadge } from "@/components/cart-count-badge";
 import { TopTrustStrip } from "@/components/top-trust-strip";
 import { LuxuryHeader } from "@/components/storefront/luxury/luxury-header";
+import { SportHeader } from "@/components/storefront/sport/sport-header";
 import {
   defaultNavigationMenu,
   defaultTrustBadges,
@@ -11,6 +12,9 @@ import {
   type TrustBadge,
 } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getStoreBrandName } from "@/lib/store-brand";
+import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type StorefrontHeaderProps = {
   activeNav?: string;
@@ -27,13 +31,17 @@ export async function StorefrontHeader({
   cartCount = 0,
   showAccountLabel = false,
   searchActive = false,
-  brandName = "APPLABBET",
+  brandName: brandNameProp,
   trustBadges,
   trustStripSize = "default",
 }: StorefrontHeaderProps) {
   let topTrust = trustBadges || defaultTrustBadges;
   let navItems: NavigationMenuItem[] = defaultNavigationMenu;
   let themeKey = "classic";
+  let brandName = brandNameProp ?? await getStoreBrandName();
+  // Nav-länkar hämtas från temats storefront-config så att alla undersidor
+  // matchar startsidan exakt (samma källa). Faller tillbaka på DB-menyn.
+  let configNav: { label: string; href: string }[] | null = null;
 
   if (!trustBadges) {
     const host = await getCurrentHost();
@@ -43,15 +51,25 @@ export async function StorefrontHeader({
       topTrust = settings?.trust_badges || defaultTrustBadges;
       navItems = settings?.navigation_menu || defaultNavigationMenu;
       themeKey = normalizeThemeKey(settings?.theme_key);
+      configNav = getStorefrontConfig(themeKey).navItems;
     }
   }
 
   const normalizeNavHref = (href: string) =>
     href === "/products?sort=bestsellers" ? "/bastsaljare" : href;
 
-  const links = navItems
-    .filter((item) => item.enabled)
+  const links = (configNav ?? navItems.filter((item) => item.enabled))
     .map((item) => ({ label: item.label, href: normalizeNavHref(item.href) }));
+
+  // Inloggningsstatus → utility-bar visar "Mina sidor" istället för "Logga in"
+  let isLoggedIn = false;
+  try {
+    const sb = await createSupabaseServerClient();
+    const { data } = await sb.auth.getUser();
+    isLoggedIn = Boolean(data.user);
+  } catch {
+    isLoggedIn = false;
+  }
 
   // ── Luxury-tema: eget header ──────────────────────────────────
   if (themeKey === "luxury") {
@@ -61,8 +79,22 @@ export async function StorefrontHeader({
           brandName={brandName}
           links={links}
           cartInitialCount={cartCount}
+          activeNav={activeNav}
         />
       </div>
+    );
+  }
+
+  // ── Sport-tema: eget header ───────────────────────────────────
+  if (themeKey === "sport") {
+    return (
+      <SportHeader
+        brandName={brandName}
+        links={links}
+        cartInitialCount={cartCount}
+        activeNav={activeNav}
+        isLoggedIn={isLoggedIn}
+      />
     );
   }
 

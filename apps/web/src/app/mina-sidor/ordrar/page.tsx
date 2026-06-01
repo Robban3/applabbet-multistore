@@ -7,6 +7,7 @@ import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatMinorPrice } from "@/lib/format";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
 type OrderTab = "alla" | "pagaende" | "levererade" | "returnerade";
 
@@ -168,6 +169,102 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
     const matchesQuery = !q || haystack.includes(q.toLowerCase());
     return matchesTab && matchesQuery;
   });
+
+  // Tema-detektering. Sport renderar utan boxad shell — layouten ger header + tabs.
+  const settings = await getTenantSettings(tenant);
+  const isSport = normalizeThemeKey(settings?.theme_key) === "sport";
+
+  if (isSport) {
+    const statusPill = (status: string) =>
+      status === "Skickad"
+        ? "bg-[#dbeafe] text-[#1d4ed8]"
+        : status === "Returnerad"
+          ? "bg-[#f5f5f5] text-[#111]"
+          : "bg-[#dcfce7] text-[#166534]";
+
+    const tabs: Array<{ key: OrderTab; label: string }> = [
+      { key: "alla", label: "Alla" },
+      { key: "pagaende", label: "Pågående" },
+      { key: "levererade", label: "Levererade" },
+      { key: "returnerade", label: "Returnerade" },
+    ];
+
+    return (
+      <section className="bg-white px-6 py-10 lg:px-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[12px] text-[#757575]">Konto · Mina ordrar</p>
+            <h1 className="mt-1 text-[28px] font-medium text-[#111] lg:text-[36px]">
+              {getCmsBlockField(cms.blocks, "hero", "title", "Mina ordrar")}
+            </h1>
+            <p className="mt-1 text-[14px] text-[#757575]">
+              {getCmsBlockField(cms.blocks, "hero", "subtitle", "Här ser du alla dina ordrar och deras status.")}
+            </p>
+          </div>
+          <form method="GET" action="/mina-sidor/ordrar" className="flex items-center gap-2">
+            {activeTab !== "alla" ? <input type="hidden" name="tab" value={activeTab} /> : null}
+            <label className="inline-flex items-center gap-2 rounded-full border border-[#e5e5e5] px-4 py-2 text-[14px] text-[#111]">
+              <SearchIcon />
+              <input
+                name="q"
+                defaultValue={q}
+                placeholder="Sök ordrar"
+                className="w-48 outline-none"
+              />
+            </label>
+          </form>
+        </div>
+
+        {/* Status-tabs (separat sub-nav under heading) */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          {tabs.map((t) => {
+            const active = activeTab === t.key;
+            return (
+              <Link
+                key={t.key}
+                href={createOrdersQuery("/mina-sidor/ordrar", t.key, q)}
+                className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-medium transition ${
+                  active ? "bg-[#111] text-white" : "border border-[#e5e5e5] text-[#111] hover:bg-[#f5f5f5]"
+                }`}
+              >
+                {t.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Orderlista */}
+        <div className="mt-8 divide-y divide-[#e5e5e5]">
+          {filteredOrders.map((order) => (
+            <article key={order.id} className="grid grid-cols-[110px_1fr_auto] gap-5 py-6 sm:grid-cols-[110px_1fr_auto_auto]">
+              <div className="aspect-square w-[110px] bg-[#f5f5f5]" />
+              <div>
+                <p className="text-[13px] text-[#757575]">Order {order.id} · Lagd {order.date}</p>
+                <p className="mt-1 text-[15px] font-medium text-[#111]">{order.title}</p>
+                <p className="mt-0.5 text-[13px] text-[#757575]">{order.quantity} st</p>
+                <span className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-[12px] font-medium ${statusPill(order.status)}`}>
+                  {order.status}
+                </span>
+                {order.note ? <p className="mt-2 text-[12px] text-[#757575]">{order.note}</p> : null}
+              </div>
+              <p className="hidden text-right text-[15px] font-medium text-[#111] sm:block">{order.price}</p>
+              <Link
+                href={`/mina-sidor/ordrar?tab=${activeTab}&id=${order.id}`}
+                className="inline-flex h-9 items-center rounded-full border border-[#111] px-4 text-[13px] font-medium text-[#111] transition hover:bg-[#f5f5f5]"
+              >
+                {order.action}
+              </Link>
+            </article>
+          ))}
+          {filteredOrders.length === 0 ? (
+            <p className="py-10 text-center text-[14px] text-[#757575]">
+              {getCmsBlockField(cms.blocks, "orders", "emptyState", "Inga ordrar matchar ditt filter.")}
+            </p>
+          ) : null}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <main style={{ background: "var(--store-footer-bg)" }}>

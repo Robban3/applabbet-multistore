@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { requireAdminAccess } from "@/lib/admin-access";
 import { normalizeLoyaltyProgramEnabled, normalizeThemeKey } from "@/lib/tenant-settings";
+import { AdminThemePicker } from "@/components/admin-theme-picker";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -175,21 +176,10 @@ export default async function AdminSiteSettingsPage() {
               />
             </label>
             {themeAllowed ? (
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-slate-700">Tema / skal</span>
-                <select
-                  name="theme_key"
-                  defaultValue={normalizeThemeKey(data?.theme_key)}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                >
-                  <option value="classic">Classic</option>
-                  <option value="sport">Sport</option>
-                  <option value="fashion">Klädbutik</option>
-                  <option value="beauty">Skönhet</option>
-                  <option value="electronics">Elektronik</option>
-                  <option value="minimal">Minimal</option>
-                </select>
-              </label>
+              <div>
+                <span className="mb-2 block text-sm font-medium text-slate-700">Tema / skal</span>
+                <AdminThemePicker currentTheme={normalizeThemeKey(data?.theme_key)} />
+              </div>
             ) : (
               <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
                 Tema hanteras internt av butikbyggaren.

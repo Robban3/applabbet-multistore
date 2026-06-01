@@ -2,9 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
 
 const fallbackSteps = [
@@ -133,6 +136,133 @@ export default async function ReturerAterbetalningarPage({ searchParams }: Retur
     if (!user) {
       redirect("/konto/login?next=/returer-aterbetalningar%3Faccount%3D1");
     }
+  }
+
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const settings = tenant ? await getTenantSettings(tenant) : null;
+  const isSport = normalizeThemeKey(settings?.theme_key) === "sport";
+
+  if (isSport) {
+    const sportInner = (
+      <>
+        {/* Steg */}
+        <section className="w-full px-6 py-12 lg:px-10">
+          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">Process</p>
+          <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
+            {getCmsBlockField(cms.blocks, "sections", "howItWorksTitle", "Så funkar en retur")}
+          </h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-5">
+            {steps.map((step, idx) => (
+              <article key={step.title} className="border-2 border-[#0a0f08] bg-white p-5">
+                <span className="flex h-9 w-9 items-center justify-center bg-[#b3ff00] text-sm font-black text-[#0a0f08]">{idx + 1}</span>
+                <p className="mt-3 text-base font-black uppercase tracking-[-0.01em] text-[#0a0f08]">{step.title}</p>
+                <p className="mt-1 text-[13px] font-medium text-[#0a0f08]/60">{step.text}</p>
+              </article>
+            ))}
+          </div>
+          {accountView ? (
+            <Link
+              href={getCmsBlockField(cms.blocks, "steps", "createReturnHref", "/returer-aterbetalningar/skapa-retur?account=1")}
+              className="mt-6 inline-flex items-center gap-2 bg-[#0a0f08] px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white transition hover:bg-[#1a2113]"
+            >
+              {getCmsBlockField(cms.blocks, "steps", "createReturnLabel", "Skapa din retur")}
+              <ArrowRightIcon />
+            </Link>
+          ) : null}
+        </section>
+
+        {/* Öppet köp + Återbetalning */}
+        <section className="w-full bg-[#0a0f08] px-6 py-12 text-white lg:px-10">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <article className="border-2 border-[#b3ff00] bg-white/5 p-6">
+              <h3 className="text-xl font-black uppercase tracking-[-0.01em] text-[#b3ff00]">
+                {getCmsBlockField(cms.blocks, "cards", "returnsTitle", "30 dagars öppet köp")}
+              </h3>
+              <p className="mt-2 text-[13px] font-medium text-white/60">
+                {getCmsBlockField(cms.blocks, "cards", "returnsText", "Du har alltid 30 dagars öppet köp från den dag du mottagit din vara.")}
+              </p>
+              <ul className="mt-4 space-y-2 text-[13px] font-medium text-white/80">
+                <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem1", "Varan är i originalskick")}</li>
+                <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem2", "Alla lappar och originalförpackning finns med")}</li>
+                <li className="flex items-center gap-2"><span className="text-[#b3ff00]">▸</span>{getCmsBlockField(cms.blocks, "cards", "returnsItem3", "Returkostnad: 49 kr")}</li>
+              </ul>
+              <Link
+                href={getCmsBlockField(cms.blocks, "cards", "returnsButtonHref", "/returer-aterbetalningar/skapa-retur?account=1")}
+                className="mt-5 inline-flex items-center gap-2 bg-[#b3ff00] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.15em] text-[#0a0f08] transition hover:bg-[#9fe600]"
+              >
+                {getCmsBlockField(cms.blocks, "cards", "returnsButtonLabel", "Skapa en retur")}
+                <ArrowRightIcon />
+              </Link>
+            </article>
+            <article className="border-2 border-white/15 bg-white/5 p-6">
+              <h3 className="text-xl font-black uppercase tracking-[-0.01em] text-white">
+                {getCmsBlockField(cms.blocks, "cards", "refundsTitle", "Återbetalningar")}
+              </h3>
+              <p className="mt-2 text-[13px] font-medium text-white/60">
+                {getCmsBlockField(cms.blocks, "cards", "refundsText", "När vi mottagit och godkänt din retur återbetalas beloppet till samma betalningsmetod.")}
+              </p>
+              {refundRows.length > 0 ? (
+                <div className="mt-4 space-y-2 text-[13px]">
+                  {refundRows.map((row, index) => (
+                    <div key={`${row.label}-${index}`} className="flex items-center justify-between border-b border-white/10 pb-1 font-medium text-white/80">
+                      <span>{row.label}</span>
+                      <span className="text-[#b3ff00]">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </article>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        {faqItems.length > 0 ? (
+          <section className="w-full px-6 py-12 lg:px-10">
+            <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">FAQ</p>
+            <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
+              {getCmsBlockField(cms.blocks, "sections", "faqTitle", "Vanliga frågor")}
+            </h2>
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {faqColumns.map((items, colIdx) => (
+                <div key={`faq-col-${colIdx}`} className="space-y-3">
+                  {items.map((item) => (
+                    <details key={item.question} className="group border-2 border-[#0a0f08] bg-white">
+                      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-bold text-[#0a0f08]">
+                        <span>{item.question}</span>
+                        <span className="text-[#4a7c00] text-lg leading-none transition group-open:rotate-45">+</span>
+                      </summary>
+                      <p className="border-t-2 border-[#0a0f08] px-4 py-3 text-[13px] font-medium text-[#0a0f08]/60">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </>
+    );
+
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div style={{ background: "var(--store-header-gradient)" }}>
+          <StorefrontHeader activeNav="Kundservice" cartCount={0} />
+          <SportPageHero
+            eyebrow="Returer"
+            title={getCmsBlockField(cms.blocks, "hero", "title", "Enkelt\natt ångra.")}
+            description={getCmsBlockField(cms.blocks, "hero", "description", "Inte rätt passform? 30 dagars öppet köp och smidig retur — inga krångel.")}
+          />
+        </div>
+        {accountView ? (
+          <div className="mx-auto grid w-full max-w-[1380px] gap-6 px-6 py-8 lg:grid-cols-[230px_1fr] lg:px-10">
+            <AccountSidebar activeHref="/returer-aterbetalningar?account=1" />
+            <div>{sportInner}</div>
+          </div>
+        ) : (
+          sportInner
+        )}
+      </main>
+    );
   }
 
   const content = (

@@ -1,73 +1,27 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { readDevThemeOverride } from "@/lib/dev-theme-override";
 import type { StorefrontThemeKey } from "@/lib/themes/types";
 import type { Tenant } from "@/types/commerce";
 
-export type PaymentMethods = {
-  stripe: boolean;
-  klarna: boolean;
-  swish: boolean;
-};
+// Delade typer + konstanter (client-safe). Re-exporteras för bakåtkompat —
+// klient-kod KAN importera direkt från shared-filen för minsta bundle.
+import {
+  defaultTrustBadges,
+  defaultNavigationMenu,
+  type PaymentMethods,
+  type NavigationMenuItem,
+  type TrustBadge,
+  type TenantSettings,
+} from "@/lib/tenant-settings-shared";
 
-export type NavigationMenuItem = {
-  label: string;
-  href: string;
-  slug: string;
-  order: number;
-  enabled: boolean;
-};
-
-export type TrustBadge = {
-  title: string;
-  text: string;
-  icon: "truck" | "rotate" | "shield" | "star";
-  enabled: boolean;
-};
-
-export type TenantSettings = {
-  tenant_id: string;
-  logo_url: string | null;
-  brand_name: string | null;
-  company_name: string | null;
-  org_number: string | null;
-  vat_number: string | null;
-  support_email: string | null;
-  support_phone: string | null;
-  footer_show_company_name: boolean;
-  footer_show_org_number: boolean;
-  footer_show_support_phone: boolean;
-  footer_show_support_email: boolean;
-  address_line1: string | null;
-  postal_code: string | null;
-  city: string | null;
-  country: string | null;
-  payment_methods: PaymentMethods;
-  payment_config: Record<string, string>;
-  trust_badges: TrustBadge[];
-  navigation_menu: NavigationMenuItem[];
-  loyalty_program_enabled: boolean;
-  theme_key: StorefrontThemeKey;
-};
+export { defaultTrustBadges, defaultNavigationMenu };
+export type { PaymentMethods, NavigationMenuItem, TrustBadge, TenantSettings };
 
 const defaultPaymentMethods: PaymentMethods = {
   stripe: true,
   klarna: false,
   swish: false,
 };
-
-export const defaultTrustBadges: TrustBadge[] = [
-  { title: "Fri frakt över 499 kr", text: "Snabb & spårbar leverans", icon: "truck", enabled: true },
-  { title: "30 dagars öppet köp", text: "Enkelt att returnera", icon: "rotate", enabled: true },
-  { title: "Säker betalning", text: "Tryggt & säkert", icon: "shield", enabled: true },
-];
-
-export const defaultNavigationMenu: NavigationMenuItem[] = [
-  { label: "Hem", href: "/", slug: "", order: 10, enabled: true },
-  { label: "Kategorier", href: "/products", slug: "", order: 20, enabled: true },
-  { label: "Nyheter", href: "/nyheter", slug: "", order: 30, enabled: true },
-  { label: "Bästsäljare", href: "/bastsaljare", slug: "", order: 40, enabled: true },
-  { label: "Om oss", href: "/om-oss", slug: "", order: 50, enabled: true },
-  { label: "Kundservice", href: "/kundservice", slug: "", order: 60, enabled: true },
-];
 
 export function normalizePaymentMethods(input: unknown): PaymentMethods {
   const source = typeof input === "object" && input ? (input as Record<string, unknown>) : {};
@@ -177,6 +131,12 @@ export async function getTenantSettings(tenant: Tenant): Promise<TenantSettings 
     .maybeSingle();
 
   if (!data) return null;
+  // Dev-cookie får BARA påverka utvecklingstenanten "applabbet-demo".
+  // Riktiga tenants (sport-demo / luxury-demo / classic-demo) styrs av sin egen
+  // theme_key i DB — annars skulle en användare som råkar ha dev_theme satt
+  // se "fel" tema på en riktig butik.
+  const allowDevOverride = tenant.slug === "applabbet-demo";
+  const devTheme = allowDevOverride ? await readDevThemeOverride() : null;
   return {
     ...(data as Omit<TenantSettings, "payment_methods" | "payment_config" | "trust_badges" | "loyalty_program_enabled" | "theme_key">),
     payment_methods: normalizePaymentMethods(data.payment_methods),
@@ -191,6 +151,6 @@ export async function getTenantSettings(tenant: Tenant): Promise<TenantSettings 
     trust_badges: normalizeTrustBadges(data.trust_badges),
     navigation_menu: normalizeNavigationMenu(data.navigation_menu),
     loyalty_program_enabled: normalizeLoyaltyProgramEnabled(data.loyalty_program_enabled),
-    theme_key: normalizeThemeKey(data.theme_key),
+    theme_key: devTheme ?? normalizeThemeKey(data.theme_key),
   };
 }

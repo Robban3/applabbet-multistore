@@ -1,7 +1,9 @@
 import { CmsInlineText } from "@/components/cms-inline-text";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
@@ -121,13 +123,15 @@ function BoltIcon() {
 
 export default async function OmOssPage() {
   const definition = getCmsPage("om-oss");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("om-oss", { blocks: fallbackBlocks });
   const brandName = await getStoreBrandName();
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const settings = tenant ? await getTenantSettings(tenant) : null;
-  const isLuxury = normalizeThemeKey(settings?.theme_key) === "luxury";
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isLuxury = themeKey === "luxury";
+  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
+  const fallbackBlocks = applyThemePlaceholdersToDefaults("om-oss", themeKey, rawFallback);
+  const cms = await getPublishedPageContent("om-oss", { blocks: fallbackBlocks });
   const stats = fallbackStats.map((item, index) => {
     const itemNumber = index + 1;
     return {
@@ -150,6 +154,71 @@ export default async function OmOssPage() {
     };
   });
 
+  const isSport = themeKey === "sport";
+
+  if (isSport) {
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div style={{ background: "var(--store-header-gradient)" }}>
+          <StorefrontHeader activeNav="Om oss" cartCount={0} brandName={brandName} />
+          <SportPageHero
+            eyebrow={getCmsBlockField(cms.blocks, "hero", "eyebrow", "Om oss")}
+            title={getCmsBlockField(cms.blocks, "hero", "title", "Mer än en sportbutik.\nEn drivkraft för bättre prestation.")}
+            description={getCmsBlockField(cms.blocks, "hero", "description", "Vi föddes ur en passion för träning och viljan att hjälpa dig nå din fulla potential.")}
+          />
+        </div>
+        <section className="border-b border-[#dce9cf]">
+          <div className="grid grid-cols-2 divide-x divide-[#dce9cf] lg:grid-cols-4">
+            {stats.map((stat, index) => (
+              <div key={stat.label} className="px-8 py-10 text-center">
+                <CmsInlineText as="p" blockKey="stats" fieldKey={`item${index + 1}Value`}
+                  className="text-[38px] font-black leading-none text-[#0a0f08]" value={stat.value} />
+                <CmsInlineText as="p" blockKey="stats" fieldKey={`item${index + 1}Label`}
+                  className="mt-2 text-[11px] font-bold tracking-[0.2em] uppercase text-[#0a0f08]/50" value={stat.label} />
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="px-6 py-14 lg:px-10">
+          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#b3ff00]">Vår filosofi</p>
+          <CmsInlineText as="h2" blockKey="values" fieldKey="title"
+            className="mt-3 text-[32px] font-black uppercase leading-tight text-[#0a0f08]"
+            value={getCmsBlockField(cms.blocks, "values", "title", "Det vi står för")} />
+          <div className="mt-4 h-1 w-12 bg-[#b3ff00]" />
+          <div className="mt-8 grid gap-px bg-[#dce9cf] sm:grid-cols-2">
+            {values.map((value, index) => (
+              <div key={value.title} className="bg-[#eef5e7] p-8">
+                <CmsInlineText as="h3" blockKey="values" fieldKey={`item${index + 1}Title`}
+                  className="text-[14px] font-black uppercase tracking-[0.05em] text-[#0a0f08]" value={value.title} />
+                <div className="my-3 h-0.5 w-8 bg-[#b3ff00]" />
+                <CmsInlineText as="p" blockKey="values" fieldKey={`item${index + 1}Text`}
+                  className="text-[13px] font-medium leading-relaxed text-[#0a0f08]/60" value={value.text} />
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="border-t border-[#dce9cf] px-6 py-14 lg:px-10">
+          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#b3ff00]">Teamet</p>
+          <CmsInlineText as="h2" blockKey="story" fieldKey="teamTitle"
+            className="mt-3 text-[32px] font-black uppercase leading-tight text-[#0a0f08]"
+            value={getCmsBlockField(cms.blocks, "story", "teamTitle", "Människorna bakom")} />
+          <div className="mt-4 h-1 w-12 bg-[#b3ff00]" />
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            {teamMembers.map((member, index) => (
+              <div key={member.name} className="border-t-2 border-[#b3ff00] pt-5">
+                <div className="mb-3 h-16 w-16 bg-[#dce9cf]" />
+                <CmsInlineText as="p" blockKey="story" fieldKey={`member${index + 1}Name`}
+                  className="text-[14px] font-black uppercase text-[#0a0f08]" value={member.name} />
+                <CmsInlineText as="p" blockKey="story" fieldKey={`member${index + 1}Role`}
+                  className="mt-1 text-[11px] font-bold tracking-[0.1em] uppercase text-[#0a0f08]/50" value={member.role} />
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   if (isLuxury) {
     return (
       <main style={{ background: "var(--store-footer-bg)" }}>
@@ -157,59 +226,113 @@ export default async function OmOssPage() {
           <StorefrontHeader activeNav="Om oss" cartCount={0} brandName={brandName} />
           <div className="px-8 py-20 sm:px-12 lg:px-14 border-b border-white/8">
             <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">Maison</p>
-            <h1 className="mt-4 font-light text-white" style={{ fontSize: "clamp(40px, 5vw, 72px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}>
-              {getCmsBlockField(cms.blocks, "hero", "title", `L'histoire de ${brandName}`)}
-            </h1>
+            <CmsInlineText
+              as="h1"
+              blockKey="hero"
+              fieldKey="title"
+              className="mt-4 text-white"
+              style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontSize: "clamp(44px, 5.5vw, 80px)", fontWeight: 300, fontStyle: "italic", letterSpacing: "0.01em", lineHeight: 1.05 }}
+              value={getCmsBlockField(cms.blocks, "hero", "title", `L'histoire de ${brandName}`)}
+            />
             <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
-            <p className="mt-6 max-w-[560px] text-[15px] font-light leading-relaxed text-white/55">
-              {getCmsBlockField(cms.blocks, "hero", "description", `${brandName} — en passion för det exceptionella, sedan grundandet.`)}
-            </p>
+            <CmsInlineText
+              as="p"
+              blockKey="hero"
+              fieldKey="description"
+              className="mt-6 max-w-[560px] text-[15px] font-light leading-relaxed text-white/55"
+              value={getCmsBlockField(cms.blocks, "hero", "description", `${brandName} — en passion för det exceptionella, sedan grundandet.`)}
+            />
           </div>
         </div>
 
         {/* Stats */}
         <section className="border-b border-[#EDE5DC]">
-          <div className="mx-auto grid max-w-[1380px] grid-cols-2 divide-x divide-[#EDE5DC] lg:grid-cols-4">
-            {stats.map((stat) => (
+          <div className="grid grid-cols-2 divide-x divide-[#EDE5DC] lg:grid-cols-4">
+            {stats.map((stat, index) => (
               <div key={stat.label} className="px-10 py-12 text-center">
-                <p className="font-light text-[#17120d]" style={{ fontSize: "clamp(28px, 3vw, 42px)" }}>{stat.value}</p>
-                <p className="mt-2 text-[11px] font-light tracking-[0.2em] uppercase text-[#5f4a3a]">{stat.label}</p>
+                <CmsInlineText
+                  as="p"
+                  blockKey="stats"
+                  fieldKey={`item${index + 1}Value`}
+                  className="font-light text-[#17120d]"
+                  style={{ fontSize: "clamp(28px, 3vw, 42px)" }}
+                  value={stat.value}
+                />
+                <CmsInlineText
+                  as="p"
+                  blockKey="stats"
+                  fieldKey={`item${index + 1}Label`}
+                  className="mt-2 text-[11px] font-light tracking-[0.2em] uppercase text-[#5f4a3a]"
+                  value={stat.label}
+                />
               </div>
             ))}
           </div>
         </section>
 
         {/* Värderingar */}
-        <section className="mx-auto max-w-[1380px] px-8 py-16 sm:px-12 lg:px-14">
+        <section className="px-8 py-16 sm:px-12 lg:px-14">
           <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">Nos valeurs</p>
-          <h2 className="mt-4 text-3xl font-light tracking-[-0.02em] text-[#17120d] lg:text-4xl">
-            {getCmsBlockField(cms.blocks, "values", "title", "Det vi tror på")}
-          </h2>
+          <CmsInlineText
+            as="h2"
+            blockKey="values"
+            fieldKey="title"
+            className="mt-4 text-3xl font-light tracking-[-0.02em] text-[#17120d] lg:text-4xl"
+            value={getCmsBlockField(cms.blocks, "values", "title", "Det vi tror på")}
+          />
           <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
           <div className="mt-10 grid gap-px bg-[#EDE5DC] border border-[#EDE5DC] sm:grid-cols-2">
-            {values.map((value) => (
+            {values.map((value, index) => (
               <div key={value.title} className="bg-[#FAF8F5] p-8">
-                <h3 className="text-[13px] font-light tracking-[0.05em] text-[#17120d]">{value.title}</h3>
+                <CmsInlineText
+                  as="h3"
+                  blockKey="values"
+                  fieldKey={`item${index + 1}Title`}
+                  className="text-[13px] font-light tracking-[0.05em] text-[#17120d]"
+                  value={value.title}
+                />
                 <div className="my-4 h-px w-8 bg-[#C41E3A]" />
-                <p className="text-[12px] font-light leading-relaxed text-[#5f4a3a]">{value.text}</p>
+                <CmsInlineText
+                  as="p"
+                  blockKey="values"
+                  fieldKey={`item${index + 1}Text`}
+                  className="text-[12px] font-light leading-relaxed text-[#5f4a3a]"
+                  value={value.text}
+                />
               </div>
             ))}
           </div>
         </section>
 
         {/* Team */}
-        <section className="mx-auto max-w-[1380px] border-t border-[#EDE5DC] px-8 py-16 sm:px-12 lg:px-14">
+        <section className="border-t border-[#EDE5DC] px-8 py-16 sm:px-12 lg:px-14">
           <p className="text-[10px] font-light tracking-[0.5em] text-[#C41E3A] uppercase">L'équipe</p>
-          <h2 className="mt-4 text-3xl font-light tracking-[-0.02em] text-[#17120d] lg:text-4xl">
-            {getCmsBlockField(cms.blocks, "story", "teamTitle", "Människorna bakom")}
-          </h2>
+          <CmsInlineText
+            as="h2"
+            blockKey="story"
+            fieldKey="teamTitle"
+            className="mt-4 text-3xl font-light tracking-[-0.02em] text-[#17120d] lg:text-4xl"
+            value={getCmsBlockField(cms.blocks, "story", "teamTitle", "Människorna bakom")}
+          />
           <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {teamMembers.map((member) => (
+            {teamMembers.map((member, index) => (
               <div key={member.name} className="border-t border-[#EDE5DC] pt-6">
                 <div className="mb-4 h-20 w-20 bg-[#EDE5DC]" />
-                <p className="text-[13px] font-light tracking-[0.05em] text-[#17120d]">{member.name}</p>
-                <p className="mt-1 text-[11px] font-light tracking-[0.15em] uppercase text-[#5f4a3a]">{member.role}</p>
+                <CmsInlineText
+                  as="p"
+                  blockKey="story"
+                  fieldKey={`member${index + 1}Name`}
+                  className="text-[13px] font-light tracking-[0.05em] text-[#17120d]"
+                  value={member.name}
+                />
+                <CmsInlineText
+                  as="p"
+                  blockKey="story"
+                  fieldKey={`member${index + 1}Role`}
+                  className="mt-1 text-[11px] font-light tracking-[0.15em] uppercase text-[#5f4a3a]"
+                  value={member.role}
+                />
               </div>
             ))}
           </div>
@@ -237,8 +360,8 @@ export default async function OmOssPage() {
                 as="h1"
                 blockKey="hero"
                 fieldKey="title"
-                className="max-w-[680px] text-5xl font-semibold leading-[1.06] text-slate-900 lg:text-[58px]"
-                value={getCmsBlockField(cms.blocks, "hero", "title", "Mer än en sportbutik. En drivkraft för bättre prestation.")}
+                className="max-w-[680px] whitespace-pre-line text-5xl font-semibold leading-[1.06] text-slate-900 lg:text-[58px]"
+                value={getCmsBlockField(cms.blocks, "hero", "title", "Mer än en sportbutik.\nEn drivkraft för bättre prestation.")}
               />
               <CmsInlineText
                 as="p"

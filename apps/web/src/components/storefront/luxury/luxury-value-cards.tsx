@@ -22,7 +22,7 @@ function CardIcon({ index }: { index: number }) {
 
 export function LuxuryValueCards({ cards }: { cards: ValueCard[] }) {
   return (
-    <section className="mx-auto w-full max-w-[1380px] px-8 pb-16 sm:px-12 lg:px-14">
+    <section className="w-full px-8 pb-16 sm:px-12 lg:px-14">
       <div className="grid gap-px bg-[#EDE5DC] border border-[#EDE5DC] sm:grid-cols-3">
         {cards.map((card, index) => (
           <article key={card.title} className="flex flex-col items-center bg-[#FAF8F5] px-8 py-12 text-center">

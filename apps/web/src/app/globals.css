@@ -4,6 +4,7 @@
   --background: #f8fafc;
   --foreground: #0f172a;
   --store-accent: #c8a164;
+  --store-accent-fg: #0a0a0a;
   --store-header-gradient: linear-gradient(to bottom, #100f0d, #11100f, #0c0b09);
   --store-trust-gradient: linear-gradient(to right, #0f0f0f, #181818);
   --store-footer-surface: #0f0f0f;
@@ -114,6 +115,7 @@ body:has([data-admin-layout]) [data-storefront-footer] {
 
 body[data-store-theme="sport"] {
   --store-accent: #b3ff00;
+  --store-accent-fg: #000000;
   --store-header-gradient: linear-gradient(to bottom, #0a0f08, #0c1209, #060b05);
   --store-trust-gradient: linear-gradient(to right, #0c1406, #121c08);
   --store-footer-surface: #0a0f08;
@@ -156,6 +158,7 @@ body[data-store-theme="beauty"] {
 
 body[data-store-theme="electronics"] {
   --store-accent: #2f7dff;
+  --store-accent-fg: #ffffff;
   --store-header-gradient: linear-gradient(to bottom, #060c17, #081225, #0a1831);
   --store-trust-gradient: linear-gradient(to right, #eff5ff, #e5eefc);
   --store-footer-surface: #071222;
@@ -170,6 +173,7 @@ body[data-store-theme="electronics"] {
 
 body[data-store-theme="minimal"] {
   --store-accent: #1f2937;
+  --store-accent-fg: #ffffff;
   --store-header-gradient: linear-gradient(to bottom, #1f2937, #111827, #0b1220);
   --store-trust-gradient: linear-gradient(to right, #111827, #1f2937);
   --store-footer-surface: #111827;
@@ -184,6 +188,7 @@ body[data-store-theme="minimal"] {
 
 body[data-store-theme="luxury"] {
   --store-accent: #C41E3A;
+  --store-accent-fg: #ffffff;
   --store-accent-gold: #B8963E;
   --store-header-gradient: linear-gradient(to bottom, #0c0a08, #100d0a, #0a0806);
   --store-trust-gradient: linear-gradient(to right, #0c0a08, #100d0a);
@@ -514,3 +519,286 @@ body[data-store-theme="luxury"] svg.text-emerald-500 {
   color: #C41E3A !important;
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   SPORT THEME — Global overrides (Nike-inspirerat)
+   Retemar alla delade/generiska ytor: produktdetalj, cart,
+   checkout, mina-sidor m.fl. → mörkt + lime + fet uppercase.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Bastypografi */
+body[data-store-theme="sport"] {
+  background: #f4f7f0;
+  color: #0a0f08;
+}
+
+/* Rubriker → låt komponenterna styra vikt (Nike = ren medium/bold).
+   Endast lätt tracking-justering. */
+body[data-store-theme="sport"] h1,
+body[data-store-theme="sport"] h2 {
+  letter-spacing: -0.02em;
+}
+
+/* Lätt rundade hörn (Nike-rent) — behåll piller runda */
+body[data-store-theme="sport"] .rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Kort / paneler → rena ljusa ramar (Nike använder whitespace, ej tunga ramar) */
+body[data-store-theme="sport"] .border-slate-200,
+body[data-store-theme="sport"] .border-slate-300,
+body[data-store-theme="sport"] .border-\[color\:var\(--store-card-border\)\],
+body[data-store-theme="sport"] .border-\[color\:var\(--store-footer-border\)\] {
+  border-color: #e5e5e5 !important;
+}
+
+/* Primärknappar (bg-black) → ren svart Nike-pill-känsla */
+body[data-store-theme="sport"] .bg-black {
+  background-color: #111 !important;
+}
+
+/* Accent-knappar (lime) får svart text */
+body[data-store-theme="sport"] .bg-\[color\:var\(--store-accent\)\] {
+  color: #0a0f08 !important;
+  font-weight: 700;
+}
+
+/* ── /mina-sidor/* sport: dölj gamla undersidors shell ────────
+   Layouten (mina-sidor/layout.tsx) ger header + tabs. Undersidornas
+   egna <main>, breadcrumb, AccountSidebar och boxade kort blir
+   redundanta — vi gömmer dem så bara content syns under tabsen. */
+body[data-store-theme="sport"] [data-mina-sidor-sport] > main {
+  background: #fff !important;
+  padding: 0 !important;
+}
+body[data-store-theme="sport"] [data-mina-sidor-sport] > main > section {
+  max-width: none !important;
+  padding: 0 !important;
+}
+body[data-store-theme="sport"] [data-mina-sidor-sport] > main > section > div {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+/* Dölj StorefrontHeader inuti undersidorna (layouten har en redan) */
+body[data-store-theme="sport"] [data-mina-sidor-sport] header {
+  display: none !important;
+}
+/* Dölj sidans interna AccountSidebar (tabs ovanför täcker behovet) */
+body[data-store-theme="sport"] [data-mina-sidor-sport] aside.space-y-3,
+body[data-store-theme="sport"] [data-mina-sidor-sport] [data-account-sidebar] {
+  display: none !important;
+}
+/* Single-column-layout istället för sidebar+content */
+body[data-store-theme="sport"] [data-mina-sidor-sport] .lg\:grid-cols-\[230px_1fr\],
+body[data-store-theme="sport"] [data-mina-sidor-sport] .lg\:grid-cols-\[260px_1fr\],
+body[data-store-theme="sport"] [data-mina-sidor-sport] .lg\:grid-cols-\[270px_1fr\] {
+  display: block !important;
+}
+
+/* Inputfält → rena ljusa Nike-fält */
+body[data-store-theme="sport"] input[type="text"],
+body[data-store-theme="sport"] input[type="email"],
+body[data-store-theme="sport"] input[type="password"],
+body[data-store-theme="sport"] input[type="tel"],
+body[data-store-theme="sport"] input[type="number"],
+body[data-store-theme="sport"] textarea,
+body[data-store-theme="sport"] select {
+  border-color: #e5e5e5 !important;
+}
+body[data-store-theme="sport"] input:focus,
+body[data-store-theme="sport"] textarea:focus,
+body[data-store-theme="sport"] select:focus {
+  outline-color: #111 !important;
+  border-color: #111 !important;
+}
+body[data-store-theme="sport"] input[type="checkbox"],
+body[data-store-theme="sport"] input[type="radio"] {
+  accent-color: #b3ff00;
+}
+
+/* Accentfärgade ikoner/text → lime-grön (ej guld) */
+body[data-store-theme="sport"] svg.text-\[\#8a6a44\],
+body[data-store-theme="sport"] svg.text-\[\#b88f50\],
+body[data-store-theme="sport"] svg.text-\[\#c9973d\],
+body[data-store-theme="sport"] svg.text-\[\#B8963E\] {
+  color: #4a7c00 !important;
+}
+
+/* Skuggor → diskreta */
+body[data-store-theme="sport"] .shadow-md,
+body[data-store-theme="sport"] .shadow-lg,
+body[data-store-theme="sport"] .shadow-xl,
+body[data-store-theme="sport"] .shadow-2xl {
+  box-shadow: 0 4px 16px rgba(10, 15, 8, 0.08) !important;
+}
+
+/* Boxade sidor → full-bredd (ta bort yttre kort-wrapper) */
+body[data-store-theme="sport"] .overflow-hidden.rounded-\[18px\].border.bg-white,
+body[data-store-theme="sport"] .overflow-hidden.rounded-\[18px\].border.bg-\[color\:var\(--store-shell-surface\)\] {
+  border: none !important;
+  box-shadow: none !important;
+}
+body[data-store-theme="sport"] .overflow-hidden.rounded-\[6px\].border {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Footer full-bredd för sport */
+body[data-store-theme="sport"] footer > div {
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+body[data-store-theme="sport"] footer .grid,
+body[data-store-theme="sport"] footer .border-t.px-6 {
+  padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important;
+}
+
+/* ── SPORT: produktdetalj-knappar i Nike-pill-stil ────────── */
+/* Add-to-cart / Köp nu blir stora svarta pill-knappar */
+body[data-store-theme="sport"] .w-full.rounded-md.px-4.py-3 {
+  border-radius: 9999px !important;
+  height: 56px;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  background-color: #111 !important;
+  color: #fff !important;
+}
+body[data-store-theme="sport"] .w-full.rounded-md.px-4.py-3:hover {
+  background-color: #000 !important;
+}
+body[data-store-theme="sport"] .w-full.rounded-md.px-4.py-3:disabled {
+  background-color: #cccccc !important;
+  color: #fff !important;
+}
+
+/* Storleksknappar → Nike-grid rutor (kvadrater med tjock ram vid hover) */
+body[data-store-theme="sport"] .rounded-md.border.px-3.py-1\.5 {
+  border-radius: 4px !important;
+  border-color: #cccccc !important;
+  min-width: 56px;
+  padding: 12px !important;
+  font-size: 14px !important;
+}
+body[data-store-theme="sport"] .rounded-md.border.px-3.py-1\.5:hover {
+  border-color: #111 !important;
+}
+
+/* Quantity-stepper → rundad pill */
+body[data-store-theme="sport"] .inline-flex.items-center.rounded-md.border.border-slate-300 {
+  border-radius: 9999px !important;
+  border-color: #cccccc !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FASHION THEME (Filippa K-inspirerat) — Global overrides
+   ═══════════════════════════════════════════════════════════ */
+
+body[data-store-theme="fashion"] {
+  background: #FAF9F6;
+  color: #1A1A1A;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+body[data-store-theme="fashion"] h1,
+body[data-store-theme="fashion"] h2,
+body[data-store-theme="fashion"] h3 {
+  font-weight: 300 !important;
+  letter-spacing: -0.005em;
+  color: #1A1A1A;
+}
+
+/* Rena tunna kanter, ingen rundning på kort */
+body[data-store-theme="fashion"] .rounded-xl,
+body[data-store-theme="fashion"] .rounded-2xl,
+body[data-store-theme="fashion"] .rounded-lg,
+body[data-store-theme="fashion"] .rounded-md,
+body[data-store-theme="fashion"] .rounded-\[14px\],
+body[data-store-theme="fashion"] .rounded-\[18px\] {
+  border-radius: 0 !important;
+}
+body[data-store-theme="fashion"] .rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Primärknappar — svart fyllning, tunn typografi, raka kanter */
+body[data-store-theme="fashion"] .bg-black,
+body[data-store-theme="fashion"] .bg-\[color\:var\(--store-accent\)\] {
+  background-color: #1A1A1A !important;
+  color: #fff !important;
+  border-radius: 0 !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px !important;
+}
+
+/* Inputs — minimalistiska med svart focus */
+body[data-store-theme="fashion"] input[type="text"],
+body[data-store-theme="fashion"] input[type="email"],
+body[data-store-theme="fashion"] input[type="password"],
+body[data-store-theme="fashion"] input[type="tel"],
+body[data-store-theme="fashion"] input[type="number"],
+body[data-store-theme="fashion"] textarea,
+body[data-store-theme="fashion"] select {
+  border-radius: 0 !important;
+  border-color: #E5E1DC !important;
+  background: #fff !important;
+}
+body[data-store-theme="fashion"] input:focus,
+body[data-store-theme="fashion"] textarea:focus,
+body[data-store-theme="fashion"] select:focus {
+  border-color: #1A1A1A !important;
+  outline: none;
+}
+body[data-store-theme="fashion"] input[type="checkbox"],
+body[data-store-theme="fashion"] input[type="radio"] {
+  accent-color: #1A1A1A;
+}
+
+/* Borders → varm sand */
+body[data-store-theme="fashion"] .border-slate-200,
+body[data-store-theme="fashion"] .border-slate-300,
+body[data-store-theme="fashion"] .border-\[color\:var\(--store-card-border\)\],
+body[data-store-theme="fashion"] .border-\[color\:var\(--store-footer-border\)\] {
+  border-color: #E5E1DC !important;
+}
+
+/* Skuggor → diskreta */
+body[data-store-theme="fashion"] .shadow-md,
+body[data-store-theme="fashion"] .shadow-lg,
+body[data-store-theme="fashion"] .shadow-xl,
+body[data-store-theme="fashion"] .shadow-2xl {
+  box-shadow: 0 4px 24px rgba(26, 26, 26, 0.06) !important;
+}
+
+/* Boxade sidor → full-bredd */
+body[data-store-theme="fashion"] .overflow-hidden.rounded-\[18px\].border.bg-white,
+body[data-store-theme="fashion"] .overflow-hidden.rounded-\[18px\].border.bg-\[color\:var\(--store-shell-surface\)\] {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Footer full-bredd */
+body[data-store-theme="fashion"] footer > div {
+  max-width: 100% !important;
+}
+body[data-store-theme="fashion"] footer .grid,
+body[data-store-theme="fashion"] footer .border-t.px-6 {
+  padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important;
+}
+
+/* Accent-ikoner (guld/brun) → graphite */
+body[data-store-theme="fashion"] svg.text-\[\#8a6a44\],
+body[data-store-theme="fashion"] svg.text-\[\#c9973d\],
+body[data-store-theme="fashion"] svg.text-\[\#B8963E\] {
+  color: #1A1A1A !important;
+}

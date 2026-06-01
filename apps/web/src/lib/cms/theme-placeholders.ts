@@ -276,11 +276,11 @@ const productsThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   },
   luxury: {
     hero: {
-      title: "Luxury Collection",
-      description: "Exklusiva produkter for dig som vill ha premiumkansla, kvalitet och hantverk.",
-      trustLine1: "Premium kvalitet",
-      trustLine2: "Noggrant utvalt sortiment",
-      trustLine3: "Exklusiv service",
+      title: "Nos Collections",
+      description: "Noggrant kuraterade pjäser — exklusivt urval av det extraordinära.",
+      trustLine1: "Garanterad äkthet",
+      trustLine2: "Personlig service",
+      trustLine3: "Diskret leverans",
     },
   },
   minimal: {
@@ -294,10 +294,10 @@ const productsThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   },
   sport: {
     hero: {
-      title: "Traning & prestanda",
-      description: "Allt du behover for lopning, styrka och vardagsaktivitet.",
-      trustLine1: "Fri frakt over 499 kr",
-      trustLine2: "30 dagars oppet kop",
+      title: "Alla produkter",
+      description: "Utforska hela sortimentet — kläder, skor och utrustning.",
+      trustLine1: "Fri frakt över 499 kr",
+      trustLine2: "30 dagars öppet köp",
       trustLine3: "Snabb leverans 1-2 arbetsdagar",
     },
   },
@@ -328,8 +328,8 @@ const nyheterThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   classic: { hero: { title: "Nyheter 2026" } },
   luxury: {
     hero: {
-      title: "Luxury News",
-      description: "Senaste premiumprodukterna och exklusiva nyheter i sortimentet.",
+      title: "Nouveautés",
+      description: "De senaste tillskotten i vår kollektion — noggrant utvalda för det extraordinära.",
     },
   },
   minimal: { hero: { title: "Nya favoriter", description: "Nyheter med fokus pa enkel design och kvalitet." } },
@@ -337,6 +337,144 @@ const nyheterThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   fashion: { hero: { title: "Nya kollektioner", description: "Sasongens senaste mode och accessoarer." } },
   beauty: { hero: { title: "Beauty-nyheter", description: "Nya slapp inom hudvard, smink och harvard." } },
   electronics: { hero: { title: "Tech-nyheter", description: "Det senaste inom datorer, mobil och smarta hem." } },
+};
+
+const bastsaljareThemeBlocks: Record<string, ThemeBlocks> = {
+  luxury: {
+    hero: {
+      eyebrow: "Sélection",
+      title: "Pièces d'exception",
+      description: "Noggrant kuraterade pjäser — de mest eftertraktade i vår kollektion.",
+    },
+  },
+  sport: {
+    hero: {
+      eyebrow: "Toppval",
+      title: "Mest populärt just nu",
+      description: "De produkter våra kunder älskar mest — utvalda för prestation och hållbarhet.",
+    },
+  },
+  fashion: {
+    hero: {
+      eyebrow: "Editor's Pick",
+      title: "Säsongens bästsäljare",
+      description: "De plagg och accessoarer som våra kunder återkommer till, gång på gång.",
+    },
+  },
+  beauty: {
+    hero: {
+      eyebrow: "Mest älskade",
+      title: "Kundernas favoriter",
+      description: "De skönhetsprodukter som säljer mest — beprövade och rekommenderade av tusentals kunder.",
+    },
+  },
+  electronics: {
+    hero: {
+      eyebrow: "Topplistade",
+      title: "Mest sålda just nu",
+      description: "Teknikprodukterna som flest kunder väljer — för en bättre vardag.",
+    },
+  },
+  minimal: {
+    hero: {
+      eyebrow: "Kuraterat urval",
+      title: "Det mest populära",
+      description: "Enkla, välgjorda produkter som våra kunder återvänder till.",
+    },
+  },
+};
+
+const omOssThemeBlocks: Record<string, ThemeBlocks> = {
+  luxury: {
+    hero: {
+      eyebrow: "Maison",
+      title: "L'histoire de la maison",
+      description: "En passion för det extraordinära — noggrant kuraterade pjäser sedan grundandet.",
+    },
+    values: {
+      title: "Ce en quoi nous croyons",
+    },
+    story: {
+      teamTitle: "L'équipe",
+      historyTitle: "Notre histoire",
+      historyText: "Allt började med en vision: att göra det allra bästa tillgängligt. Idag är vi en av Nordens ledande aktörer inom premium och lyx.",
+    },
+  },
+  sport: {
+    hero: {
+      eyebrow: "Om oss",
+      title: "Mer än en sportbutik.\nEn drivkraft för bättre prestation.",
+      description: "Vi föddes ur en passion för träning och rörelsen och viljan att hjälpa dig nå din fulla potential.",
+    },
+    values: {
+      title: "Det vi står för",
+    },
+    story: {
+      teamTitle: "Teamet bakom",
+      historyTitle: "Från idé till rörelse",
+      historyText: "Allt började med en enkel idé: att samla de bästa produkterna för träning och aktiv livsstil på ett ställe.",
+    },
+  },
+  fashion: {
+    hero: {
+      eyebrow: "Vår berättelse",
+      title: "Mode med\nmening och känsla.",
+      description: "Vi tror på kläder som uttrycker vem du är — noggrant utvalda plagg med fokus på kvalitet och hållbarhet.",
+    },
+    values: {
+      title: "Vår filosofi",
+    },
+    story: {
+      teamTitle: "Bakom kollektionen",
+      historyTitle: "Hur det började",
+      historyText: "Vi startade med en passion för stil och en övertygelse om att bra kläder ska vara tillgängliga för alla.",
+    },
+  },
+  beauty: {
+    hero: {
+      eyebrow: "Vår passion",
+      title: "Skönhet som\nstärker självkänslan.",
+      description: "Vi kurerar skönhetsprodukter som verkligen fungerar — handplockade av experter för att lyfta din naturliga skönhet.",
+    },
+    values: {
+      title: "Vad vi tror på",
+    },
+    story: {
+      teamTitle: "Våra experteer",
+      historyTitle: "Berättelsen bakom",
+      historyText: "Vi grundades av skönhetsexperter med en gemensam vision: att göra kvalitetsprodukter enkla att hitta och förstå.",
+    },
+  },
+  electronics: {
+    hero: {
+      eyebrow: "Om oss",
+      title: "Teknik som\nförenklar vardagen.",
+      description: "Vi hjälper dig navigera teknikdjungeln och hitta produkterna som verkligen gör skillnad i din vardag.",
+    },
+    values: {
+      title: "Vad vi värdesätter",
+    },
+    story: {
+      teamTitle: "Teknikexperterna",
+      historyTitle: "Vår resa",
+      historyText: "Grundat av teknikentusiaster med ett enkelt mål: att göra de bästa elektronikprodukterna tillgängliga för alla.",
+    },
+  },
+  minimal: {
+    hero: {
+      eyebrow: "Om oss",
+      title: "Enkelt gjort.\nBra från grunden.",
+      description: "Vi väljer ut produkter som verkligen håller — utan onödiga kompromisser eller brus.",
+    },
+    values: {
+      title: "Vår filosofi",
+    },
+    story: {
+      teamTitle: "Teamet",
+      historyTitle: "Varför vi finns",
+      historyText: "Vi startade ur en frustration över för många val och för lite kvalitet. Lösningen: ett noggrant kurerat sortiment.",
+    },
+  },
 };
 
 const detailThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
@@ -394,6 +532,12 @@ export function applyThemePlaceholdersToDefaults(
   }
   if (pageKey === "nyheter") {
     return mergeBlocks(defaults, nyheterThemeBlocks[themeKey]);
+  }
+  if (pageKey === "bastsaljare") {
+    return mergeBlocks(defaults, bastsaljareThemeBlocks[themeKey] ?? {});
+  }
+  if (pageKey === "om-oss") {
+    return mergeBlocks(defaults, omOssThemeBlocks[themeKey] ?? {});
   }
   if (pageKey === "product-detail") {
     return mergeBlocks(defaults, detailThemeBlocks[themeKey]);

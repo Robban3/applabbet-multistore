@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CartCountBadge } from "@/components/cart-count-badge";
 import {
   CatalogPagination,
   CatalogResultsGrid,
@@ -7,23 +6,22 @@ import {
 } from "@/components/catalog-blocks";
 import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
 import { PriceRangeFilter } from "@/components/price-range-filter";
+import { CatalogFilterSidebar } from "@/components/catalog-filter-sidebar";
+import { StorefrontHeader } from "@/components/storefront-header";
+import { LuxuryBestSellers } from "@/components/storefront/luxury/luxury-best-sellers";
+import { SportBestSellers } from "@/components/storefront/sport/sport-best-sellers";
+import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
 import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
+import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
+import { applyThemeScopeToCatalogQuery } from "@/lib/storefront/theme-catalog-scope";
 import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
-
-const navItems = [
-  { label: "Hem", href: "/" },
-  { label: "Kategorier", href: "/products" },
-  { label: "Nyheter", href: "/nyheter" },
-  { label: "Bästsäljare", href: "/bastsaljare" },
-  { label: "Om oss", href: "/om-oss" },
-  { label: "Kundservice", href: "/kundservice" },
-];
 
 const trustCards = [
   { title: "Fri frakt", text: "Vid köp över 499 kr", icon: "truck" },
@@ -145,9 +143,6 @@ function inferCategoryIconType(name: string): "headphones" | "speaker" | "soundb
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const definition = getCmsPage("products");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("products", { blocks: fallbackBlocks });
-
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const brandName = await getStoreBrandName();
@@ -168,6 +163,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const supabase = createSupabaseAdminClient();
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
+  const fallbackBlocks = applyThemePlaceholdersToDefaults("products", themeKey, rawFallback);
+  const cms = await getPublishedPageContent("products", { blocks: fallbackBlocks });
+  const storefrontConfig = getStorefrontConfig(themeKey);
+  const isLuxury = themeKey === "luxury";
   const isFashion = themeKey === "fashion";
   const isBeauty = themeKey === "beauty";
   const isElectronics = themeKey === "electronics";
@@ -191,9 +191,31 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           : isElectronics
             ? "electronics"
             : "default";
-  const catalog = await getCatalogData(supabase, tenant.id, query);
+  // Begränsa till temats kategorier när användaren inte uttryckligen filtrerat.
+  const scopedQuery = await applyThemeScopeToCatalogQuery(supabase, tenant.id, themeKey, query);
+  const catalog = await getCatalogData(supabase, tenant.id, scopedQuery);
   const favoriteProductIds = await getFavoriteProductIdsForCurrentUser(tenant.id);
-  const categoryFilterOptions = catalog.availableCategories.map((category) => category.name);
+
+  // ── Tema-relevanta kategorier ─────────────────────────────────
+  // En tenant kan innehålla blandade kategorier (i demo/dev), men varje
+  // tema visar bara sina egna. Matchningen görs mot config.categoryCards
+  // (lower-case title). Om temat inte definierar nån titel-lista
+  // → visa alla DB-kategorier (= riktiga butiker med ren data).
+  const themeCategoryTitles = new Set(
+    storefrontConfig.categoryCards.map((c) => c.title.trim().toLowerCase()),
+  );
+  const themeRelevantCategories =
+    themeCategoryTitles.size > 0
+      ? catalog.availableCategories.filter((c) =>
+          themeCategoryTitles.has(c.name.trim().toLowerCase()),
+        )
+      : catalog.availableCategories;
+  // Fallback: om filtrering ger 0 träffar (config matchar inte DB)
+  // → visa allt, så användaren inte ser en tom katalog.
+  const visibleCategories =
+    themeRelevantCategories.length > 0 ? themeRelevantCategories : catalog.availableCategories;
+
+  const categoryFilterOptions = visibleCategories.map((category) => category.name);
   const brandFilterOptions = catalog.availableBrands;
   const { data: allPublishedCategoryRows } = await supabase
     .from("products")
@@ -213,7 +235,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       icon: "all" as const,
       href: "/products",
     },
-    ...catalog.availableCategories.map((category) => ({
+    ...visibleCategories.map((category) => ({
       title: category.name,
       count: categoryCountById.get(category.id) ?? 0,
       icon: inferCategoryIconType(category.name),
@@ -239,6 +261,236 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const shellSurface = "var(--store-soft-surface)";
   const shellCardBorder = "var(--store-card-border)";
 
+  // ── Kategori-navigering drivs av RIKTIGA DB-kategorier ──
+  // (matchande slugs + korrekta antal) så filter, rubrik och count uppdateras.
+  const grandTotal = (allPublishedCategoryRows || []).length || catalog.total;
+  const navCategories = visibleCategories.map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    count: categoryCountById.get(c.id) ?? 0,
+  }));
+  // Aktiv kategori härledd från query-param (slug ELLER namn) mot DB.
+  const activeCategoryName =
+    query.categories.length === 1
+      ? (catalog.availableCategories.find(
+          (c) =>
+            c.slug.toLowerCase() === query.categories[0].toLowerCase() ||
+            c.name.toLowerCase() === query.categories[0].toLowerCase(),
+        )?.name ?? null)
+      : null;
+
+  if (isSport) {
+    const activeSportCat = activeCategoryName;
+    // Nike.com-stil: stor rubrik = kategorinamn ELLER "Alla produkter"
+    const pageTitle = activeSportCat ?? "Alla produkter";
+    // "Nike Skor (2)" / "Nike Alla produkter (8)" — Nike skriver brand + kategori
+    const headingWithCount = `${pageTitle} (${catalog.total})`;
+
+    return (
+      <main className="bg-white">
+        <StorefrontHeader activeNav="Kategorier" cartCount={2} brandName={brandName} />
+
+        {/* Header: breadcrumb + stor titel + sort row (Nike-stil) */}
+        <section className="border-b border-[#e5e5e5] bg-white px-6 pt-8 pb-4 lg:px-10">
+          <nav className="text-[12px] text-[#757575]">
+            <Link href="/" className="hover:underline">Hem</Link>
+            <span className="mx-2">/</span>
+            <Link href="/products" className="hover:underline">Produkter</Link>
+            {activeSportCat ? (
+              <>
+                <span className="mx-2">/</span>
+                <span className="text-[#111]">{activeSportCat}</span>
+              </>
+            ) : null}
+          </nav>
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+            <h1 className="text-[24px] font-medium text-[#111] lg:text-[28px]">{headingWithCount}</h1>
+            <form method="GET" action="/products" className="flex items-center gap-2">
+              {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+              {query.brands.map((b) => <input key={b} type="hidden" name="brand" value={b} />)}
+              <span className="text-[14px] text-[#111]">Sortera efter</span>
+              <select name="sort" defaultValue={query.sort} className="rounded-full border border-[#e5e5e5] bg-white px-4 py-2 text-[14px] text-[#111] focus:outline-none">
+                <option value="relevance">Populärast</option>
+                <option value="newest">Nyast</option>
+                <option value="price_asc">Pris stigande</option>
+                <option value="price_desc">Pris fallande</option>
+              </select>
+            </form>
+          </div>
+        </section>
+
+        {/* Filter + grid */}
+        <section className="bg-white px-6 pt-8 pb-16 lg:px-10">
+          <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
+            {/* Vänster: kategori-lista + filter (Nike-stil sidebar) */}
+            <aside className="space-y-8 lg:sticky lg:top-6 lg:self-start">
+              <div>
+                <p className="mb-3 text-[15px] font-medium text-[#111]">Kategorier</p>
+                <ul className="space-y-2">
+                  <li>
+                    <Link
+                      href="/products"
+                      className={`block text-[14px] transition hover:text-[#757575] ${!activeSportCat ? "font-medium text-[#111]" : "text-[#111]"}`}
+                    >
+                      Alla
+                    </Link>
+                  </li>
+                  {navCategories.map((cat) => {
+                    const isActive = activeSportCat?.toLowerCase() === cat.name.toLowerCase();
+                    return (
+                      <li key={cat.slug}>
+                        <Link
+                          href={`/products?category=${encodeURIComponent(cat.slug)}`}
+                          className={`block text-[14px] transition hover:text-[#757575] ${isActive ? "font-medium text-[#111]" : "text-[#111]"}`}
+                        >
+                          {cat.name}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              <CatalogFilterSidebar
+                themeKey="sport"
+                actionPath="/products"
+                query={query}
+                categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+                brands={brandFilterOptions}
+              />
+            </aside>
+
+            {/* Grid */}
+            <section>
+              {catalog.items.length > 0 ? (
+                <>
+                  <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} cardVariant="sport" />
+                  <CatalogPagination actionPath="/products" query={query} totalPages={catalog.totalPages} />
+                </>
+              ) : (
+                <div className="py-16 text-center">
+                  <p className="text-[18px] font-medium text-[#111]">Inga produkter hittades</p>
+                  <p className="mt-2 text-[14px] text-[#757575]">Prova att rensa filtren eller välj en annan kategori.</p>
+                  <Link href="/products" className="mt-6 inline-flex h-11 items-center rounded-full bg-[#111] px-6 text-[14px] font-medium text-white hover:bg-black">
+                    Visa alla produkter
+                  </Link>
+                </div>
+              )}
+            </section>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (isLuxury) {
+    const activeCategory = activeCategoryName;
+
+    const heroTitle = activeCategory ?? getCmsBlockField(cms.blocks, "hero", "title", "Nos collections");
+    const heroEyebrow = activeCategory ? "Collection" : "Collection";
+    const heroDescription = activeCategory
+      ? `${catalog.total} pjäser i ${activeCategory}`
+      : getCmsBlockField(cms.blocks, "hero", "description", "Utforska vår kuraterade kollektion av exklusiva produkter.");
+
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div style={{ background: "var(--store-header-gradient)" }}>
+          <StorefrontHeader activeNav="Kategorier" cartCount={2} brandName={brandName} />
+          <div className="border-b border-white/8 px-8 py-16 sm:px-12 lg:px-14 lg:py-20">
+            <p className="text-[10px] font-light tracking-[0.5em] uppercase text-[#C41E3A]">{heroEyebrow}</p>
+            <h1 className="mt-4 text-white" style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontSize: "clamp(40px, 4.5vw, 72px)", fontWeight: 300, fontStyle: "italic", letterSpacing: "0.01em", lineHeight: 1.05 }}>
+              {heroTitle}
+            </h1>
+            <p className="mt-4 max-w-[500px] text-[14px] font-light leading-relaxed text-white/55">
+              {heroDescription}
+            </p>
+            <div className="mt-6 h-px w-12 bg-[#C41E3A]" />
+          </div>
+        </div>
+
+        {/* Kategorinaviering */}
+        <nav className="border-b border-[#EDE5DC]">
+          <div className="flex flex-wrap px-8 sm:px-12 lg:px-14">
+            <Link
+              href="/products"
+              className={`border-r border-[#EDE5DC] px-6 py-4 text-[10px] font-light tracking-[0.25em] uppercase transition pl-0 ${
+                !activeCategory ? "text-[#17120d] border-b-2 border-b-[#C41E3A]" : "text-[#5f4a3a] hover:text-[#17120d]"
+              }`}
+            >
+              Tout <span className="ml-1 text-[#C41E3A]">({catalog.total})</span>
+            </Link>
+            {storefrontConfig.categoryCards.map((cat) => {
+              const dbCat = catalog.availableCategories.find(
+                (c) => c.name.toLowerCase() === cat.title.toLowerCase()
+              );
+              const href = dbCat
+                ? `/products?category=${encodeURIComponent(dbCat.slug)}`
+                : `/products?category=${encodeURIComponent(cat.title.toLowerCase())}`;
+              const count = dbCat ? (categoryCountById.get(dbCat.id) ?? 0) : 0;
+              const isActiveCat = activeCategory?.toLowerCase() === cat.title.toLowerCase();
+              return (
+                <Link
+                  key={cat.title}
+                  href={href}
+                  className={`border-r border-[#EDE5DC] px-6 py-4 text-[10px] font-light tracking-[0.25em] uppercase transition last:border-r-0 ${
+                    isActiveCat ? "text-[#17120d] border-b-2 border-b-[#C41E3A]" : "text-[#5f4a3a] hover:text-[#17120d]"
+                  }`}
+                >
+                  {cat.title}
+                  {count > 0 && <span className="ml-1 text-[#C41E3A]">({count})</span>}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        <section className="w-full px-8 py-10 sm:px-12 lg:px-14">
+          <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
+            <CatalogFilterSidebar
+              themeKey="luxury"
+              actionPath="/products"
+              query={query}
+              categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+              brands={brandFilterOptions}
+            />
+            <section>
+              <div className="mb-6 flex items-center justify-between">
+                <p className="text-[12px] font-light tracking-[0.05em] text-[#5f4a3a]">{resultLabel}</p>
+                <form method="GET" action="/products" className="flex items-center gap-2">
+                  {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+                  {query.brands.map((b) => <input key={b} type="hidden" name="brand" value={b} />)}
+                  <select name="sort" defaultValue={query.sort} className="border border-[#EDE5DC] bg-white px-3 py-1.5 text-[11px] font-light tracking-[0.1em] text-[#5f4a3a]">
+                    <option value="relevance">Mest populära</option>
+                    <option value="newest">Nyast</option>
+                    <option value="price_asc">Pris stigande</option>
+                    <option value="price_desc">Pris fallande</option>
+                  </select>
+                  <button type="submit" className="border border-[#EDE5DC] bg-white px-3 py-1.5 text-[11px] font-light text-[#5f4a3a] hover:bg-[#FAF8F5]">Visa</button>
+                </form>
+              </div>
+              {catalog.items.length > 0 ? (
+                <>
+                  <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} cardVariant="luxury" />
+                  <CatalogPagination actionPath="/products" query={query} totalPages={catalog.totalPages} />
+                </>
+              ) : (
+                <LuxuryBestSellers
+                  title={getCmsBlockField(cms.blocks, "hero", "title", "Nos collections")}
+                  viewAllLabel=""
+                  products={storefrontConfig.products.map((p) => ({
+                    title: p.title,
+                    priceMinor: p.priceMinor,
+                    currency: p.currency,
+                    badge: "EXKLUSIV",
+                  }))}
+                />
+              )}
+            </section>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main style={{ background: shellBackground }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
@@ -250,79 +502,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             className="relative min-h-[390px] overflow-hidden px-6 pb-18 pt-6 text-white"
             style={{ background: "var(--store-header-gradient)" }}
           >
-            <header className="relative z-20 -mx-6 mb-4 flex items-center justify-between border-b border-white/10 px-6 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs tracking-[0.26em] text-[color:var(--store-accent)]">{brandName.toUpperCase()}</span>
-              </div>
-              <nav className="hidden items-center gap-6 text-[13px] font-medium text-white/90 xl:flex">
-                {navItems.map((item, idx) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={idx === 1 ? "border-b border-[color:var(--store-accent)] pb-1 text-white" : "hover:text-[color:var(--store-accent)]"}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-              <div className="flex items-center gap-2 text-white/85">
-                <details className="relative xl:hidden">
-                  <summary className="inline-flex h-9 w-9 cursor-pointer list-none items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
-                      <path d="M4 7h16M4 12h16M4 17h16" />
-                    </svg>
-                  </summary>
-                  <div
-                    className="fixed inset-x-3 top-16 z-[120] max-h-[70vh] overflow-auto rounded-lg border border-white/15 p-2 shadow-xl sm:inset-x-auto sm:right-4 sm:min-w-[260px]"
-                    style={{ background: "var(--store-header-overlay-surface)" }}
-                  >
-                    {navItems.map((item, idx) => (
-                      <Link
-                        key={`mobile-${item.label}`}
-                        href={item.href}
-                        className={`block rounded-md px-3 py-2 text-sm ${
-                          idx === 1 ? "bg-white/10 text-white" : "text-white/90 hover:bg-white/10"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                </details>
-                <Link
-                  href="/sok"
-                  aria-label="Sök"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M20 20L16.65 16.65" />
-                  </svg>
-                </Link>
-                <Link
-                  href="/mina-sidor"
-                  aria-label="Konto"
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <circle cx="12" cy="8" r="3.5" />
-                    <path d="M4 20C5.8 16.8 8.6 15.2 12 15.2C15.4 15.2 18.2 16.8 20 20" />
-                  </svg>
-                </Link>
-                <Link
-                  href="/cart"
-                  aria-label="Varukorg"
-                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 transition hover:bg-white/10"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9">
-                    <circle cx="9" cy="20" r="1.5" />
-                    <circle cx="17" cy="20" r="1.5" />
-                    <path d="M3 4H5L7.2 15H18.2L20.5 7.5H6.3" />
-                  </svg>
-                  <CartCountBadge initialCount={2} />
-                </Link>
-              </div>
-            </header>
+            <StorefrontHeader activeNav="Kategorier" cartCount={2} brandName={brandName} />
 
             <div
               className="pointer-events-none absolute right-6 top-2 h-52 w-80 rounded-full border-[20px]"
@@ -416,95 +596,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </div>
 
           <div className="grid gap-6 px-5 py-5 lg:grid-cols-[260px_1fr]">
-            <aside
-              className={`rounded-xl border p-4 ${filterShellClass}`}
-              style={filterShellClass ? undefined : { borderColor: shellCardBorder, background: shellSurface }}
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">Filter</h2>
-                <Link href="/products" className="text-xs text-slate-500 hover:text-slate-700">
-                  Rensa alla
-                </Link>
-              </div>
-
-              <AutoSubmitFilterForm action="/products" className="space-y-5 text-sm text-slate-700">
-                <div>
-                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Kategori</p>
-                  <div className="space-y-2">
-                    {categoryFilterOptions.map((category) => (
-                      <label key={category} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          name="category"
-                          value={category}
-                          defaultChecked={query.categories.includes(category)}
-                          className="accent-[color:var(--store-accent)]"
-                        />
-                        {category}
-                      </label>
-                    ))}
-                    {categoryFilterOptions.length === 0 ? (
-                      <p className="text-xs text-slate-500">Inga kategorier skapade ännu.</p>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div>
-                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Varumärke</p>
-                  <div className="space-y-2">
-                    {brandFilterOptions.map((brand) => (
-                      <label key={brand} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          name="brand"
-                          value={brand}
-                          defaultChecked={query.brands.includes(brand)}
-                          className="accent-[color:var(--store-accent)]"
-                        />
-                        {brand}
-                      </label>
-                    ))}
-                    {brandFilterOptions.length === 0 ? (
-                      <p className="text-xs text-slate-500">Inga varumärken tillgängliga ännu.</p>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div>
-                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Pris</p>
-                  <PriceRangeFilter
-                    minBound={0}
-                    maxBound={10000}
-                    initialMin={query.minPrice}
-                    initialMax={query.maxPrice}
-                  />
-                </div>
-
-                <div>
-                  <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isBeauty ? "text-[#8b5c6f]" : "text-slate-500"}`}>Egenskaper</p>
-                  <div className="space-y-2">
-                    {catalog.availableFeatures.map((feature) => (
-                      <label key={feature} className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          name="feature"
-                          value={feature}
-                          defaultChecked={query.features.includes(feature)}
-                          className="accent-[color:var(--store-accent)]"
-                        />
-                        {feature}
-                      </label>
-                    ))}
-                    {catalog.availableFeatures.length === 0 ? (
-                      <p className="text-xs text-slate-500">Inga egenskaper tillgängliga ännu.</p>
-                    ) : null}
-                  </div>
-                </div>
-
-                {query.q ? <input type="hidden" name="q" value={query.q} /> : null}
-                {query.sort !== "relevance" ? <input type="hidden" name="sort" value={query.sort} /> : null}
-              </AutoSubmitFilterForm>
-            </aside>
+            <CatalogFilterSidebar
+              themeKey={themeKey}
+              actionPath="/products"
+              query={query}
+              categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+              brands={brandFilterOptions}
+              features={catalog.availableFeatures}
+            />
 
             <section>
               <div className="mb-3 space-y-3">

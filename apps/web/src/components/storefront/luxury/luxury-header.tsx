@@ -7,9 +7,10 @@ export type LuxuryHeaderProps = {
   brandName: string;
   links: LuxuryHeaderLink[];
   cartInitialCount?: number;
+  activeNav?: string;
 };
 
-export function LuxuryHeader({ brandName, links, cartInitialCount = 0 }: LuxuryHeaderProps) {
+export function LuxuryHeader({ brandName, links, cartInitialCount = 0, activeNav }: LuxuryHeaderProps) {
   return (
     <header className="relative flex items-center justify-between border-b border-white/8 px-8 py-5 lg:px-14">
       {/* Logo */}
@@ -24,15 +25,18 @@ export function LuxuryHeader({ brandName, links, cartInitialCount = 0 }: LuxuryH
 
       {/* Nav */}
       <nav className="hidden items-center gap-10 text-[11px] font-light tracking-[0.2em] text-white/70 uppercase xl:flex">
-        {links.map((item, idx) => (
-          <Link
-            key={`${item.href}-${idx}`}
-            href={item.href}
-            className={`transition hover:text-white ${idx === 0 ? "text-white border-b border-[#C41E3A] pb-0.5" : ""}`}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {links.map((item, idx) => {
+          const isActive = activeNav ? item.label === activeNav : idx === 0;
+          return (
+            <Link
+              key={`${item.href}-${idx}`}
+              href={item.href}
+              className={`transition hover:text-white ${isActive ? "text-white border-b border-[#C41E3A] pb-0.5" : ""}`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Actions */}
@@ -64,11 +68,14 @@ export function LuxuryHeader({ brandName, links, cartInitialCount = 0 }: LuxuryH
             </svg>
           </summary>
           <div className="fixed inset-x-4 top-20 z-[120] overflow-hidden rounded-lg border border-white/10 shadow-2xl" style={{ background: "var(--store-header-overlay-surface)" }}>
-            {links.map((item, idx) => (
-              <Link key={`m-${idx}`} href={item.href} className="block border-b border-white/8 px-6 py-3.5 text-[11px] tracking-[0.2em] uppercase text-white/70 transition hover:text-white last:border-0">
+            {links.map((item, idx) => {
+              const isActive = activeNav ? item.label === activeNav : idx === 0;
+              return (
+              <Link key={`m-${idx}`} href={item.href} className={`block border-b border-white/8 px-6 py-3.5 text-[11px] tracking-[0.2em] uppercase transition last:border-0 ${isActive ? "text-white border-l-2 border-l-[#C41E3A]" : "text-white/70 hover:text-white"}`}>
                 {item.label}
               </Link>
-            ))}
+              );
+            })}
           </div>
         </details>
       </div>

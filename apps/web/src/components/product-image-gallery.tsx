@@ -73,7 +73,7 @@ export function ProductImageGallery({ title, images }: ProductImageGalleryProps)
       </div>
 
       <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-[image:var(--store-media-gradient)] p-5 shadow-sm">
-        <span className="inline-flex rounded bg-[color:var(--store-accent)] px-3 py-1 text-xs font-semibold text-slate-900">
+        <span className="inline-flex rounded bg-[color:var(--store-accent)] px-3 py-1 text-xs font-semibold text-[color:var(--store-accent-fg)]">
           BÄSTSÄLJARE
         </span>
         <div className="mt-6 h-[26rem] overflow-hidden rounded-xl border border-white/10 bg-[radial-gradient(circle_at_35%_30%,rgba(255,202,138,0.30),transparent_42%)]">

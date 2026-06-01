@@ -1,8 +1,10 @@
 import { CheckoutClient } from "@/components/checkout-client";
+import { StorefrontHeader } from "@/components/storefront-header";
+import { SportCart } from "@/components/storefront/sport/sport-cart";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getStoreBrandName } from "@/lib/store-brand";
-import { getTenantSettings } from "@/lib/tenant-settings";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 
 export default async function CartPage() {
@@ -13,7 +15,19 @@ export default async function CartPage() {
   const tenant = await resolveTenantByHost(host);
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const brandName = await getStoreBrandName();
+  const themeKey = normalizeThemeKey(settings?.theme_key);
 
+  // ── Sport: Nike-stil cart ────────────────────────────────────
+  if (themeKey === "sport") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader cartCount={0} brandName={brandName} />
+        <SportCart heading={getCmsBlockField(cms.blocks, "summary", "title", "Bag")} />
+      </main>
+    );
+  }
+
+  // ── Default (övriga teman): befintlig cart ───────────────────
   return (
     <main style={{ background: "var(--store-footer-bg)" }}>
       <CheckoutClient

@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
 type ShippingOption = {
   carrier: string;
@@ -191,6 +194,107 @@ export default async function LeveransPage() {
     faqItems.slice(0, Math.ceil(faqItems.length / 2)),
     faqItems.slice(Math.ceil(faqItems.length / 2)),
   ];
+
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const settings = tenant ? await getTenantSettings(tenant) : null;
+  const isSport = normalizeThemeKey(settings?.theme_key) === "sport";
+
+  if (isSport) {
+    return (
+      <main style={{ background: "var(--store-footer-bg)" }}>
+        <div style={{ background: "var(--store-header-gradient)" }}>
+          <StorefrontHeader activeNav="Kundservice" cartCount={3} />
+          <SportPageHero
+            eyebrow="Leverans"
+            title={getCmsBlockField(cms.blocks, "hero", "title", "Snabbt\nframme.")}
+            description={getCmsBlockField(cms.blocks, "hero", "description", "Beställ idag, träna imorgon. Snabba, spårbara leveranser över hela Sverige.")}
+          />
+        </div>
+
+        {/* Fraktalternativ */}
+        <section className="w-full px-6 py-12 lg:px-10">
+          <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">Frakt</p>
+          <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
+            {getCmsBlockField(cms.blocks, "sections", "shippingTitle", "Fraktalternativ")}
+          </h2>
+          <div className="mt-6 border-2 border-[#0a0f08]">
+            {shippingOptionsFromCms.map((option, index) => (
+              <article key={option.brand} className={`grid items-center gap-4 px-5 py-5 md:grid-cols-[0.8fr_1.9fr_1fr_0.9fr] ${index > 0 ? "border-t-2 border-[#0a0f08]" : ""}`}>
+                <p className="text-xl font-black uppercase text-[#0a0f08]">{option.carrier}</p>
+                <div>
+                  <p className="text-sm font-black uppercase text-[#0a0f08]">{option.brand}</p>
+                  <p className="whitespace-pre-line text-[13px] font-medium text-[#0a0f08]/60">{option.description}</p>
+                </div>
+                <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[#4a7c00]">{option.eta}</p>
+                <div className="text-right">
+                  <p className="text-2xl font-black text-[#0a0f08]">{option.price}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#0a0f08]/45">{option.freeText}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Leveranstider + Bra att veta */}
+        {[
+          { title: getCmsBlockField(cms.blocks, "sections", "deliveryTimesTitle", "Leveranstider"), items: deliveryInfoFromCms, dark: false },
+          { title: getCmsBlockField(cms.blocks, "sections", "goodToKnowTitle", "Bra att veta"), items: goodToKnowFromCms, dark: true },
+        ].map((block) => (
+          <section key={block.title} className={`w-full px-6 py-12 lg:px-10 ${block.dark ? "bg-[#0a0f08] text-white" : ""}`}>
+            <p className={`text-[11px] font-black tracking-[0.3em] uppercase ${block.dark ? "text-[#b3ff00]" : "text-[#4a7c00]"}`}>Info</p>
+            <h2 className={`mt-2 text-3xl font-black uppercase tracking-[-0.02em] lg:text-4xl ${block.dark ? "text-white" : "text-[#0a0f08]"}`}>{block.title}</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-4">
+              {block.items.map((item) => (
+                <article key={item.title} className={`border-2 p-5 ${block.dark ? "border-white/15 bg-white/5" : "border-[#0a0f08] bg-white"}`}>
+                  <div className={`mb-3 h-1 w-8 ${block.dark ? "bg-[#b3ff00]" : "bg-[#b3ff00]"}`} />
+                  <p className={`text-sm font-black uppercase ${block.dark ? "text-white" : "text-[#0a0f08]"}`}>{item.title}</p>
+                  <p className={`mt-1 whitespace-pre-line text-[13px] font-medium ${block.dark ? "text-white/55" : "text-[#0a0f08]/60"}`}>{item.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+
+        {/* FAQ */}
+        {faqItems.length > 0 ? (
+          <section className="w-full px-6 py-12 lg:px-10">
+            <p className="text-[11px] font-black tracking-[0.3em] uppercase text-[#4a7c00]">FAQ</p>
+            <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.02em] text-[#0a0f08] lg:text-4xl">
+              {getCmsBlockField(cms.blocks, "sections", "faqTitle", "Vanliga frågor")}
+            </h2>
+            <div className="mt-6 grid gap-3 md:grid-cols-2">
+              {faqColumns.map((items, colIdx) => (
+                <div key={`faq-col-${colIdx}`} className="space-y-3">
+                  {items.map((item) => (
+                    <details key={item.question} className="group border-2 border-[#0a0f08] bg-white">
+                      <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-bold text-[#0a0f08]">
+                        <span>{item.question}</span>
+                        <span className="text-[#4a7c00] text-lg leading-none transition group-open:rotate-45">+</span>
+                      </summary>
+                      <p className="border-t-2 border-[#0a0f08] px-4 py-3 text-[13px] font-medium text-[#0a0f08]/60">{item.answer}</p>
+                    </details>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* Trust strip */}
+        {trustBottom.length > 0 ? (
+          <section className="grid w-full border-t border-[#dce9cf] sm:grid-cols-2 lg:grid-cols-4">
+            {trustBottom.map((item) => (
+              <article key={item.title} className="flex min-h-[88px] flex-col justify-center border-b border-[#dce9cf] bg-[#eef5e7] px-6 py-4 lg:border-b-0 lg:border-l lg:first:border-l-0">
+                <p className="text-sm font-black uppercase tracking-[-0.01em] text-[#0a0f08]">{item.title}</p>
+                <p className="mt-1 text-xs font-medium text-[#0a0f08]/60">{item.text}</p>
+              </article>
+            ))}
+          </section>
+        ) : null}
+      </main>
+    );
+  }
 
   return (
     <main className="bg-white">

@@ -22,10 +22,8 @@ export const sportThemeConfig: StorefrontThemeConfig = {
   categoryCards: [
     { title: 'Löparskor', accent: 'from-[#1f2a28]' },
     { title: 'Träningskläder', accent: 'from-[#24312f]' },
-    { title: 'Träning', accent: 'from-[#212826]' },
-    { title: 'Lagsport', accent: 'from-[#27302c]' },
-    { title: 'Outdoor', accent: 'from-[#212724]' },
-    { title: 'Accessoarer', accent: 'from-[#222a27]' }
+    { title: 'Utrustning', accent: 'from-[#212826]' },
+    { title: 'Sportaccessoarer', accent: 'from-[#27302c]' }
   ],
   trustCards: [
     { title: 'Fri frakt', text: 'På beställningar över 499 kr', icon: 'truck' },

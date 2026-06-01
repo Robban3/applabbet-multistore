@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
 type CmsInlineTextProps = {
@@ -9,6 +9,7 @@ type CmsInlineTextProps = {
   fieldKey: string;
   as?: "span" | "p" | "h1" | "h2" | "h3";
   className?: string;
+  style?: React.CSSProperties;
 };
 
 function getIsInlineEditMode() {
@@ -22,6 +23,7 @@ export function CmsInlineText({
   fieldKey,
   as = "span",
   className,
+  style,
 }: CmsInlineTextProps) {
   const searchParams = useSearchParams();
   const isInlineEditMode = searchParams.get("cms_edit") === "1" || getIsInlineEditMode();
@@ -33,13 +35,14 @@ export function CmsInlineText({
 
   if (!isInlineEditMode) {
     const Tag = as;
-    return <Tag className={className}>{value}</Tag>;
+    return <Tag className={className} style={style}>{value}</Tag>;
   }
 
   const Tag = as;
   return (
     <Tag
       className={baseClasses}
+      style={style}
       contentEditable
       suppressContentEditableWarning
       onInput={(event) => {

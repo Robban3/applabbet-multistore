@@ -16,8 +16,8 @@ export function LuxuryPageHero({ eyebrow, title, description }: LuxuryPageHeroPr
         </p>
       ) : null}
       <h1
-        className="mt-4 font-light text-white"
-        style={{ fontSize: "clamp(36px, 4vw, 64px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}
+        className="mt-4 text-white"
+        style={{ fontFamily: "var(--font-cormorant), Georgia, serif", fontSize: "clamp(40px, 4.5vw, 72px)", fontWeight: 300, fontStyle: "italic", letterSpacing: "0.01em", lineHeight: 1.05 }}
       >
         {title}
       </h1>

@@ -12,7 +12,7 @@ type CmsBlockComposerProps = {
   pageKey?: string;
 };
 
-function inputTypeForField(): "text" {
+function inputTypeForField(_field?: unknown): "text" {
   // We store both absolute and relative paths (e.g. "/products").
   // Browser URL validation blocks form submit/preview for many valid CMS links,
   // so URL fields are treated as plain text inputs.
@@ -92,11 +92,14 @@ export function CmsBlockComposer({ blocks, initialValues, pageKey }: CmsBlockCom
         return;
       }
       if (!blocks.some((block) => block.key === maybePayload.blockKey)) return;
+      const blockKey = maybePayload.blockKey as string;
+      const fieldKey = maybePayload.fieldKey as string;
+      const value = maybePayload.value as string;
       setValues((prev) => ({
         ...prev,
-        [maybePayload.blockKey]: {
-          ...(prev[maybePayload.blockKey] || {}),
-          [maybePayload.fieldKey]: maybePayload.value,
+        [blockKey]: {
+          ...(prev[blockKey] || {}),
+          [fieldKey]: value,
         },
       }));
     }

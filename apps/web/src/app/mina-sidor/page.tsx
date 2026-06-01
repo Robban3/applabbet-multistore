@@ -2,11 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AccountSidebar, buildAccountSidebarItems } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { SportAccountShell } from "@/components/storefront/sport/sport-account-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getTenantSettings } from "@/lib/tenant-settings";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 
 const trustCards = [
@@ -80,6 +81,94 @@ export default async function MinaSidorPage() {
     greetingName = fallbackName;
   }
 
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const isSport = themeKey === "sport";
+  const isLuxury = themeKey === "luxury";
+
+  if (isSport) {
+    // Layout (mina-sidor/layout.tsx) renderar header + Hej + tabs.
+    // Sidan returnerar bara sitt content.
+    return (
+      <section className="bg-white px-6 py-10 lg:px-10">
+        {/* Tiles — Nike "Recently viewed"-stil */}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {topCards.map((card) => (
+            <Link key={card.title} href={card.href} className="group flex flex-col justify-between bg-[#f5f5f5] p-5 transition hover:bg-[#ececec]">
+              <p className="text-[13px] text-[#111]">{card.title}</p>
+              <p className="mt-4 text-[32px] font-medium text-[#111]">{card.value}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-[13px] text-[#111] underline-offset-2 group-hover:underline">
+                {card.action} →
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Två kolumner */}
+        <div className="mt-10 grid gap-10 border-t border-[#e5e5e5] pt-10 lg:grid-cols-[1fr_1fr]">
+          <div>
+            <div className="flex items-end justify-between">
+              <h2 className="text-[24px] font-medium text-[#111]">Senaste ordrar</h2>
+              <Link href="/mina-sidor/ordrar" className="text-[14px] font-medium text-[#111] underline-offset-2 hover:underline">Visa alla →</Link>
+            </div>
+            <div className="mt-5 divide-y divide-[#e5e5e5]">
+              {["APL-10568", "APL-10321", "APL-10211", "APL-10005"].map((id) => (
+                <div key={id} className="flex items-center gap-4 py-4">
+                  <div className="h-14 w-14 shrink-0 bg-[#f5f5f5]" />
+                  <div className="flex-1">
+                    <p className="text-[15px] font-medium text-[#111]">Order #{id}</p>
+                    <p className="text-[13px] text-[#757575]">2 produkter</p>
+                  </div>
+                  <p className="text-[15px] font-medium text-[#111]">5 597 kr</p>
+                  <Link href="/mina-sidor/ordrar" className="text-[13px] text-[#111] underline-offset-2 hover:underline">Detaljer</Link>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            <div>
+              <div className="flex items-end justify-between">
+                <h2 className="text-[24px] font-medium text-[#111]">Leverans på väg</h2>
+                <Link href="/mina-sidor/leveranser" className="text-[14px] font-medium text-[#111] underline-offset-2 hover:underline">Spåra →</Link>
+              </div>
+              <div className="mt-5 flex items-center gap-4">
+                <div className="h-16 w-16 bg-[#f5f5f5]" />
+                <div>
+                  <p className="text-[15px] font-medium text-[#111]">Stride Air Runner</p>
+                  <p className="text-[13px] text-[#757575]">Beräknad leverans</p>
+                  <p className="text-[14px] font-medium text-[#111]">28 maj – 30 maj</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-end justify-between">
+                <h2 className="text-[24px] font-medium text-[#111]">Mina favoriter</h2>
+                <Link href="/mina-sidor/favoriter" className="text-[14px] font-medium text-[#111] underline-offset-2 hover:underline">Visa alla →</Link>
+              </div>
+              <div className="mt-5 grid grid-cols-4 gap-3">
+                {["Stride Air Runner", "Core Training Shirt", "Power Dumbbell Set", "Hydro Flow Flaska"].map((name) => (
+                  <div key={name} className="space-y-2">
+                    <div className="aspect-square bg-[#f5f5f5]" />
+                    <p className="line-clamp-2 text-[12px] font-medium text-[#111]">{name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[#f5f5f5] p-6">
+              <h3 className="text-[20px] font-medium text-[#111]">Behöver du hjälp?</h3>
+              <p className="mt-1 text-[14px] text-[#757575]">Vårt kundserviceteam finns här för dig.</p>
+              <Link href="/kundservice" className="mt-4 inline-flex h-11 items-center rounded-full bg-[#111] px-6 text-[14px] font-medium text-white hover:bg-black">
+                Kontakta kundservice
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <main style={{ background: "var(--store-footer-bg)" }}>
       <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
@@ -103,7 +192,7 @@ export default async function MinaSidorPage() {
                     <p className="text-xs uppercase tracking-wide text-[color:var(--store-accent)]">Medlem</p>
                     <p className="text-2xl font-semibold">{brandName} Club</p>
                     <p className="mt-1 text-sm">Du har 120 poäng</p>
-                    <Link href="/mina-sidor/poang" className="mt-3 inline-flex rounded-md bg-[color:var(--store-accent)] px-3 py-2 text-sm font-semibold text-slate-900">Se dina förmåner</Link>
+                    <Link href="/mina-sidor/poang" className="mt-3 inline-flex rounded-md bg-[color:var(--store-accent)] px-3 py-2 text-sm font-semibold text-[color:var(--store-accent-fg)]">Se dina förmåner</Link>
                   </div>
                 ) : null}
               </aside>

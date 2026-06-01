@@ -6,14 +6,14 @@ export const minimalThemeConfig: StorefrontThemeConfig = {
   bestSellersTitle: 'Bästsäljare',
   brandsTitle: 'Utvalda varumärken',
   hero: {
-    title: 'Det viktigaste utan brus',
+    title: 'Det viktigaste\nutan brus',
     description: 'Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet.'
   },
   navItems: [
     { label: 'Hem', href: '/' },
     { label: 'Produkter', href: '/products' },
     { label: 'Nyheter', href: '/nyheter' },
-    { label: 'Populart', href: '/bastsaljare' },
+    { label: 'Populärt', href: '/bastsaljare' },
     { label: 'Om oss', href: '/om-oss' },
     { label: 'Support', href: '/kundservice' }
   ],
@@ -26,32 +26,32 @@ export const minimalThemeConfig: StorefrontThemeConfig = {
     { title: 'Nyheter', accent: 'from-[#2b3748]' }
   ],
   trustCards: [
-    { title: 'Fri frakt', text: 'Over 499 kr', icon: 'truck' },
-    { title: '30 dagars oppet kop', text: 'Enkelt & smidigt', icon: 'shield' },
+    { title: 'Fri frakt', text: 'Över 499 kr', icon: 'truck' },
+    { title: '30 dagars öppet köp', text: 'Enkelt & smidigt', icon: 'shield' },
     { title: 'Snabb leverans', text: '1-2 arbetsdagar', icon: 'star' },
-    { title: 'Trygg support', text: 'Vi hjalper dig snabbt', icon: 'headset' }
+    { title: 'Trygg support', text: 'Vi hjälper dig snabbt', icon: 'headset' }
   ],
-  brandLogos: ['MUJI', 'UNIQLO', 'NORDIC', 'Aarke', 'BOSE', 'SONOS', 'IKEA'],
+  brandLogos: ['MUJI', 'UNIQLO', 'Aarke', 'BOSE', 'SONOS', 'HAY', 'IKEA'],
   valueCards: [
     {
       title: 'Mindre brus',
-      text: 'Vi fokuserar pa produkter som gor vardagen enklare.'
+      text: 'Vi fokuserar på produkter som gör vardagen enklare.'
     },
     {
-      title: 'Kvalitet forst',
-      text: 'Noggrant utvalda produkter med hog kvalitet.'
+      title: 'Kvalitet först',
+      text: 'Noggrant utvalda produkter med hög kvalitet och lång livslängd.'
     },
     {
       title: 'Snabb support',
-      text: 'Personlig hjalp nar du behover den.'
+      text: 'Personlig hjälp när du behöver den.'
     }
   ],
   products: [
-    { title: 'Minimal Desk Lamp', priceMinor: 69900, currency: 'SEK' },
-    { title: 'Essential Wireless Speaker', priceMinor: 129900, currency: 'SEK' },
-    { title: 'Nordic Coffee Brewer', priceMinor: 89900, currency: 'SEK' },
-    { title: 'Slate Storage Box', priceMinor: 29900, currency: 'SEK' },
-    { title: 'Core Backpack', priceMinor: 79900, currency: 'SEK' },
-    { title: 'Everyday Notebook Set', priceMinor: 14900, currency: 'SEK' }
+    { title: 'Aesop Rind Concentrate Body Balm', priceMinor: 49900, currency: 'SEK' },
+    { title: 'Aarke Carbonator Pro', priceMinor: 129900, currency: 'SEK' },
+    { title: 'Moleskine Classic Anteckningsbok', priceMinor: 24900, currency: 'SEK' },
+    { title: 'HAY Soft Brick Kuddset', priceMinor: 59900, currency: 'SEK' },
+    { title: 'Moment Ryggsäck 21L', priceMinor: 149900, currency: 'SEK' },
+    { title: 'Lexon Mino Bluetooth-högtalare', priceMinor: 39900, currency: 'SEK' }
   ]
 };

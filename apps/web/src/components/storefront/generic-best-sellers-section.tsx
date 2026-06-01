@@ -57,7 +57,11 @@ export function GenericBestSellersSection({
               style={{ borderColor: "var(--store-card-border)" }}
             >
               <Link href={productHref} className="block">
-                <div className="relative h-44 bg-[image:var(--store-media-gradient)]">
+                <div className="relative h-44 overflow-hidden bg-[image:var(--store-media-gradient)]">
+                  {"image_url" in product && product.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={product.image_url} alt={productTitle} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  ) : null}
                   {"id" in product ? (
                     <FavoriteToggle
                       productId={product.id}
@@ -66,7 +70,7 @@ export function GenericBestSellersSection({
                     />
                   ) : null}
                   {idx === 0 ? (
-                    <span className="absolute left-2 top-2 rounded bg-[color:var(--store-accent)] px-2 py-0.5 text-[10px] font-bold text-slate-900">
+                    <span className="absolute left-2 top-2 rounded bg-[color:var(--store-accent)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--store-accent-fg)]">
                       {bestSellerBadge}
                     </span>
                   ) : null}

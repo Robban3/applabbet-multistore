@@ -26,7 +26,7 @@ function formatKr(minor: number) {
 
 function CheckIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.2">
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="white" strokeWidth="2.2">
       <path d="m5 12 4 4 10-10" />
     </svg>
   );
@@ -64,6 +64,7 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
   const selectedReason = getParam(params.reason).trim();
   const selectedComment = getParam(params.comment).trim();
   const selectedItems = getParams(params.itemId);
+  const showReasonError = getParam(params.error) === "reason";
   if (!orderId || !method || selectedItems.length === 0) {
     redirect("/returer-aterbetalningar/skapa-retur/registrera/steg-3?account=1");
   }
@@ -113,19 +114,27 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
     const comment = String(formData.get("comment") || "").trim();
     const formOrderId = String(formData.get("orderId") || "").trim();
     const formMethod = String(formData.get("returnMethod") || "").trim();
-    if (!reason || !formOrderId || !formMethod) {
-      redirect("/returer-aterbetalningar/skapa-retur/registrera/steg-4?account=1");
-    }
-    const next = new URLSearchParams();
-    next.set("account", "1");
-    next.set("orderId", formOrderId);
-    next.set("returnMethod", formMethod);
-    next.set("reason", reason);
-    if (comment) next.set("comment", comment);
+    const back = new URLSearchParams();
+    back.set("account", "1");
+    if (formOrderId) back.set("orderId", formOrderId);
+    if (formMethod) back.set("returnMethod", formMethod);
+    if (comment) back.set("comment", comment);
     for (const item of formData.getAll("itemId")) {
       const value = String(item || "").trim();
-      if (value) next.append("itemId", value);
+      if (value) back.append("itemId", value);
     }
+
+    if (!reason) {
+      back.set("error", "reason");
+      redirect(`/returer-aterbetalningar/skapa-retur/registrera/steg-4?${back.toString()}`);
+    }
+    if (!formOrderId || !formMethod) {
+      redirect("/returer-aterbetalningar/skapa-retur/registrera?account=1");
+    }
+
+    const next = new URLSearchParams(back);
+    next.set("reason", reason);
+    next.delete("error");
     redirect(`/returer-aterbetalningar/skapa-retur/registrera/steg-5?${next.toString()}`);
   }
 
@@ -144,7 +153,7 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
                 </Link>
                 <span className="mx-1">›</span>
-                <Link href={`/returer-aterbetalningar/skapa-retur/registrera/steg-4?account=1&orderId=${encodeURIComponent(orderId)}`} className="text-[#d7ad62]">
+                <Link href={`/returer-aterbetalningar/skapa-retur/registrera/steg-4?account=1&orderId=${encodeURIComponent(orderId)}`} className="text-[color:var(--store-accent)]">
                   {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbStep4Label", "Steg 4")}
                 </Link>
               </p>
@@ -159,7 +168,7 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
               <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[#c8a164]/40 bg-[#231b13]/60" />
+              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
             </div>
           </section>
 
@@ -175,12 +184,12 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
                 <article key={step} className="text-center">
                   <span
                     className={`mx-auto inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                      idx < 3 ? "bg-black text-white" : idx === 3 ? "bg-[#d7ad62] text-slate-900" : "bg-[#f2eee7] text-slate-900"
+                      idx < 3 ? "bg-[#16a34a] text-white" : idx === 3 ? "bg-[#0f0d0a] text-white" : "border-2 border-slate-200 bg-white text-slate-400"
                     }`}
                   >
                     {idx < 3 ? <CheckIcon /> : idx + 1}
                   </span>
-                  <p className={`mt-2 text-sm font-semibold ${idx === 3 ? "text-[#d39d3d]" : "text-slate-700"}`}>{step}</p>
+                  <p className={`mt-2 text-sm font-semibold ${idx === 3 ? "text-slate-900" : "text-slate-700"}`}>{step}</p>
                 </article>
               ))}
             </div>
@@ -229,11 +238,13 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
                     <label className="block">
                       <span className="mb-1 block text-sm font-semibold text-slate-900">
                         {getCmsBlockField(cms.blocks, "flowStep4", "reasonLabel", "Ange anledning till retur")}
+                        <span className="ml-1 text-red-500">*</span>
                       </span>
                       <select
                         name="reason"
                         defaultValue={selectedReason || ""}
-                        className="w-full rounded-lg border border-[#d7ad62] bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-900"
+                        required
+                        className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-900 ${showReasonError ? "border-red-500" : "border-[var(--store-accent)]"}`}
                       >
                         <option value="" disabled>
                           {getCmsBlockField(cms.blocks, "flowStep4", "reasonPlaceholder", "Välj anledning")}
@@ -245,6 +256,9 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
                         <option value="regret">{getCmsBlockField(cms.blocks, "flowStep4", "reasonOption5", "Ångrat köp")}</option>
                         <option value="other">{getCmsBlockField(cms.blocks, "flowStep4", "reasonOption6", "Annat (vänligen specificera)")}</option>
                       </select>
+                      {showReasonError && (
+                        <p className="mt-1.5 text-sm text-red-500">Du måste ange en anledning till returen.</p>
+                      )}
                     </label>
 
                     <label className="mt-3 block">
@@ -284,7 +298,7 @@ export default async function ReturnStepFourPage({ searchParams }: ReturnStepFou
                     </svg>
                     {getCmsBlockField(cms.blocks, "flowStep4", "backButtonLabel", "Tillbaka till steg 3")}
                   </Link>
-                  <button className="inline-flex items-center gap-2 rounded-full bg-[#d7ad62] px-6 py-3 text-sm font-semibold text-slate-900 hover:bg-[#e2ba75]">
+                  <button className="inline-flex items-center gap-2 rounded-full bg-[color:var(--store-accent)] px-6 py-3 text-sm font-semibold text-[color:var(--store-accent-fg)] hover:bg-[color:var(--store-accent)]">
                     {getCmsBlockField(cms.blocks, "flowStep4", "nextButtonLabel", "Fortsätt till steg 5")}
                     <ArrowRightIcon />
                   </button>

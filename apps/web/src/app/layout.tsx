@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import { LiveChatWidget } from "@/components/live-chat-widget";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { SiteFooter } from "@/components/site-footer";
+import { DevThemeSwitcher } from "@/components/dev-theme-switcher";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import "./globals.css";
@@ -14,6 +15,13 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
 });
 
 const geistMono = Geist_Mono({
@@ -76,7 +84,7 @@ export default async function RootLayout({
   const storeTheme = normalizeThemeKey(tenantSettings?.theme_key);
 
   return (
-    <html lang="sv" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="sv" className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col" data-store-theme={storeTheme}>
         {previewIsActive ? (
           <div className="sticky top-0 z-[70] border-b border-sky-200 bg-sky-50/95 px-3 py-2 backdrop-blur">
@@ -104,6 +112,9 @@ export default async function RootLayout({
           </div>
         ) : null}
         {children}
+        {process.env.NODE_ENV === "development" && (
+          <DevThemeSwitcher currentTheme={storeTheme} />
+        )}
         <div data-storefront-footer>
           <SiteFooter />
         </div>

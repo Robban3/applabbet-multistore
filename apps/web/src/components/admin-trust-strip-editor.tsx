@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { TopTrustStrip } from "@/components/top-trust-strip";
-import type { TrustBadge } from "@/lib/tenant-settings";
+import type { TrustBadge } from "@/lib/tenant-settings-shared";
 
 const ICON_OPTIONS: Array<{ value: TrustBadge["icon"]; label: string }> = [
   { value: "truck", label: "Lastbil / leverans" },
