@@ -32,20 +32,26 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (existing?.id) {
-    await supabase
+    const { error: deleteError } = await supabase
       .from("customer_favorites")
       .delete()
       .eq("tenant_id", tenant.id)
       .eq("user_id", user.id)
       .eq("product_id", productId);
+    if (deleteError) {
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
     return NextResponse.json({ favorited: false });
   }
 
-  await supabase.from("customer_favorites").insert({
+  const { error: insertError } = await supabase.from("customer_favorites").insert({
     tenant_id: tenant.id,
     user_id: user.id,
     product_id: productId,
   });
+  if (insertError) {
+    return NextResponse.json({ error: insertError.message }, { status: 500 });
+  }
 
   return NextResponse.json({ favorited: true });
 }
