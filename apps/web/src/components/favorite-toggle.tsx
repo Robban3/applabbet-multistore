@@ -17,7 +17,7 @@ export function FavoriteToggle({
   label,
   className = "",
   activeClassName = "text-rose-500",
-  inactiveClassName = "text-white/90",
+  inactiveClassName = "",
 }: FavoriteToggleProps) {
   const [favorited, setFavorited] = useState(initialFavorited);
   const [loading, setLoading] = useState(false);
@@ -53,6 +53,7 @@ export function FavoriteToggle({
     <button
       type="button"
       onClick={onToggle}
+      data-favorite
       aria-label={favorited ? "Ta bort favorit" : "Lägg till favorit"}
       className={`${className} ${favorited ? activeClassName : inactiveClassName}`}
     >
