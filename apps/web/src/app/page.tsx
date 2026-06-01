@@ -48,8 +48,6 @@ import {
   MinimalHero,
   MinimalCategoryGrid,
   MinimalBestSellers,
-  MinimalBrands,
-  MinimalValueCards,
 } from "@/components/storefront/minimal";
 import {
   ElectronicsHeader,
@@ -433,8 +431,6 @@ export default async function Home() {
         />
         <MinimalCategoryGrid title={categoriesSectionTitle} categories={minimalCategories} />
         <MinimalBestSellers title={bestSellersTitle} viewAllLabel={bestSellersViewAllLabel} products={minimalProducts} />
-        <MinimalBrands title={brandsTitle} brands={brandLogos} />
-        <MinimalValueCards cards={valueCards} />
       </main>
     );
   }
