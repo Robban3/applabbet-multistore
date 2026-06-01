@@ -18,7 +18,7 @@ const TARGETS = [
   { key: "luxury",      label: "Luxury",      accent: "#C41E3A", host: "luxury.localhost",      hasTenant: true,  brand: "Maison Noir" },
   { key: "sport",       label: "Sport",       accent: "#b3ff00", host: "sport.localhost",       hasTenant: true,  brand: "Velocity Sport" },
   { key: "fashion",     label: "Fashion",     accent: "#1A1A1A", host: "fashion.localhost",     hasTenant: true,  brand: "Applabbet Demo" },
-  { key: "beauty",      label: "Beauty",      accent: "#f1a9bf", host: "localhost",             hasTenant: false, brand: "(cookie-preview)" },
+  { key: "beauty",      label: "Beauty",      accent: "#EC008C", host: "beauty.localhost",      hasTenant: true,  brand: "Applabbet Demo" },
   { key: "electronics", label: "Electronics", accent: "#2f7dff", host: "electronics.localhost", hasTenant: true,  brand: "Applabbet Demo" },
   { key: "minimal",     label: "Minimal",     accent: "#0071E3", host: "minimal.localhost",     hasTenant: true,  brand: "Applabbet Demo" },
   { key: "dev",         label: "Dev (blandat)", accent: "#888",   host: "localhost",            hasTenant: true,  brand: "Applabbet Demo" },
