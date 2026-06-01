@@ -33,8 +33,8 @@ export function LuxuryBestSellers({ title, viewAllLabel, products }: LuxuryBestS
         </Link>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {products.slice(0, 6).map((product, index) => (
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        {products.slice(0, 4).map((product, index) => (
           <article key={`${product.title}-${index}`} className="group relative">
             <Link href={product.href || "/products"} className="block">
               <div className="relative aspect-square overflow-hidden bg-[#F5F0E8]">
@@ -69,11 +69,11 @@ export function LuxuryBestSellers({ title, viewAllLabel, products }: LuxuryBestS
             <div className="mt-4 flex items-start justify-between gap-2">
               <div className="flex-1">
                 <Link href={product.href || "/products"}>
-                  <p className="text-[12px] font-light tracking-[0.05em] text-[#17120d] transition group-hover:text-[#C41E3A] line-clamp-2">
+                  <p className="text-[15px] font-light tracking-[0.05em] text-[#17120d] transition group-hover:text-[#C41E3A] line-clamp-2">
                     {product.title}
                   </p>
                 </Link>
-                <p className="mt-1.5 text-[13px] font-light text-[#5f4a3a]">
+                <p className="mt-1.5 text-[14px] font-light text-[#5f4a3a]">
                   {formatMinorPrice(product.priceMinor, product.currency)}
                 </p>
               </div>
