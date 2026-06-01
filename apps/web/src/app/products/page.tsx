@@ -13,6 +13,7 @@ import { SportBestSellers } from "@/components/storefront/sport/sport-best-selle
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
+import { ElectronicsPageHero } from "@/components/storefront/electronics";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
@@ -281,6 +282,82 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             c.name.toLowerCase() === query.categories[0].toLowerCase(),
         )?.name ?? null)
       : null;
+
+  if (isElectronics) {
+    const activeCat = activeCategoryName;
+    const pageTitle = activeCat ?? "Alla produkter";
+    return (
+      <main className="bg-white">
+        <StorefrontHeader activeNav="" cartCount={2} brandName={brandName} />
+        <ElectronicsPageHero
+          eyebrow={activeCat ? "Kategori" : "Produkter"}
+          title={`${pageTitle}`}
+          description={`${catalog.total} produkter`}
+        />
+        <section className="bg-[#F4F7FC] px-6 py-10">
+          <div className="mx-auto grid max-w-[1280px] gap-8 lg:grid-cols-[230px_1fr]">
+            {/* Filter-sidebar */}
+            <aside className="space-y-6 lg:sticky lg:top-32 lg:self-start">
+              <div className="rounded-[12px] border border-[#DCE6F5] bg-white p-5">
+                <p className="mb-3 text-[14px] font-bold text-[#0A2540]">Kategorier</p>
+                <ul className="space-y-1.5">
+                  <li>
+                    <Link href="/products" className={`block text-[14px] ${!activeCat ? "font-semibold text-[#2f7dff]" : "text-[#0A2540] hover:text-[#2f7dff]"}`}>
+                      Alla ({grandTotal})
+                    </Link>
+                  </li>
+                  {navCategories.map((cat) => {
+                    const isActive = activeCat?.toLowerCase() === cat.name.toLowerCase();
+                    return (
+                      <li key={cat.slug}>
+                        <Link href={`/products?category=${encodeURIComponent(cat.slug)}`} className={`flex items-center justify-between text-[14px] ${isActive ? "font-semibold text-[#2f7dff]" : "text-[#0A2540] hover:text-[#2f7dff]"}`}>
+                          {cat.name} <span className="text-[#0A2540]/40">({cat.count})</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              <CatalogFilterSidebar
+                themeKey={themeKey}
+                actionPath="/products"
+                query={query}
+                categories={visibleCategories.map((c) => ({ id: c.id, slug: c.slug, name: c.name }))}
+                brands={brandFilterOptions}
+              />
+            </aside>
+
+            <section>
+              <div className="mb-5 flex items-center justify-between rounded-[12px] border border-[#DCE6F5] bg-white px-4 py-3">
+                <p className="text-[14px] text-[#0A2540]/70">{resultLabel}</p>
+                <form method="GET" action="/products" className="flex items-center gap-2">
+                  {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+                  {query.brands.map((b) => <input key={b} type="hidden" name="brand" value={b} />)}
+                  <select name="sort" defaultValue={query.sort} className="rounded-[8px] border border-[#DCE6F5] bg-white px-3 py-1.5 text-[13px] text-[#0A2540] focus:outline-none">
+                    <option value="relevance">Mest sålda</option>
+                    <option value="newest">Nyast</option>
+                    <option value="price_asc">Lägsta pris</option>
+                    <option value="price_desc">Högsta pris</option>
+                  </select>
+                </form>
+              </div>
+              {catalog.items.length > 0 ? (
+                <>
+                  <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} cardVariant="electronics-deal" />
+                  <CatalogPagination actionPath="/products" query={query} totalPages={catalog.totalPages} />
+                </>
+              ) : (
+                <div className="rounded-[12px] border border-[#DCE6F5] bg-white py-16 text-center">
+                  <p className="text-[16px] text-[#0A2540]">Inga produkter hittades</p>
+                  <Link href="/products" className="mt-6 inline-flex h-11 items-center rounded-full bg-[#2f7dff] px-6 text-[15px] font-semibold text-white hover:bg-[#1a6cf0]">Visa alla</Link>
+                </div>
+              )}
+            </section>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (isMinimalTheme) {
     const activeCat = activeCategoryName;

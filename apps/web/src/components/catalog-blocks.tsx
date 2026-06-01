@@ -5,6 +5,7 @@ import { formatMinorPrice } from "@/lib/format";
 import type { CatalogQueryState, CatalogSort } from "@/lib/catalog";
 import type { Product } from "@/types/commerce";
 import { FavoriteToggle } from "@/components/favorite-toggle";
+import { ElectronicsDealCard } from "@/components/storefront/electronics/electronics-deal-card";
 
 type CatalogFilterSidebarProps = {
   actionPath: string;
@@ -189,7 +190,7 @@ export function CatalogResultsGrid({
   products: Product[];
   favoriteProductIds?: string[];
   badgeLabel?: string;
-  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport" | "luxury" | "minimal";
+  cardVariant?: "default" | "fashion" | "beauty" | "electronics" | "sport" | "luxury" | "minimal" | "electronics-deal";
 }) {
   const favoriteIds = new Set(favoriteProductIds);
   const isFashion = cardVariant === "fashion";
@@ -198,6 +199,7 @@ export function CatalogResultsGrid({
   const isSport = cardVariant === "sport";
   const isLuxury = cardVariant === "luxury";
   const isMinimal = cardVariant === "minimal";
+  const isElectronicsDeal = cardVariant === "electronics-deal";
   const beautyCardBorder = "border-[#ecd8df]";
   const beautyImageSurface = "bg-gradient-to-br from-[#fdf3f6] via-[#f8e8ee] to-[#f3dde6]";
 
@@ -219,6 +221,27 @@ export function CatalogResultsGrid({
       brun: "#7c4a2d",
     };
     return map[normalized] || "#111827";
+  }
+
+  if (isElectronicsDeal) {
+    // Webhallen-stil deal-grid
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <ElectronicsDealCard
+            key={product.id}
+            product={{
+              id: product.id,
+              slug: product.slug,
+              title: product.title,
+              priceMinor: product.price_minor,
+              currency: product.currency,
+              imageUrl: product.image_url ?? undefined,
+            }}
+          />
+        ))}
+      </div>
+    );
   }
 
   if (isMinimal) {

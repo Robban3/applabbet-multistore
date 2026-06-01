@@ -160,16 +160,16 @@ body[data-store-theme="beauty"] {
 body[data-store-theme="electronics"] {
   --store-accent: #2f7dff;
   --store-accent-fg: #ffffff;
-  --store-header-gradient: linear-gradient(to bottom, #060c17, #081225, #0a1831);
-  --store-trust-gradient: linear-gradient(to right, #eff5ff, #e5eefc);
-  --store-footer-surface: #071222;
-  --store-footer-bg: #f3f7ff;
-  --store-footer-border: #d7e3fa;
+  --store-header-gradient: #ffffff;
+  --store-trust-gradient: linear-gradient(to right, #EAF1FB, #EAF1FB);
+  --store-footer-surface: #0A2540;
+  --store-footer-bg: #ffffff;
+  --store-footer-border: #DCE6F5;
   --store-shell-surface: #ffffff;
-  --store-soft-surface: #f8fbff;
-  --store-card-border: #d6e4fb;
-  --store-media-gradient: linear-gradient(135deg, #0d1b39 0%, #102650 50%, #0a1731 100%);
-  --store-header-overlay-surface: #0b162b;
+  --store-soft-surface: #F4F7FC;
+  --store-card-border: #DCE6F5;
+  --store-media-gradient: linear-gradient(135deg, #EAF1FB 0%, #DCE6F5 100%);
+  --store-header-overlay-surface: #0A2540;
 }
 
 body[data-store-theme="minimal"] {
@@ -922,4 +922,112 @@ body[data-store-theme="minimal"] svg.text-\[\#8a6a44\],
 body[data-store-theme="minimal"] svg.text-\[\#c9973d\],
 body[data-store-theme="minimal"] svg.text-\[\#B8963E\] {
   color: #1D1D1F !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ELECTRONICS THEME (Komplett+Webhallen+Apple-hybrid)
+   ═══════════════════════════════════════════════════════════ */
+
+body[data-store-theme="electronics"] {
+  background: #ffffff;
+  color: #0A2540;
+}
+
+body[data-store-theme="electronics"] h1,
+body[data-store-theme="electronics"] h2,
+body[data-store-theme="electronics"] h3 {
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+  color: #0A2540;
+}
+
+/* Måttligt rundade hörn (12px) */
+body[data-store-theme="electronics"] .rounded-md,
+body[data-store-theme="electronics"] .rounded-lg,
+body[data-store-theme="electronics"] .rounded-xl,
+body[data-store-theme="electronics"] .rounded-\[14px\],
+body[data-store-theme="electronics"] .rounded-\[18px\] {
+  border-radius: 12px !important;
+}
+body[data-store-theme="electronics"] .rounded-2xl { border-radius: 16px !important; }
+body[data-store-theme="electronics"] .rounded-full { border-radius: 9999px !important; }
+
+/* Primärknappar → blå pill */
+body[data-store-theme="electronics"] .bg-black,
+body[data-store-theme="electronics"] .bg-\[color\:var\(--store-accent\)\] {
+  background-color: #2f7dff !important;
+  color: #fff !important;
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+body[data-store-theme="electronics"] .bg-black:hover,
+body[data-store-theme="electronics"] .bg-\[color\:var\(--store-accent\)\]:hover {
+  background-color: #1a6cf0 !important;
+}
+
+/* Inputs → rundade, blå focus */
+body[data-store-theme="electronics"] input[type="text"],
+body[data-store-theme="electronics"] input[type="email"],
+body[data-store-theme="electronics"] input[type="password"],
+body[data-store-theme="electronics"] input[type="tel"],
+body[data-store-theme="electronics"] input[type="number"],
+body[data-store-theme="electronics"] textarea,
+body[data-store-theme="electronics"] select {
+  border-radius: 10px !important;
+  border-color: #DCE6F5 !important;
+  background: #fff !important;
+}
+body[data-store-theme="electronics"] input:focus,
+body[data-store-theme="electronics"] textarea:focus,
+body[data-store-theme="electronics"] select:focus {
+  border-color: #2f7dff !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(47,125,255,0.15) !important;
+}
+body[data-store-theme="electronics"] input[type="checkbox"],
+body[data-store-theme="electronics"] input[type="radio"] {
+  accent-color: #2f7dff;
+}
+
+/* Borders → ljusblå-grå */
+body[data-store-theme="electronics"] .border-slate-200,
+body[data-store-theme="electronics"] .border-slate-300,
+body[data-store-theme="electronics"] .border-\[color\:var\(--store-card-border\)\],
+body[data-store-theme="electronics"] .border-\[color\:var\(--store-footer-border\)\] {
+  border-color: #DCE6F5 !important;
+}
+
+/* Diskreta skuggor */
+body[data-store-theme="electronics"] .shadow-md,
+body[data-store-theme="electronics"] .shadow-lg,
+body[data-store-theme="electronics"] .shadow-xl,
+body[data-store-theme="electronics"] .shadow-2xl {
+  box-shadow: 0 4px 20px rgba(10,37,64,0.08) !important;
+}
+
+/* Boxade sidor → full-bredd */
+body[data-store-theme="electronics"] .overflow-hidden.rounded-\[18px\].border.bg-white,
+body[data-store-theme="electronics"] .overflow-hidden.rounded-\[18px\].border.bg-\[color\:var\(--store-shell-surface\)\] {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Footer full-bredd */
+body[data-store-theme="electronics"] footer > div { max-width: 100% !important; }
+body[data-store-theme="electronics"] footer .grid,
+body[data-store-theme="electronics"] footer .border-t.px-6 {
+  padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important;
+}
+
+/* mina-sidor bakgrund */
+body[data-store-theme="electronics"] [data-mina-sidor-sport] > main { background: #fff !important; }
+
+/* Guld/brun-ikoner → blå */
+body[data-store-theme="electronics"] svg.text-\[\#8a6a44\],
+body[data-store-theme="electronics"] svg.text-\[\#c9973d\],
+body[data-store-theme="electronics"] svg.text-\[\#B8963E\] {
+  color: #2f7dff !important;
 }

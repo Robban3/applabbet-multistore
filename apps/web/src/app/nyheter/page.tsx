@@ -11,6 +11,7 @@ import { StorefrontHeader } from "@/components/storefront-header";
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
+import { ElectronicsPageHero } from "@/components/storefront/electronics";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
@@ -95,6 +96,32 @@ export default async function NyheterPage({ searchParams }: NyheterPageProps) {
   const resultLabel = resultLabelTemplate.includes("{count}")
     ? resultLabelTemplate.replace("{count}", String(catalog.total))
     : `${catalog.total} produkter`;
+
+  if (themeKey === "electronics") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader activeNav="" cartCount={2} />
+        <ElectronicsPageHero eyebrow="Nyheter" title={getCmsBlockField(cms.blocks, "hero", "title", "Senaste nyheterna")} description={`${catalog.total} produkter`} />
+        <section className="bg-[#F4F7FC] px-6 py-10">
+          <div className="mx-auto max-w-[1280px]">
+            <div className="mb-5 flex items-center justify-between rounded-[12px] border border-[#DCE6F5] bg-white px-4 py-3">
+              <p className="text-[14px] text-[#0A2540]/70">{resultLabel}</p>
+              <form method="GET" action="/nyheter" className="flex items-center gap-2">
+                {query.categories.map((c) => <input key={c} type="hidden" name="category" value={c} />)}
+                <select name="sort" defaultValue={query.sort} className="rounded-[8px] border border-[#DCE6F5] bg-white px-3 py-1.5 text-[13px] text-[#0A2540] focus:outline-none">
+                  <option value="newest">Nyast</option>
+                  <option value="price_asc">Lägsta pris</option>
+                  <option value="price_desc">Högsta pris</option>
+                </select>
+              </form>
+            </div>
+            <CatalogResultsGrid products={catalog.items} favoriteProductIds={favoriteProductIds} cardVariant="electronics-deal" />
+            <CatalogPagination actionPath="/nyheter" query={query} totalPages={catalog.totalPages} />
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (themeKey === "minimal") {
     return (

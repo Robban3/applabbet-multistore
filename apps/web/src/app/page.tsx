@@ -51,6 +51,14 @@ import {
   MinimalBrands,
   MinimalValueCards,
 } from "@/components/storefront/minimal";
+import {
+  ElectronicsHeader,
+  ElectronicsHero,
+  ElectronicsCategoryGrid,
+  ElectronicsBestSellers,
+  ElectronicsBrands,
+  ElectronicsValueCards,
+} from "@/components/storefront/electronics";
 import { SportBrands } from "@/components/storefront/sport/sport-brands";
 import { SportValueCards } from "@/components/storefront/sport/sport-value-cards";
 
@@ -295,6 +303,7 @@ export default async function Home() {
   let featuredProducts: Product[] = [];
   let favoriteIds = new Set<string>();
   const categoryNameById = new Map<string, string>();
+  const megaCategories: { name: string; slug: string }[] = [];
   if (tenant) {
     const supabase = createSupabaseAdminClient();
     // Tema-scope: hämta bara produkter vars kategori matchar temats categoryCards.
@@ -302,13 +311,14 @@ export default async function Home() {
       storefrontConfig.categoryCards.map((c) => c.title.trim().toLowerCase()),
     );
     // Hämta alla tenant-kategorier en gång — används till
-    // (a) tema-scope-filtrering och (b) subtitle-lookup per produkt.
+    // (a) tema-scope-filtrering, (b) subtitle-lookup, (c) electronics megameny.
     const { data: dbCats } = await supabase
       .from("product_categories")
-      .select("id, name")
+      .select("id, name, slug")
       .eq("tenant_id", tenant.id);
     for (const c of dbCats || []) {
       categoryNameById.set(String(c.id), String(c.name));
+      megaCategories.push({ name: String(c.name), slug: String(c.slug) });
     }
     let scopedCategoryIds: string[] | null = null;
     if (themeTitles.size > 0) {
@@ -366,6 +376,43 @@ export default async function Home() {
   ];
 
   const displayedCategoryCards = isBeauty || isSport ? categoryCards.slice(0, 5) : categoryCards;
+
+  if (isElectronics) {
+    const elecCategories = categoryCards.map((c) => ({
+      title: c.title,
+      href: `/products?category=${encodeURIComponent(c.title.toLowerCase())}`,
+      imageUrl: c.imageUrl,
+    }));
+    const elecProducts = classicBestSellerProducts.map((p) => ({
+      id: p.id,
+      slug: p.href?.split("/products/")[1],
+      title: p.title,
+      priceMinor: p.priceMinor,
+      currency: p.currency,
+      href: p.href,
+      imageUrl: p.imageUrl,
+      subtitle: p.subtitle,
+    }));
+    return (
+      <main className="bg-white">
+        <ElectronicsHeader brandName={brandName} links={navItems} megaCategories={megaCategories} />
+        <ElectronicsHero
+          eyebrow="Veckans deals"
+          title={getCmsBlockField(cms.blocks, "hero", "title", "Teknik till\nrätt pris.")}
+          description={getCmsBlockField(cms.blocks, "hero", "description", "Tusentals produkter, snabba leveranser och experthjälp.")}
+          primaryCtaHref={primaryCtaHref}
+          primaryCtaLabel={primaryCtaLabel}
+          secondaryCtaHref={secondaryCtaHref}
+          secondaryCtaLabel={secondaryCtaLabel}
+          heroImageUrl={heroImageUrl || undefined}
+        />
+        <ElectronicsCategoryGrid title={categoriesSectionTitle} categories={elecCategories} />
+        <ElectronicsBestSellers title={bestSellersTitle} viewAllLabel={bestSellersViewAllLabel} products={elecProducts} />
+        <ElectronicsBrands title={brandsTitle} brands={brandLogos} />
+        <ElectronicsValueCards cards={valueCards} />
+      </main>
+    );
+  }
 
   if (isMinimalTheme) {
     const minimalCategories = categoryCards.map((c) => ({

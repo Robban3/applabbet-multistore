@@ -3,6 +3,7 @@ import { StorefrontHeader } from "@/components/storefront-header";
 import { SportCart } from "@/components/storefront/sport/sport-cart";
 import { FashionCart } from "@/components/storefront/fashion";
 import { MinimalCart } from "@/components/storefront/minimal";
+import { ElectronicsCart } from "@/components/storefront/electronics";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { getStoreBrandName } from "@/lib/store-brand";
@@ -45,6 +46,16 @@ export default async function CartPage() {
       <main className="bg-white">
         <StorefrontHeader cartCount={0} brandName={brandName} />
         <MinimalCart heading={getCmsBlockField(cms.blocks, "summary", "title", "Din väska")} />
+      </main>
+    );
+  }
+
+  // ── Electronics: Komplett/Webhallen-stil cart ────────────────
+  if (themeKey === "electronics") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader cartCount={0} brandName={brandName} />
+        <ElectronicsCart heading={getCmsBlockField(cms.blocks, "summary", "title", "Varukorg")} />
       </main>
     );
   }

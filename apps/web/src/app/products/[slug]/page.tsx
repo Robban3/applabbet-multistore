@@ -6,6 +6,7 @@ import { ProductImageGallery } from "@/components/product-image-gallery";
 import { SportProductGallery } from "@/components/storefront/sport/sport-product-gallery";
 import { FashionProductGallery } from "@/components/storefront/fashion/fashion-product-gallery";
 import { MinimalProductGallery } from "@/components/storefront/minimal/minimal-product-gallery";
+import { ElectronicsProductGallery } from "@/components/storefront/electronics";
 import { ProductDetailTabs } from "@/components/product-detail-tabs";
 import { ProductPurchaseControls } from "@/components/product-purchase-controls";
 import { formatMinorPrice } from "@/lib/format";
@@ -84,7 +85,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const isSport = themeKey === "sport";
   const isFashion = themeKey === "fashion";
   const isMinimalTheme = themeKey === "minimal";
-  const isFullPage = isLuxury || isSport || isFashion || isMinimalTheme;
+  const isElectronicsTheme = themeKey === "electronics";
+  const isFullPage = isLuxury || isSport || isFashion || isMinimalTheme || isElectronicsTheme;
 
   const supabase = createSupabaseAdminClient();
   const { data: productWithTabs, error: productWithTabsError } = await supabase
@@ -317,6 +319,100 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </section>
           </div>
   );
+
+  if (isElectronicsTheme) {
+    // Komplett/Webhallen-stil produktdetalj
+    return (
+      <main className="bg-white">
+        <StorefrontHeader brandName={brandName} cartCount={2} />
+        <section className="mx-auto w-full max-w-[1280px] px-6 pt-6">
+          <nav className="text-[12px] text-[#0A2540]/55">
+            <Link href="/" className="hover:underline">Hem</Link>
+            <span className="mx-2">/</span>
+            <Link href="/products" className="hover:underline">Produkter</Link>
+            <span className="mx-2">/</span>
+            <span className="text-[#0A2540]">{product.title}</span>
+          </nav>
+
+          <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_380px] lg:gap-12">
+            <ElectronicsProductGallery title={product.title} images={orderedImages} />
+
+            <aside className="lg:sticky lg:top-32 lg:self-start">
+              <h1 className="text-[26px] font-bold leading-tight text-[#0A2540] lg:text-[30px]">{product.title}</h1>
+              <p className="mt-2 text-[13px] text-[#FFB400]">★★★★<span className="text-[#DCE6F5]">★</span> <span className="text-[#0A2540]/45">(86 omdömen)</span></p>
+
+              <div className="mt-5 rounded-[12px] border border-[#DCE6F5] bg-[#F4F7FC] p-5">
+                <p className="text-[32px] font-bold text-[#0A2540]">{formatMinorPrice(product.price_minor, product.currency)}</p>
+                <p className="mt-1 text-[13px] text-[#0A2540]/60">Inkl. moms · Fri frakt</p>
+                <p className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#1a8754]">
+                  <span className="h-2 w-2 rounded-full bg-[#1a8754]" /> I lager — skickas inom 1-2 arbetsdagar
+                </p>
+                <div className="mt-4">
+                  <ProductPurchaseControls
+                    productId={product.id}
+                    title={product.title}
+                    priceMinor={product.price_minor}
+                    currency={product.currency}
+                    productColors={product.product_colors}
+                    productMaterials={product.product_materials}
+                    productSizes={product.product_sizes}
+                    availableStock={availableStock}
+                  />
+                </div>
+              </div>
+
+              {/* Trust */}
+              <div className="mt-5 grid grid-cols-2 gap-3 text-[13px] text-[#0A2540]">
+                <div className="flex items-center gap-2 rounded-[10px] border border-[#DCE6F5] px-3 py-2.5">🚚 Fri frakt</div>
+                <div className="flex items-center gap-2 rounded-[10px] border border-[#DCE6F5] px-3 py-2.5">↩ 30 dagars öppet köp</div>
+                <div className="flex items-center gap-2 rounded-[10px] border border-[#DCE6F5] px-3 py-2.5">🛡 3 års garanti</div>
+                <div className="flex items-center gap-2 rounded-[10px] border border-[#DCE6F5] px-3 py-2.5">💬 Experthjälp</div>
+              </div>
+
+              <div className="mt-6 space-y-4 border-t border-[#DCE6F5] pt-6">
+                <div>
+                  <h2 className="text-[16px] font-bold text-[#0A2540]">Produktbeskrivning</h2>
+                  <p className="mt-2 text-[14px] leading-relaxed text-[#0A2540]/70">{detailDescriptionIntro}</p>
+                  {detailDescriptionBullets.length > 0 ? (
+                    <ul className="mt-3 space-y-1.5 text-[14px] text-[#0A2540]/70">
+                      {detailDescriptionBullets.map((b, i) => (
+                        <li key={i} className="flex gap-2"><span className="text-[#2f7dff]">✓</span>{b}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+                <details className="border-t border-[#DCE6F5] pt-4">
+                  <summary className="cursor-pointer list-none text-[16px] font-bold text-[#0A2540]">Specifikationer</summary>
+                  <p className="mt-2 text-[14px] leading-relaxed text-[#0A2540]/70">{detailSpecifications}</p>
+                </details>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        {/* Relaterat */}
+        <section className="mx-auto w-full max-w-[1280px] px-6 py-14">
+          <h2 className="mb-6 text-[24px] font-bold text-[#0A2540]">Andra köpte också</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedProducts.map((item) => (
+              <Link key={item.id} href={`/products/${item.slug}`} className="group flex flex-col overflow-hidden rounded-[12px] border border-[#DCE6F5] bg-white transition hover:shadow-md">
+                <div className="relative aspect-square bg-[#F4F7FC]">
+                  {item.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={resolveProductImageUrl(item.image_url) ?? ""} alt={item.title} className="absolute inset-0 h-full w-full object-contain p-4" />
+                  ) : null}
+                </div>
+                <div className="p-4">
+                  <p className="line-clamp-2 text-[14px] font-semibold text-[#0A2540]">{item.title}</p>
+                  <p className="mt-2 text-[18px] font-bold text-[#0A2540]">{formatMinorPrice(item.price_minor, item.currency)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (isMinimalTheme) {
     // Apple-stil produktdetalj: centrerad layout, stor produktbild, blå köp-knapp

@@ -5,6 +5,7 @@ import { LuxuryHeader } from "@/components/storefront/luxury/luxury-header";
 import { SportHeader } from "@/components/storefront/sport/sport-header";
 import { FashionHeader } from "@/components/storefront/fashion/fashion-header";
 import { MinimalHeader } from "@/components/storefront/minimal/minimal-header";
+import { ElectronicsHeader } from "@/components/storefront/electronics/electronics-header";
 import {
   defaultNavigationMenu,
   defaultTrustBadges,
@@ -44,6 +45,7 @@ export async function StorefrontHeader({
   // Nav-länkar hämtas från temats storefront-config så att alla undersidor
   // matchar startsidan exakt (samma källa). Faller tillbaka på DB-menyn.
   let configNav: { label: string; href: string }[] | null = null;
+  let megaCategories: { name: string; slug: string }[] = [];
 
   if (!trustBadges) {
     const host = await getCurrentHost();
@@ -54,6 +56,16 @@ export async function StorefrontHeader({
       navItems = settings?.navigation_menu || defaultNavigationMenu;
       themeKey = normalizeThemeKey(settings?.theme_key);
       configNav = getStorefrontConfig(themeKey).navItems;
+      // Megameny för electronics — riktiga DB-kategorier
+      if (themeKey === "electronics") {
+        const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+        const sb = createSupabaseAdminClient();
+        const { data } = await sb
+          .from("product_categories")
+          .select("name, slug")
+          .eq("tenant_id", tenant.id);
+        megaCategories = (data || []).map((c) => ({ name: String(c.name), slug: String(c.slug) }));
+      }
     }
   }
 
@@ -119,6 +131,20 @@ export async function StorefrontHeader({
       <MinimalHeader
         brandName={brandName}
         links={links}
+        cartInitialCount={cartCount}
+        activeNav={activeNav}
+        isLoggedIn={isLoggedIn}
+      />
+    );
+  }
+
+  // ── Electronics-tema (Komplett/Webhallen): eget header ───────
+  if (themeKey === "electronics") {
+    return (
+      <ElectronicsHeader
+        brandName={brandName}
+        links={links}
+        megaCategories={megaCategories}
         cartInitialCount={cartCount}
         activeNav={activeNav}
         isLoggedIn={isLoggedIn}
