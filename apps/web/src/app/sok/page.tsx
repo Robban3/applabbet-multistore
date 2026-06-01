@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AutoSubmitFilterForm } from "@/components/auto-submit-filter-form";
-import { CatalogResultsGrid } from "@/components/catalog-blocks";
+import { CatalogPagination, CatalogResultsGrid } from "@/components/catalog-blocks";
+import { ElectronicsPageHero } from "@/components/storefront/electronics";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { PriceRangeFilter } from "@/components/price-range-filter";
 import { StorefrontHeader } from "@/components/storefront-header";
@@ -143,6 +144,84 @@ export default async function SokPage({ searchParams }: SokPageProps) {
   const featuredProducts = catalog.items.slice(0, 4);
   const totalPages = Math.max(1, catalog.totalPages);
   const currentPage = Math.min(query.page, totalPages);
+
+  if (themeKey === "electronics") {
+    return (
+      <main className="bg-white">
+        <StorefrontHeader activeNav="" cartCount={2} />
+        <ElectronicsPageHero
+          eyebrow="Sök"
+          title={heading}
+          description={resultCountLabel}
+        />
+        <section className="bg-[#F4F7FC] px-6 py-10">
+          <div className="mx-auto max-w-[1280px]">
+            <div className="mb-5 flex items-center justify-between rounded-[12px] border border-[#DCE6F5] bg-white px-4 py-3">
+              <form method="GET" action="/sok" className="flex flex-1 items-center gap-3">
+                <input
+                  name="q"
+                  defaultValue={query.q}
+                  placeholder="Sök bland tusentals produkter…"
+                  className="h-10 flex-1 rounded-[8px] border border-[#DCE6F5] bg-[#F4F7FC] px-4 text-[14px] text-[#0A2540] focus:border-[#2f7dff] focus:bg-white focus:outline-none"
+                />
+                {query.categories.map((category) => (
+                  <input key={`elec-category-${category}`} type="hidden" name="category" value={category} />
+                ))}
+                {query.brands.map((brand) => (
+                  <input key={`elec-brand-${brand}`} type="hidden" name="brand" value={brand} />
+                ))}
+                <button
+                  type="submit"
+                  className="inline-flex h-10 shrink-0 items-center rounded-full bg-[#2f7dff] px-5 text-[14px] font-semibold text-white hover:bg-[#1a6cf0]"
+                >
+                  Sök
+                </button>
+              </form>
+              <form method="GET" action="/sok" className="ml-4 flex items-center gap-2">
+                {query.q ? <input type="hidden" name="q" value={query.q} /> : null}
+                {query.categories.map((category) => (
+                  <input key={`elec-sort-category-${category}`} type="hidden" name="category" value={category} />
+                ))}
+                {query.brands.map((brand) => (
+                  <input key={`elec-sort-brand-${brand}`} type="hidden" name="brand" value={brand} />
+                ))}
+                <select
+                  name="sort"
+                  defaultValue={query.sort}
+                  className="rounded-[8px] border border-[#DCE6F5] bg-white px-3 py-1.5 text-[13px] text-[#0A2540] focus:outline-none"
+                >
+                  <option value="relevance">Mest relevanta</option>
+                  <option value="newest">Nyast</option>
+                  <option value="price_asc">Lägsta pris</option>
+                  <option value="price_desc">Högsta pris</option>
+                </select>
+              </form>
+            </div>
+            {catalog.items.length > 0 ? (
+              <>
+                <CatalogResultsGrid
+                  products={catalog.items}
+                  favoriteProductIds={favoriteProductIds}
+                  cardVariant="electronics-deal"
+                />
+                <CatalogPagination actionPath="/sok" query={query} totalPages={catalog.totalPages} />
+              </>
+            ) : (
+              <div className="rounded-[12px] border border-[#DCE6F5] bg-white py-16 text-center">
+                <p className="text-[16px] text-[#0A2540]">Inga produkter hittades</p>
+                <Link
+                  href="/products"
+                  className="mt-6 inline-flex h-11 items-center rounded-full bg-[#2f7dff] px-6 text-[15px] font-semibold text-white hover:bg-[#1a6cf0]"
+                >
+                  Visa alla produkter
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main style={{ background: "var(--store-footer-bg)" }}>

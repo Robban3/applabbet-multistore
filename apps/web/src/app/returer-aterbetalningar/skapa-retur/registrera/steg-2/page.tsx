@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { StorefrontHeader } from "@/components/storefront-header";
+import {
+  ReturerFlowAccountLayout,
+  ReturerFlowBreadcrumb,
+  ReturerFlowBreadcrumbLink,
+} from "@/components/returer/returer-flow-account-layout";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -87,42 +91,34 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
         ];
 
   const orderLabel = order ? `Order #${String(order.id).slice(0, 5).toUpperCase()}` : "Order #10245";
+  const flowTitle = getCmsBlockField(cms.blocks, "flowStep2", "title", "Välj produkter");
+  const flowSubtitle = getCmsBlockField(cms.blocks, "flowStep2", "subtitleTemplate", "{order} - välj vilka produkter som ska returneras.").replace(
+    "{order}",
+    orderLabel,
+  );
 
   return (
-    <main className="bg-white">
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <StorefrontHeader cartCount={0} />
-
-          <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
-            <div className="relative z-10 max-w-[560px]">
-              <p className="text-xs text-white/70">
-                <Link href="/" className="hover:text-white">Hem</Link>
-                <span className="mx-1">›</span>
-                <Link href="/returer-aterbetalningar?account=1" className="hover:text-white">
-                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
-                </Link>
-                <span className="mx-1">›</span>
-                <Link href={`/returer-aterbetalningar/skapa-retur/registrera?account=1&orderId=${encodeURIComponent(selectedOrder)}`} className="text-[color:var(--store-accent)]">
-                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbStep2Label", "Steg 2")}
-                </Link>
-              </p>
-              <h1 className="mt-3 text-[62px] font-semibold leading-[0.95] tracking-tight">
-                {getCmsBlockField(cms.blocks, "flowHero", "titlePrefix", "Skapa din")} {getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}
-              </h1>
-              <p className="mt-3 text-[30px] leading-relaxed text-white/92">
-                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine1", "Markera vilka produkter du vill returnera.")}
-                <br />
-                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine2", "Du väljer antal och anledning i nästa steg.")}
-              </p>
-            </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
-              <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
-            </div>
-          </section>
-
-          <section className="px-6 py-6">
+    <ReturerFlowAccountLayout
+      title={flowTitle}
+      subtitle={flowSubtitle}
+      breadcrumb={
+        <ReturerFlowBreadcrumb>
+          <ReturerFlowBreadcrumbLink href="/">Hem</ReturerFlowBreadcrumbLink>
+          <span className="mx-1">›</span>
+          <ReturerFlowBreadcrumbLink href="/returer-aterbetalningar?account=1">
+            {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
+          </ReturerFlowBreadcrumbLink>
+          <span className="mx-1">›</span>
+          <ReturerFlowBreadcrumbLink
+            href={`/returer-aterbetalningar/skapa-retur/registrera?account=1&orderId=${encodeURIComponent(selectedOrder)}`}
+            active
+          >
+            {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbStep2Label", "Steg 2")}
+          </ReturerFlowBreadcrumbLink>
+        </ReturerFlowBreadcrumb>
+      }
+    >
+      <section className="px-6 py-6">
             <div className="grid gap-3 md:grid-cols-5">
               {[
                 getCmsBlockField(cms.blocks, "flowNavigation", "step1Label", "Välj order"),
@@ -198,9 +194,7 @@ export default async function ReturnStepTwoPage({ searchParams }: ReturnStepTwoP
                 </div>
               </form>
             </section>
-          </section>
-        </div>
       </section>
-    </main>
+    </ReturerFlowAccountLayout>
   );
 }

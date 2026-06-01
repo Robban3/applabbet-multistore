@@ -349,7 +349,9 @@ export function CatalogResultsGrid({
                 <FavoriteToggle
                   productId={product.id}
                   initialFavorited={favoriteIds.has(product.id)}
-                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#111] shadow-sm transition hover:bg-[#f5f5f5]"
+                  className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:bg-[#f5f5f5]"
+                  inactiveClassName="text-[#111]"
+                  activeClassName="text-[#111]"
                 />
                 {badgeLabel ? (
                   <span className="absolute left-3 top-3 text-[13px] font-medium text-[#f5402c]">

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { loadAccountContext } from "@/lib/account-context";
+import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -143,60 +145,33 @@ export default async function MinaBetalningsmetoderPage({ searchParams }: PagePr
     }));
   }
 
-  return (
-    <main style={{ background: "var(--store-footer-bg)" }}>
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div
-          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
-          style={{ borderColor: "var(--store-footer-border)" }}
-        >
-          <StorefrontHeader cartCount={0} />
-          <div className="px-6 py-5">
-          <p className="text-xs text-slate-500">
-            <Link href="/" className="hover:text-slate-700">Hem</Link>
-            <span className="mx-1">&gt;</span>
-            <Link href="/mina-sidor" className="hover:text-slate-700">Mina sidor</Link>
-            <span className="mx-1">&gt;</span>
-            <Link href="/mina-sidor/betalningsmetoder" className="hover:text-slate-700">
-              {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Betalningsmetoder")}
-            </Link>
-          </p>
-          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1 className="text-5xl font-semibold tracking-tight text-slate-900">
-                {getCmsBlockField(cms.blocks, "hero", "title", "Betalningsmetoder")}
-              </h1>
-              <p className="mt-1 text-sm text-slate-600">
-                {getCmsBlockField(
-                  cms.blocks,
-                  "hero",
-                  "subtitle",
-                  "Hantera dina sparade betalmetoder och välj hur du vill betala.",
-                )}
-              </p>
-            </div>
-            <a
-              href="/api/payment-methods/portal"
-              className={`inline-flex rounded-md px-4 py-2 text-sm font-semibold ${
-                stripe
-                  ? "bg-slate-900 text-white hover:bg-slate-800"
-                  : "cursor-not-allowed bg-slate-200 text-slate-500"
-              }`}
-            >
-              + Lägg till betalmetod
-            </a>
-          </div>
+  const accountCtx = await loadAccountContext();
+  const pageTitle = getCmsBlockField(cms.blocks, "hero", "title", "Betalningsmetoder");
+  const pageSubtitle = getCmsBlockField(
+    cms.blocks,
+    "hero",
+    "subtitle",
+    "Hantera dina sparade betalmetoder och välj hur du vill betala.",
+  );
 
-          {errorParam ? (
-            <p className="mt-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              Kunde inte öppna betalmetodshantering just nu.
-            </p>
-          ) : null}
+  const addPaymentControl = (
+    <a
+      href="/api/payment-methods/portal"
+      className={`inline-flex rounded-full px-5 py-2.5 text-sm font-semibold ${
+        stripe ? "bg-[#2f7dff] text-white hover:bg-[#1a6cf0]" : "cursor-not-allowed bg-[#DCE6F5] text-[#0A2540]/45"
+      }`}
+    >
+      + Lägg till betalmetod
+    </a>
+  );
 
-          <div className="mt-5 grid gap-5 lg:grid-cols-[230px_1fr]">
-            <AccountSidebar activeHref="/mina-sidor/betalningsmetoder" />
-
-            <section className="space-y-3">
+  const paymentsBody = (
+    <section className="space-y-3">
+      {errorParam ? (
+        <p className="rounded-[10px] border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          Kunde inte öppna betalmetodshantering just nu.
+        </p>
+      ) : null}
               <h2 className="text-3xl font-semibold text-slate-900">
                 {getCmsBlockField(cms.blocks, "payments", "sectionTitle", "Dina sparade betalmetoder")}
               </h2>
@@ -248,7 +223,55 @@ export default async function MinaBetalningsmetoderPage({ searchParams }: PagePr
               <article className="rounded-xl border p-4 text-sm text-slate-700" style={{ borderColor: "var(--store-card-border)", background: "var(--store-soft-surface)" }}>
                 Säker betalning: vi lagrar aldrig kortnummer eller bankuppgifter i vår databas. All känslig betaldata hanteras av Stripe.
               </article>
-            </section>
+    </section>
+  );
+
+  if (usesMinaSidorTabShell(accountCtx)) {
+    return (
+      <MinaSidorTabShellContent ctx={accountCtx} title={pageTitle} subtitle={pageSubtitle} headerExtra={addPaymentControl}>
+        {paymentsBody}
+      </MinaSidorTabShellContent>
+    );
+  }
+
+  return (
+    <main style={{ background: "var(--store-footer-bg)" }}>
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div
+          className="overflow-hidden rounded-[18px] border bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]"
+          style={{ borderColor: "var(--store-footer-border)" }}
+        >
+          <StorefrontHeader cartCount={0} />
+          <div className="px-6 py-5">
+          <p className="text-xs text-slate-500">
+            <Link href="/" className="hover:text-slate-700">Hem</Link>
+            <span className="mx-1">&gt;</span>
+            <Link href="/mina-sidor" className="hover:text-slate-700">Mina sidor</Link>
+            <span className="mx-1">&gt;</span>
+            <Link href="/mina-sidor/betalningsmetoder" className="hover:text-slate-700">
+              {getCmsBlockField(cms.blocks, "hero", "breadcrumbCurrent", "Betalningsmetoder")}
+            </Link>
+          </p>
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="text-5xl font-semibold tracking-tight text-slate-900">{pageTitle}</h1>
+              <p className="mt-1 text-sm text-slate-600">{pageSubtitle}</p>
+            </div>
+            <a
+              href="/api/payment-methods/portal"
+              className={`inline-flex rounded-md px-4 py-2 text-sm font-semibold ${
+                stripe
+                  ? "bg-slate-900 text-white hover:bg-slate-800"
+                  : "cursor-not-allowed bg-slate-200 text-slate-500"
+              }`}
+            >
+              + Lägg till betalmetod
+            </a>
+          </div>
+
+          <div className="mt-5 grid gap-5 lg:grid-cols-[230px_1fr]">
+            <AccountSidebar activeHref="/mina-sidor/betalningsmetoder" />
+            {paymentsBody}
           </div>
           </div>
         </div>

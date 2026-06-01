@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
 import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { loadReturerAccountContext, renderReturerAccountPage } from "@/lib/returer-account-flow";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -63,6 +64,15 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
   if (!user) {
     redirect("/konto/login?next=/returer-aterbetalningar/skapa-retur/registrera%3Faccount%3D1");
   }
+
+  const accountCtx = await loadReturerAccountContext();
+  const flowTitle = getCmsBlockField(cms.blocks, "flowStep1", "title", "Välj order");
+  const flowSubtitle = getCmsBlockField(
+    cms.blocks,
+    "flowStep1",
+    "subtitle",
+    "Välj den order du vill returnera från listan nedan.",
+  );
 
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
@@ -145,41 +155,8 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
         ];
   const highlightedOrderId = selectedOrderId || orders[0]?.id || "";
 
-  return (
-    <main className="bg-white">
-      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
-          <StorefrontHeader cartCount={0} />
-
-          <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
-            <div className="relative z-10 max-w-[560px]">
-              <p className="text-xs text-white/70">
-                <Link href="/" className="hover:text-white">Hem</Link>
-                <span className="mx-1">›</span>
-                <Link href="/returer-aterbetalningar?account=1" className="hover:text-white">
-                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
-                </Link>
-                <span className="mx-1">›</span>
-                <Link href="/returer-aterbetalningar/skapa-retur?account=1" className="text-[color:var(--store-accent)]">
-                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbCreateReturnLabel", "Skapa din retur")}
-                </Link>
-              </p>
-              <h1 className="mt-3 text-[62px] font-semibold leading-[0.95] tracking-tight">
-                {getCmsBlockField(cms.blocks, "flowHero", "titlePrefix", "Skapa din")} {getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}
-              </h1>
-              <p className="mt-3 text-[30px] leading-relaxed text-white/92">
-                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine1", "Följ stegen nedan för att returnera din vara.")}
-                <br />
-                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine2", "Det tar bara några minuter.")}
-              </p>
-            </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
-              <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
-              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
-            </div>
-          </section>
-
-          <section className="px-6 py-6">
+  const flowBody = (
+    <section className="px-6 py-6">
             <div className="grid gap-3 md:grid-cols-5">
               {[
                 getCmsBlockField(cms.blocks, "flowNavigation", "step1Label", "Välj order"),
@@ -289,7 +266,50 @@ export default async function SkapaReturRegistreraPage({ searchParams }: CreateR
                 </div>
               </form>
             </section>
+    </section>
+  );
+
+  const tabShellPage = renderReturerAccountPage(accountCtx, {
+    title: flowTitle,
+    subtitle: flowSubtitle,
+    children: flowBody,
+  });
+  if (tabShellPage) return tabShellPage;
+
+  return (
+    <main className="bg-white">
+      <section className="mx-auto w-full max-w-[1380px] px-4 pt-2 sm:px-5">
+        <div className="overflow-hidden rounded-[18px] border border-[#e3d8cc] bg-white shadow-[0_6px_24px_rgba(21,17,12,0.06)]">
+          <StorefrontHeader cartCount={0} />
+          <section className="relative overflow-hidden border-b border-[#1d1812] bg-gradient-to-r from-[#0d0b09] via-[#17130f] to-[#231b13] px-6 py-6 text-white">
+            <div className="relative z-10 max-w-[560px]">
+              <p className="text-xs text-white/70">
+                <Link href="/" className="hover:text-white">Hem</Link>
+                <span className="mx-1">›</span>
+                <Link href="/returer-aterbetalningar?account=1" className="hover:text-white">
+                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbReturerLabel", "Returer & ångerrätt")}
+                </Link>
+                <span className="mx-1">›</span>
+                <Link href="/returer-aterbetalningar/skapa-retur?account=1" className="text-[color:var(--store-accent)]">
+                  {getCmsBlockField(cms.blocks, "flowNavigation", "breadcrumbCreateReturnLabel", "Skapa din retur")}
+                </Link>
+              </p>
+              <h1 className="mt-3 text-[62px] font-semibold leading-[0.95] tracking-tight">
+                {getCmsBlockField(cms.blocks, "flowHero", "titlePrefix", "Skapa din")}{" "}
+                {getCmsBlockField(cms.blocks, "flowHero", "titleHighlight", "retur")}
+              </h1>
+              <p className="mt-3 text-[30px] leading-relaxed text-white/92">
+                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine1", "Följ stegen nedan för att returnera din vara.")}
+                <br />
+                {getCmsBlockField(cms.blocks, "flowHero", "subtitleLine2", "Det tar bara några minuter.")}
+              </p>
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-[48%]">
+              <div className="absolute right-14 top-7 h-44 w-72 -rotate-[6deg] rounded-lg border border-white/15 bg-black/45" />
+              <div className="absolute right-9 top-20 h-36 w-56 rounded-lg border border-[var(--store-accent)]/40 bg-[#231b13]/60" />
+            </div>
           </section>
+          {flowBody}
         </div>
       </section>
     </main>

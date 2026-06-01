@@ -583,9 +583,13 @@ body[data-store-theme="minimal"] [data-mina-sidor-sport] > main { background: #f
   border: none !important;
   box-shadow: none !important;
 }
-/* Dölj StorefrontHeader inuti undersidorna (layouten har en redan) */
-[data-mina-sidor-sport] header {
+/* Dölj StorefrontHeader inuti boxade undersidor (layouten har en redan) */
+[data-mina-sidor-sport] > main header {
   display: none !important;
+}
+/* Electronics m.fl.: undersida utan nested <main> */
+[data-mina-sidor-sport] > section {
+  max-width: none !important;
 }
 /* Dölj sidans interna AccountSidebar (tabs ovanför täcker behovet) */
 [data-mina-sidor-sport] aside.space-y-3,
@@ -619,6 +623,110 @@ body[data-store-theme="sport"] input[type="checkbox"],
 body[data-store-theme="sport"] input[type="radio"] {
   accent-color: #b3ff00;
 }
+
+/* === Sport (Nike): retema delat mina-sidor-innehåll (profil, adresser,
+   betalningsmetoder, favoriter, poäng) som annars använder slate/brun
+   default-stil. Skopat till konto-shellen så övriga teman ej påverkas. === */
+body[data-store-theme="sport"] [data-mina-sidor-sport] {
+  /* CSS-variabler som inline-stilar (var(--store-card-border) m.fl.) läser */
+  --store-card-border: #e5e5e5;
+  --store-footer-border: #e5e5e5;
+  --store-soft-surface: #f5f5f5;
+  --store-shell-surface: #ffffff;
+}
+/* Textfärger → Nike svart/grå */
+body[data-store-theme="sport"] [data-mina-sidor-sport] .text-slate-900,
+body[data-store-theme="sport"] [data-mina-sidor-sport] .text-slate-800 { color: #111 !important; }
+body[data-store-theme="sport"] [data-mina-sidor-sport] .text-slate-700,
+body[data-store-theme="sport"] [data-mina-sidor-sport] .text-slate-600,
+body[data-store-theme="sport"] [data-mina-sidor-sport] .text-slate-500 { color: #757575 !important; }
+/* Kantlinjer → ljusgrå */
+body[data-store-theme="sport"] [data-mina-sidor-sport] .border-slate-100,
+body[data-store-theme="sport"] [data-mina-sidor-sport] .border-slate-200,
+body[data-store-theme="sport"] [data-mina-sidor-sport] .border-slate-300 { border-color: #e5e5e5 !important; }
+/* Ytor → vit/ljusgrå */
+body[data-store-theme="sport"] [data-mina-sidor-sport] .bg-slate-50,
+body[data-store-theme="sport"] [data-mina-sidor-sport] .bg-slate-100 { background-color: #f5f5f5 !important; }
+/* Primärknappar → svarta Nike-knappar */
+body[data-store-theme="sport"] [data-mina-sidor-sport] .bg-slate-900 { background-color: #111 !important; }
+body[data-store-theme="sport"] [data-mina-sidor-sport] .hover\:bg-slate-800:hover { background-color: #000 !important; }
+body[data-store-theme="sport"] [data-mina-sidor-sport] .hover\:bg-slate-50:hover { background-color: #f5f5f5 !important; }
+/* Jätterubriker (text-[33px]) → Nike-rubrikstorlek */
+body[data-store-theme="sport"] [data-mina-sidor-sport] h2.text-\[33px\] {
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+  font-weight: 500 !important;
+}
+/* "Redigera"-knappar → rundade Nike-pills */
+body[data-store-theme="sport"] [data-mina-sidor-sport] summary span[class*="rounded-lg"][class*="border-slate-300"] {
+  border-radius: 9999px !important;
+}
+
+/* === Fashion (Filippa K): retema delat mina-sidor-innehåll === */
+body[data-store-theme="fashion"] [data-mina-sidor-sport] {
+  --store-card-border: #E4DED3;
+  --store-footer-border: #E4DED3;
+  --store-soft-surface: #F2EEE6;
+  --store-shell-surface: #FAF9F6;
+}
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .text-slate-900,
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .text-slate-800 { color: #1A1A1A !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .text-slate-700,
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .text-slate-600,
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .text-slate-500 { color: #6F6A60 !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .border-slate-100,
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .border-slate-200,
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .border-slate-300 { border-color: #E4DED3 !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .bg-slate-50,
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .bg-slate-100 { background-color: #F2EEE6 !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .bg-slate-900 { background-color: #1A1A1A !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .hover\:bg-slate-800:hover { background-color: #000 !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] .hover\:bg-slate-50:hover { background-color: #F2EEE6 !important; }
+body[data-store-theme="fashion"] [data-mina-sidor-sport] h2.text-\[33px\] { font-size: 22px !important; line-height: 1.3 !important; font-weight: 300 !important; }
+
+/* === Minimal (Apple): retema delat mina-sidor-innehåll === */
+body[data-store-theme="minimal"] [data-mina-sidor-sport] {
+  --store-card-border: #D2D2D7;
+  --store-footer-border: #D2D2D7;
+  --store-soft-surface: #F5F5F7;
+  --store-shell-surface: #ffffff;
+}
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .text-slate-900,
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .text-slate-800 { color: #1D1D1F !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .text-slate-700,
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .text-slate-600,
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .text-slate-500 { color: #86868B !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .border-slate-100,
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .border-slate-200,
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .border-slate-300 { border-color: #D2D2D7 !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .bg-slate-50,
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .bg-slate-100 { background-color: #F5F5F7 !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .bg-slate-900 { background-color: #1D1D1F !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .hover\:bg-slate-800:hover { background-color: #000 !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] .hover\:bg-slate-50:hover { background-color: #F5F5F7 !important; }
+body[data-store-theme="minimal"] [data-mina-sidor-sport] h2.text-\[33px\] { font-size: 22px !important; line-height: 1.25 !important; font-weight: 600 !important; }
+
+/* === Electronics (Komplett): retema delat mina-sidor-innehåll === */
+body[data-store-theme="electronics"] [data-mina-sidor-sport] {
+  --store-card-border: #DCE6F5;
+  --store-footer-border: #DCE6F5;
+  --store-soft-surface: #F4F7FC;
+  --store-shell-surface: #ffffff;
+}
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .text-slate-900,
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .text-slate-800 { color: #0A2540 !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .text-slate-700,
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .text-slate-600,
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .text-slate-500 { color: #5B6B80 !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .border-slate-100,
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .border-slate-200,
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .border-slate-300 { border-color: #DCE6F5 !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .bg-slate-50,
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .bg-slate-100 { background-color: #F4F7FC !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .bg-slate-900 { background-color: #2f7dff !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .hover\:bg-slate-800:hover { background-color: #1a6cf0 !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] .hover\:bg-slate-50:hover { background-color: #F4F7FC !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] h2.text-\[33px\] { font-size: 22px !important; line-height: 1.25 !important; font-weight: 700 !important; }
 
 /* Accentfärgade ikoner/text → lime-grön (ej guld) */
 body[data-store-theme="sport"] svg.text-\[\#8a6a44\],
@@ -1024,6 +1132,9 @@ body[data-store-theme="electronics"] footer .border-t.px-6 {
 
 /* mina-sidor bakgrund */
 body[data-store-theme="electronics"] [data-mina-sidor-sport] > main { background: #fff !important; }
+body[data-store-theme="electronics"] [data-mina-sidor-sport] > section {
+  background: #f4f7fc !important;
+}
 
 /* Guld/brun-ikoner → blå */
 body[data-store-theme="electronics"] svg.text-\[\#8a6a44\],

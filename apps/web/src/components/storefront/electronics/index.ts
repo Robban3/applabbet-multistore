@@ -5,5 +5,6 @@ export * from "./electronics-deal-card";
 export * from "./electronics-best-sellers";
 export * from "./electronics-misc";
 export * from "./electronics-account-tabs";
+export * from "./electronics-mina-sidor-content";
 export * from "./electronics-cart";
 export * from "./electronics-product-gallery";

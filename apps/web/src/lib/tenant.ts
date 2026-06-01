@@ -11,9 +11,14 @@ export function normalizeHost(value: string): string {
 
 export async function getCurrentHost(): Promise<string> {
   const headersList = await headers();
+  // x-forwarded-host bär pålitligt det externa värdnamnet (t.ex.
+  // sport.localhost:3000) även under server-action-renderingar, där
+  // x-tenant-host/host kan bli "localhost" (serverns bind-adress) och
+  // felaktigt lösa upp till default-tenanten. Därför prioriteras
+  // x-forwarded-host före x-tenant-host.
   const headerHost =
-    headersList.get("x-tenant-host") ||
     headersList.get("x-forwarded-host") ||
+    headersList.get("x-tenant-host") ||
     headersList.get("host") ||
     "localhost";
   return normalizeHost(headerHost);
