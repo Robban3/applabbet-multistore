@@ -59,51 +59,30 @@ export function ClassicHero({
   heroImageUrl,
 }: ClassicHeroProps) {
   return (
-    <div>
-      {/* ── HERO ROW ── */}
-      <div className="flex min-h-[520px] flex-col lg:flex-row">
-
-        {/* Vänster: text */}
-        <div className="flex flex-1 flex-col justify-center px-8 py-12 lg:px-14 lg:py-16">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#c9973d]">
-            {eyebrow}
-          </p>
-          <h1 className="mt-4 whitespace-pre-line text-4xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-6xl">
-            {title}
-          </h1>
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-white/75">
-            {description}
-          </p>
+    <section className="relative min-h-[520px] overflow-hidden bg-[#0a0806] lg:min-h-[600px]">
+      {heroImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={heroImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1c1408] via-[#120e06] to-[#0a0806]" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0d]/80 via-[#0b0b0d]/40 to-transparent" />
+      <div className="relative mx-auto flex min-h-[520px] max-w-[1320px] flex-col justify-center px-8 py-14 lg:min-h-[600px] lg:px-14">
+        <div className="max-w-[560px]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#c9973d]">{eyebrow}</p>
+          <h1 className="mt-4 whitespace-pre-line text-4xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-6xl">{title}</h1>
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-white/80">{description}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href={primaryCtaHref}
-              className="inline-flex items-center gap-2 rounded-full bg-[#c9973d] px-7 py-3 text-sm font-semibold text-[#17120d] transition hover:brightness-110"
-            >
+            <Link href={primaryCtaHref} className="inline-flex items-center gap-2 rounded-full bg-[#c9973d] px-7 py-3 text-sm font-semibold text-[#17120d] transition hover:brightness-110">
               {primaryCtaLabel}
               <ArrowRight />
             </Link>
-            <Link
-              href={secondaryCtaHref}
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-7 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10"
-            >
+            <Link href={secondaryCtaHref} className="inline-flex items-center gap-2 rounded-full border border-white/40 px-7 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10">
               {secondaryCtaLabel}
             </Link>
           </div>
         </div>
-
-        {/* Höger: bild */}
-        <div className="relative hidden lg:block lg:w-1/2">
-          {heroImageUrl ? (
-            <img src={heroImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[#1c1408] via-[#120e06] to-[#0a0806]">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_40%,rgba(201,151,61,0.2),transparent_60%)]" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0b0b0d]/40 to-transparent" />
-        </div>
       </div>
-
-    </div>
+    </section>
   );
 }
