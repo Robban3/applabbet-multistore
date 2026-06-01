@@ -241,6 +241,13 @@ body[data-store-theme="beauty"] select:focus {
 body[data-store-theme="beauty"] input[type="checkbox"],
 body[data-store-theme="beauty"] input[type="radio"] { accent-color: #EC008C; }
 
+/* KICKS-footer: helt svart med pink topplinje */
+body[data-store-theme="beauty"] footer {
+  background: #1A1A1A !important;
+  border-top: 3px solid #EC008C !important;
+}
+body[data-store-theme="beauty"] footer .border-t { border-color: rgba(255,255,255,0.1) !important; }
+
 body[data-store-theme="electronics"] {
   --store-accent: #2f7dff;
   --store-accent-fg: #ffffff;
