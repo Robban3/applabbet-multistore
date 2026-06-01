@@ -187,6 +187,14 @@ body[data-store-theme="minimal"] {
   --store-header-overlay-surface: #ffffff;
 }
 
+/* Minimal footer (Apple): ljus grå yta → mörk text istället för hårdkodad vit */
+body[data-store-theme="minimal"] footer .text-white { color: #1D1D1F !important; }
+body[data-store-theme="minimal"] footer .text-white\/70,
+body[data-store-theme="minimal"] footer .text-white\/65,
+body[data-store-theme="minimal"] footer .text-white\/60,
+body[data-store-theme="minimal"] footer .text-white\/55 { color: #6E6E73 !important; }
+body[data-store-theme="minimal"] footer .border-white\/10 { border-color: #D2D2D7 !important; }
+
 body[data-store-theme="luxury"] {
   --store-accent: #C41E3A;
   --store-accent-fg: #ffffff;
