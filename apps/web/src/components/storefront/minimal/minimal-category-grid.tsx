@@ -24,12 +24,18 @@ export function MinimalCategoryGrid({ title, categories }: { title: string; cate
               <h3 className="text-[28px] font-semibold tracking-[-0.02em] text-[#1D1D1F] lg:text-[32px]">
                 {category.title}
               </h3>
-              <div className="mt-2 flex items-center justify-center gap-5 text-[15px] text-[#0066CC]">
-                <Link href={href} className="hover:underline">
-                  Läs mer ›
+              <div className="mt-4 flex items-center justify-center gap-3">
+                <Link
+                  href={href}
+                  className="inline-flex h-9 items-center rounded-full border border-[#0071E3] px-5 text-[14px] font-medium text-[#0071E3] transition hover:bg-[#0071E3] hover:text-white"
+                >
+                  Läs mer
                 </Link>
-                <Link href={href} className="hover:underline">
-                  Köp ›
+                <Link
+                  href={href}
+                  className="inline-flex h-9 items-center rounded-full bg-[#0071E3] px-5 text-[14px] font-medium text-white transition hover:bg-[#0077ED]"
+                >
+                  Köp
                 </Link>
               </div>
               <Link href={href} className="relative mt-6 block aspect-[16/10] w-full">
