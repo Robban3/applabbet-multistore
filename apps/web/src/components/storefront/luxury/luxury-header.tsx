@@ -40,20 +40,20 @@ export function LuxuryHeader({ brandName, links, cartInitialCount = 0, activeNav
       </nav>
 
       {/* Actions */}
-      <div className="flex items-center gap-4 text-white/70">
+      <div className="flex items-center gap-6 text-white/75">
         <Link href="/sok" aria-label="Sök" className="transition hover:text-white">
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.3">
             <circle cx="11" cy="11" r="7" /><path d="M20 20L16.65 16.65" />
           </svg>
         </Link>
         <Link href="/mina-sidor" aria-label="Konto" className="transition hover:text-white">
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.3">
             <circle cx="12" cy="8" r="3.5" />
             <path d="M4 20C5.8 16.8 8.6 15.2 12 15.2C15.4 15.2 18.2 16.8 20 20" />
           </svg>
         </Link>
         <Link href="/cart" aria-label="Varukorg" className="relative transition hover:text-white">
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.3">
             <circle cx="9" cy="20" r="1.5" /><circle cx="17" cy="20" r="1.5" />
             <path d="M3 4H5L7.2 15H18.2L20.5 7.5H6.3" />
           </svg>
