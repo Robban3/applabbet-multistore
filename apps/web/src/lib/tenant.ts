@@ -24,18 +24,13 @@ export async function getCurrentHost(): Promise<string> {
   return normalizeHost(headerHost);
 }
 
-export async function resolveTenantByHost(host: string): Promise<Tenant | null> {
-  const supabase = createSupabaseAdminClient();
-  const effectiveHost = localhostAliases.has(host)
-    ? process.env.DEFAULT_TENANT_DOMAIN || ""
-    : host;
+type SupabaseClient = ReturnType<typeof createSupabaseAdminClient>;
 
-  if (!effectiveHost) return null;
-
+async function lookupTenantByDomain(supabase: SupabaseClient, domain: string): Promise<Tenant | null> {
   const { data: mapping, error: mappingError } = await supabase
     .from("tenant_domains")
     .select("tenant_id, verification_status")
-    .eq("domain", effectiveHost)
+    .eq("domain", domain)
     .eq("verification_status", "verified")
     .maybeSingle();
 
@@ -49,4 +44,26 @@ export async function resolveTenantByHost(host: string): Promise<Tenant | null> 
 
   if (tenantError || !tenant) return null;
   return tenant as Tenant;
+}
+
+export async function resolveTenantByHost(host: string): Promise<Tenant | null> {
+  const supabase = createSupabaseAdminClient();
+  const effectiveHost = localhostAliases.has(host)
+    ? process.env.DEFAULT_TENANT_DOMAIN || ""
+    : host;
+
+  if (!effectiveHost) return null;
+
+  const tenant = await lookupTenantByDomain(supabase, effectiveHost);
+  if (tenant) return tenant;
+
+  // Om hosten inte finns i tenant_domains (t.ex. workers.dev-URL eller okänd
+  // preview-domän), fall tillbaka på DEFAULT_TENANT_DOMAIN så att deployments
+  // alltid visar en butik.
+  const fallbackDomain = process.env.DEFAULT_TENANT_DOMAIN;
+  if (fallbackDomain && effectiveHost !== fallbackDomain) {
+    return lookupTenantByDomain(supabase, fallbackDomain);
+  }
+
+  return null;
 }
