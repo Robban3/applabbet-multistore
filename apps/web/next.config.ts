@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Cloudflare CI can miss lightningcss native optional binary.
+  // Disable it to avoid native module load failures during build.
+  experimental: {
+    useLightningcss: false,
+  },
 };
 
 export default nextConfig;
