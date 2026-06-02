@@ -137,8 +137,7 @@ export async function getTenantSettings(tenant: Tenant): Promise<TenantSettings 
   // Riktiga tenants (sport-demo / luxury-demo / classic-demo) styrs av sin egen
   // theme_key i DB — annars skulle en användare som råkar ha dev_theme satt
   // se "fel" tema på en riktig butik.
-  const allowDevOverride = tenant.slug === "applabbet-demo";
-  const devTheme = allowDevOverride ? await readDevThemeOverride() : null;
+  const devTheme = await readDevThemeOverride();
   return {
     ...(data as Omit<TenantSettings, "payment_methods" | "payment_config" | "trust_badges" | "loyalty_program_enabled" | "theme_key">),
     payment_methods: normalizePaymentMethods(data.payment_methods),

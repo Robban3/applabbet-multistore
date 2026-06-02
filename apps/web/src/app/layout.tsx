@@ -109,9 +109,7 @@ export default async function RootLayout({
           </div>
         ) : null}
         {children}
-        {process.env.NODE_ENV === "development" && (
-          <DevThemeSwitcher currentTheme={storeTheme} />
-        )}
+        <DevThemeSwitcher currentTheme={storeTheme} />
         <div data-storefront-footer>
           <SiteFooter />
         </div>
