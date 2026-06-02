@@ -14,9 +14,11 @@ auto-deployar. En Worker hostar alla butiker.
 4. **Build-inställningar** (viktigt – npm **workspaces-monorepo**, lockfilen
    ligger i roten så installen MÅSTE köras i roten):
    - **Root directory:** `/` (repo-roten – INTE `apps/web`)
-   - **Build command:** `npm install && cd apps/web && npx opennextjs-cloudflare build`
+   - **Build command:** `cd apps/web && npx opennextjs-cloudflare build`
    - **Deploy command:** `cd apps/web && npx opennextjs-cloudflare deploy`
-   - (Wrangler hittar `apps/web/wrangler.jsonc` när kommandot körs i `apps/web`.)
+   - (Cloudflare kör automatiskt `npm clean-install` i roten innan build-
+     kommandot. `deploy` bygger INTE själv – därför måste `build`-kommandot
+     köra `opennextjs-cloudflare build` först.)
 
    > Samma regel som lokalt: kör aldrig `npm install` i `apps/web` – det ger
    > felet `Cannot read properties of null (reading 'location')`.

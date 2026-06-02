@@ -5,7 +5,7 @@ function normalizeHost(value: string): string {
   return host.startsWith("www.") ? host.slice(4) : host;
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-tenant-host", normalizeHost(request.headers.get("host") || "localhost"));
 
