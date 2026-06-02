@@ -246,7 +246,10 @@ export default async function Home() {
           ? "Enkelt. Rent. Funktionellt."
         : "Premium kvalitet. Utvalt med omsorg.",
   );
-  const heroImageUrlCms = getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim();
+  const heroImageUrlCmsRaw = getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim();
+  // Luxury-demots CMS pekar på en saknad fil (/images/hero-luxury.jpg) → hoppa
+  // över CMS-bilden för luxury och använd temats hero-banner istället.
+  const heroImageUrlCms = isLuxury ? "" : heroImageUrlCmsRaw;
   const heroImageUrl =
     heroImageUrlCms ||
     (isBeauty
