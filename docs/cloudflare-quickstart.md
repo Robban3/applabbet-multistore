@@ -11,11 +11,15 @@ auto-deployar. En Worker hostar alla butiker.
 2. Vänster meny: **Compute (Workers)** → **Workers & Pages** → **Create**.
 3. Välj fliken **Workers** → **Import a repository** (Connect to Git) → välj GitHub
    och repot `applabbet-multistore`.
-4. **Build-inställningar** (viktigt – monorepo):
-   - **Root directory:** `apps/web`
-   - **Build command:** `npx opennextjs-cloudflare build`
-   - **Deploy command:** `npx opennextjs-cloudflare deploy`
-   - (Wrangler hittar `apps/web/wrangler.jsonc` automatiskt.)
+4. **Build-inställningar** (viktigt – npm **workspaces-monorepo**, lockfilen
+   ligger i roten så installen MÅSTE köras i roten):
+   - **Root directory:** `/` (repo-roten – INTE `apps/web`)
+   - **Build command:** `npm install && cd apps/web && npx opennextjs-cloudflare build`
+   - **Deploy command:** `cd apps/web && npx opennextjs-cloudflare deploy`
+   - (Wrangler hittar `apps/web/wrangler.jsonc` när kommandot körs i `apps/web`.)
+
+   > Samma regel som lokalt: kör aldrig `npm install` i `apps/web` – det ger
+   > felet `Cannot read properties of null (reading 'location')`.
 5. Klicka **Create / Deploy**. Cloudflare bygger och driftsätter Workern
    `applabbet-multistore`.
 
