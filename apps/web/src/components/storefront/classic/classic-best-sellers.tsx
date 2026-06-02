@@ -67,7 +67,7 @@ export function ClassicBestSellers({ title, viewAllLabel, products }: ClassicBes
         {products.slice(0, 6).map((product, index) => (
           <article
             key={`${product.title}-${index}`}
-            className="group flex h-full flex-col overflow-hidden rounded-[18px] border border-black/10 bg-white shadow-[0_8px_24px_rgba(31,24,18,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(31,24,18,0.14)]"
+            className="group relative flex h-full flex-col overflow-hidden rounded-[18px] border border-black/10 bg-white shadow-[0_8px_24px_rgba(31,24,18,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(31,24,18,0.14)]"
           >
             <Link href={product.href || "/products"} className="block">
               <div className="relative h-44 overflow-hidden bg-gradient-to-br from-[#f5f0e8] to-[#ede5d4]">
@@ -79,16 +79,6 @@ export function ClassicBestSellers({ title, viewAllLabel, products }: ClassicBes
                   />
                 ) : null}
 
-                {product.id ? (
-                  <FavoriteToggle
-                    productId={product.id}
-                    initialFavorited={product.favorited ?? false}
-                    className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
-                    inactiveClassName="text-white"
-                    activeClassName="text-rose-400"
-                  />
-                ) : null}
-
                 {product.badge ? (
                   <span className="absolute left-3 top-3 rounded-full bg-[#17120d] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white">
                     {product.badge}
@@ -96,6 +86,15 @@ export function ClassicBestSellers({ title, viewAllLabel, products }: ClassicBes
                 ) : null}
               </div>
             </Link>
+            {product.id ? (
+              <FavoriteToggle
+                productId={product.id}
+                initialFavorited={product.favorited ?? false}
+                className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                inactiveClassName="text-white"
+                activeClassName="text-rose-400"
+              />
+            ) : null}
 
             <div className="flex flex-1 flex-col p-3.5">
               <Link href={product.href || "/products"} className="line-clamp-2 min-h-[36px] text-[13px] font-semibold leading-snug text-[#17120d] hover:underline">

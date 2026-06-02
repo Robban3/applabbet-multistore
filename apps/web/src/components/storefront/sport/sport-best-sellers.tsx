@@ -43,7 +43,7 @@ export function SportBestSellers({ title, viewAllLabel, products }: SportBestSel
         {products.slice(0, 8).map((product, idx) => {
           const productHref = product.href ?? "/products";
           return (
-            <div key={product.id ?? `${product.title}-${idx}`} className="group flex flex-col">
+            <div key={product.id ?? `${product.title}-${idx}`} className="group relative flex flex-col">
               <Link href={productHref} className="block">
                 <div className="relative aspect-square overflow-hidden bg-[#f5f5f5]">
                   {product.imageUrl ? (
@@ -54,13 +54,6 @@ export function SportBestSellers({ title, viewAllLabel, products }: SportBestSel
                       <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#bdbdbd]">Bild</span>
                     </div>
                   )}
-                  {product.id && (
-                    <FavoriteToggle
-                      productId={product.id}
-                      initialFavorited={product.favorited ?? false}
-                      className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#111] shadow-sm transition hover:bg-[#f5f5f5]"
-                    />
-                  )}
                   {product.badge && (
                     <span className="absolute left-3 top-3 text-[13px] font-medium text-[#f5402c]">
                       {product.badge}
@@ -68,6 +61,15 @@ export function SportBestSellers({ title, viewAllLabel, products }: SportBestSel
                   )}
                 </div>
               </Link>
+              {product.id && (
+                <FavoriteToggle
+                  productId={product.id}
+                  initialFavorited={product.favorited ?? false}
+                  className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:bg-[#f5f5f5]"
+                  inactiveClassName="text-[#111]"
+                  activeClassName="text-[#111]"
+                />
+              )}
 
               <div className="mt-3 flex items-start justify-between gap-2">
                 <div className="min-w-0">

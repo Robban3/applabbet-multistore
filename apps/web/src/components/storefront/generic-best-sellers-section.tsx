@@ -53,23 +53,23 @@ export function GenericBestSellersSection({
           return (
             <article
               key={"id" in product ? product.id : `${productTitle}-${idx}`}
-              className="group flex h-full flex-col overflow-hidden rounded-[14px] border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="group relative flex h-full flex-col overflow-hidden rounded-[14px] border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               style={{ borderColor: "var(--store-card-border)" }}
             >
+              {"id" in product ? (
+                <FavoriteToggle
+                  productId={product.id}
+                  initialFavorited={favoriteIds.has(product.id)}
+                  className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                  inactiveClassName="text-white"
+                  activeClassName="text-rose-400"
+                />
+              ) : null}
               <Link href={productHref} className="block">
                 <div className="relative h-44 overflow-hidden bg-[image:var(--store-media-gradient)]">
                   {"image_url" in product && product.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={product.image_url} alt={productTitle} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                  ) : null}
-                  {"id" in product ? (
-                    <FavoriteToggle
-                      productId={product.id}
-                      initialFavorited={favoriteIds.has(product.id)}
-                      className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
-                      inactiveClassName="text-white"
-                      activeClassName="text-rose-400"
-                    />
                   ) : null}
                   {idx === 0 ? (
                     <span className="absolute left-2 top-2 rounded bg-[color:var(--store-accent)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--store-accent-fg)]">

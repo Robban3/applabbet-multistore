@@ -66,7 +66,7 @@ interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
@@ -272,30 +272,30 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl lg:text-4xl">Du kanske också gillar</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 {relatedProducts.map((item) => (
-                  <Link
+                  <div
                     key={item.id}
-                    href={`/products/${item.slug}`}
-                    className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                     style={{ borderColor: shellCardBorder }}
                   >
-                    <div
-                      className="relative h-32"
-                      style={{ background: "var(--store-media-gradient)" }}
-                    >
-                      <FavoriteToggle
-                        productId={item.id}
-                        initialFavorited={favoriteIds.has(item.id)}
-                        className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
-                        inactiveClassName="text-white"
-                        activeClassName="text-rose-400"
+                    <FavoriteToggle
+                      productId={item.id}
+                      initialFavorited={favoriteIds.has(item.id)}
+                      className="absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                      inactiveClassName="text-white"
+                      activeClassName="text-rose-400"
+                    />
+                    <Link href={`/products/${item.slug}`} className="block">
+                      <div
+                        className="relative h-32"
+                        style={{ background: "var(--store-media-gradient)" }}
                       />
-                    </div>
-                    <div className="space-y-1 p-3">
-                      <p className="line-clamp-1 text-sm font-semibold text-slate-900">{item.title}</p>
-                      <p className="text-sm font-medium text-slate-800">{formatMinorPrice(item.price_minor, item.currency)}</p>
-                      <p className="text-xs text-[color:var(--store-accent)]">★★★★★ <span className="text-slate-500">(120)</span></p>
-                    </div>
-                  </Link>
+                      <div className="space-y-1 p-3">
+                        <p className="line-clamp-1 text-sm font-semibold text-slate-900">{item.title}</p>
+                        <p className="text-sm font-medium text-slate-800">{formatMinorPrice(item.price_minor, item.currency)}</p>
+                        <p className="text-xs text-[color:var(--store-accent)]">★★★★★ <span className="text-slate-500">(120)</span></p>
+                      </div>
+                    </Link>
+                  </div>
                 ))}
                 {relatedProducts.length === 0 ? (
                   <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">

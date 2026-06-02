@@ -377,20 +377,21 @@ export default async function SokPage({ searchParams }: SokPageProps) {
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Populära produkter</p>
                   <div className="mt-2 grid gap-3 sm:grid-cols-4">
                     {featuredProducts.map((item) => (
-                      <Link key={item.id} href={`/products/${item.slug}`} className="group">
-                        <div className="relative h-24 rounded-md border border-slate-200 bg-[image:var(--store-media-gradient)]">
-                          <FavoriteToggle
-                            productId={item.id}
-                            initialFavorited={favoriteIds.has(item.id)}
-                            className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30"
-                            inactiveClassName="text-white"
-                            activeClassName="text-rose-400"
-                          />
-                        </div>
-                        <p className="mt-1 text-[13px] font-semibold">{item.title}</p>
-                        <p className="text-[12px] text-slate-500">{item.description?.slice(0, 18) || "Svart"}</p>
-                        <p className="text-[25px] font-semibold">{formatMinorPrice(item.price_minor, item.currency)}</p>
-                      </Link>
+                      <div key={item.id} className="group relative">
+                        <FavoriteToggle
+                          productId={item.id}
+                          initialFavorited={favoriteIds.has(item.id)}
+                          className="absolute right-1 top-1 z-10 inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/30"
+                          inactiveClassName="text-white"
+                          activeClassName="text-rose-400"
+                        />
+                        <Link href={`/products/${item.slug}`}>
+                          <div className="relative h-24 rounded-md border border-slate-200 bg-[image:var(--store-media-gradient)]" />
+                          <p className="mt-1 text-[13px] font-semibold">{item.title}</p>
+                          <p className="text-[12px] text-slate-500">{item.description?.slice(0, 18) || "Svart"}</p>
+                          <p className="text-[25px] font-semibold">{formatMinorPrice(item.price_minor, item.currency)}</p>
+                        </Link>
+                      </div>
                     ))}
                   </div>
                   <Link href={withQuery("/sok", query, { page: 1 })} className="mt-3 inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700">
