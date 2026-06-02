@@ -87,13 +87,14 @@ Använd `kundnamn.localhost` som domän i `tenant_domains`. Det funkar direkt
 mot `localhost:3000` utan DNS. (`localhost` utan subdomän pekar på
 `DEFAULT_TENANT_DOMAIN` i `.env`.)
 
-### Produktion (kundens riktiga domän)
-1. Lägg domänen i `tenant_domains` med `verification_status = verified`.
-2. Lägg till domänen i hostingen (t.ex. Vercel → Project → Domains).
-3. Kunden pekar sin DNS mot er:
-   - **A-record** `@` → er server-IP, **eller**
-   - **CNAME** `www`/`@` → er host (t.ex. `cname.vercel-dns.com`).
-4. Vänta in DNS-propagering + TLS-certifikat (sköts av hostingen).
+### Produktion (kundens riktiga domän) – Cloudflare for SaaS
+1. Kunden pekar sin DNS mot er: `CNAME kundens-doman.se → app.applabbet.se`.
+2. Lägg till domänen som **Custom Hostname** i Cloudflare (Dashboard eller API)
+   → SSL utfärdas automatiskt.
+3. Lägg domänen i `tenant_domains` med `verification_status = verified`,
+   kopplad till kundens tenant.
+
+> Fullständiga steg + API-anrop finns i **`docs/hosting-cloudflare.md`**.
 
 > Varje kund kan ha flera domäner (t.ex. `kund.se` + `www.kund.se`) –
 > lägg en rad per domän, alla `verified`.
