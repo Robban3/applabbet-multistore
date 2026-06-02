@@ -39,17 +39,21 @@ export function DevThemeSwitcher({ currentTheme }: { currentTheme: string }) {
   function go(target: (typeof TARGETS)[number]) {
     setOpen(false);
     const port = window.location.port ? `:${window.location.port}` : "";
-    if (target.hasTenant) {
+    const isLocalhostRuntime =
+      window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
+    const targetIsLocalhost = target.host === "localhost" || target.host.endsWith(".localhost");
+
+    // On localhost we keep host-based tenant switching.
+    // On deployed hosts (workers.dev/custom domains), localhost targets are unreachable,
+    // so we fall back to cookie-based visual theme preview on the current host.
+    if (target.hasTenant && (!targetIsLocalhost || isLocalhostRuntime)) {
       document.cookie = "dev_theme=; path=/; max-age=0";
-      window.location.href = `http://${target.host}${port}/`;
+      const protocol = targetIsLocalhost ? "http" : "https";
+      window.location.href = `${protocol}://${target.host}${port}/`;
       return;
     }
     document.cookie = `dev_theme=${target.key}; path=/; max-age=31536000; samesite=lax`;
-    if (window.location.hostname !== "localhost") {
-      window.location.href = `http://localhost${port}/`;
-    } else {
-      window.location.reload();
-    }
+    window.location.reload();
   }
 
   // Aktiv target:
@@ -67,7 +71,9 @@ export function DevThemeSwitcher({ currentTheme }: { currentTheme: string }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
               DEV — Demo-butiker
             </p>
-            <p className="mt-0.5 text-[10px] text-slate-500">Subdomän = riktig tenant. Cookie = preview.</p>
+            <p className="mt-0.5 text-[10px] text-slate-500">
+              Localhost: subdomän = tenant. Deploy: cookie = preview på aktuell host.
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-px bg-slate-100 p-px">
             {TARGETS.map((t) => {
