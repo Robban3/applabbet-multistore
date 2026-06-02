@@ -17,6 +17,7 @@ import {
 } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getStoreBrandName } from "@/lib/store-brand";
+import { normalizeNavLinks } from "@/lib/navigation";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -73,8 +74,12 @@ export async function StorefrontHeader({
   const normalizeNavHref = (href: string) =>
     href === "/products?sort=bestsellers" ? "/bastsaljare" : href;
 
-  const links = (configNav ?? navItems.filter((item) => item.enabled))
-    .map((item) => ({ label: item.label, href: normalizeNavHref(item.href) }));
+  const links = normalizeNavLinks(
+    (configNav ?? navItems.filter((item) => item.enabled)).map((item) => ({
+      label: item.label,
+      href: normalizeNavHref(item.href),
+    })),
+  );
 
   // Inloggningsstatus → utility-bar visar "Mina sidor" istället för "Logga in"
   let isLoggedIn = false;

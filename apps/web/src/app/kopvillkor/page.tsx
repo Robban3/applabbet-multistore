@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { LegalHero } from "@/components/legal-hero";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 
 function TermsSectionIcon({ index }: { index: number }) {
   if (index === 0) {
@@ -66,9 +65,7 @@ function TermsSectionIcon({ index }: { index: number }) {
 }
 
 export default async function KopvillkorPage() {
-  const definition = getCmsPage("kopvillkor");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("kopvillkor", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("kopvillkor");
 
   const tocItems = Array.from({ length: 7 }, (_, index) => ({
     id: `section-${index + 1}`,

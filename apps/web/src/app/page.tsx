@@ -3,13 +3,13 @@ import { AddToCartControl } from "@/components/add-to-cart-control";
 import { CartCountBadge } from "@/components/cart-count-badge";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { formatMinorPrice } from "@/lib/format";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
 import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
+import { normalizeNavLinks } from "@/lib/navigation";
 import { getStorefrontConfig, getThemeHeroImage } from "@/lib/storefront/resolve-storefront-config";
 import { ClassicBrands } from "@/components/storefront/classic/classic-brands";
 import { ClassicValueCards } from "@/components/storefront/classic/classic-value-cards";
@@ -169,14 +169,12 @@ function MiniCartIcon() {
 }
 
 export default async function Home() {
-  const definition = getCmsPage("home");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("home", { blocks: fallbackBlocks });
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const brandName = await getStoreBrandName();
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const cms = await loadThemedCmsPageContent("home", themeKey);
   const storefrontConfig = getStorefrontConfig(themeKey);
   const isClassic = themeKey === "classic";
   const isLuxury = themeKey === "luxury";
@@ -186,9 +184,8 @@ export default async function Home() {
   const isBeauty = themeKey === "beauty";
   const isElectronics = themeKey === "electronics";
   const isMinimal = themeKey === "minimal";
-  const enforceThemePreset = !isClassic && !isLuxury;
   const readHomeField = (blockKey: string, fieldKey: string, fallback: string) =>
-    enforceThemePreset ? fallback : getCmsBlockField(cms.blocks, blockKey, fieldKey, fallback);
+    getCmsBlockField(cms.blocks, blockKey, fieldKey, fallback);
   const navFallback = storefrontConfig.navItems;
   const categoryFallback = storefrontConfig.categoryCards;
   const trustFallback = storefrontConfig.trustCards;
@@ -196,12 +193,14 @@ export default async function Home() {
   const valueCardsFallback = storefrontConfig.valueCards;
   const productsFallback = storefrontConfig.products;
 
-  const navItems = navFallback.map((item, index) => {
-    const itemNumber = index + 1;
-    const label = readHomeField("navigation", `item${itemNumber}Label`, item.label).trim() || item.label;
-    const href = readHomeField("navigation", `item${itemNumber}Href`, item.href).trim() || item.href;
-    return { label, href };
-  });
+  const navItems = normalizeNavLinks(
+    navFallback.map((item, index) => {
+      const itemNumber = index + 1;
+      const label = readHomeField("navigation", `item${itemNumber}Label`, item.label).trim() || item.label;
+      const href = readHomeField("navigation", `item${itemNumber}Href`, item.href).trim() || item.href;
+      return { label, href };
+    }),
+  );
   const categoryCards = categoryFallback.map((item, index) => {
     const itemNumber = index + 1;
     return {
@@ -248,7 +247,17 @@ export default async function Home() {
         : "Premium kvalitet. Utvalt med omsorg.",
   );
   const heroImageUrlCms = getCmsBlockField(cms.blocks, "hero", "imageUrl", "").trim();
-  const heroImageUrl = heroImageUrlCms || (isBeauty ? "/images/hero-skonhet.png" : isClassic ? "/images/hero-classic.png" : isMinimalTheme ? "/images/heroes/minimal-hero.jpg" : getThemeHeroImage(themeKey));
+  const heroImageUrl =
+    heroImageUrlCms ||
+    (isBeauty
+      ? "/images/hero-skonhet.png"
+      : isClassic
+        ? "/images/hero-classic.png"
+        : isMinimalTheme
+          ? "/images/heroes/minimal-hero.jpg"
+          : isSport
+            ? "/images/heroes/sport-hero.jpg"
+            : getThemeHeroImage(themeKey));
   const heroContentPositionRaw = readHomeField("hero", "contentPosition", "left").trim().toLowerCase();
   const heroContentPosition = heroContentPositionRaw === "right" ? "right" : "left";
   const isHeroContentRight = heroContentPosition === "right";

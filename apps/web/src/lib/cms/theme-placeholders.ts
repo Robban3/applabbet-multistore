@@ -1,5 +1,7 @@
 import type { TenantSettings } from "@/lib/tenant-settings";
 import type { CmsBlocksContent } from "@/lib/cms/registry";
+import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
+import type { StorefrontThemeKey } from "@/lib/themes/types";
 
 type ThemeKey = TenantSettings["theme_key"];
 
@@ -112,8 +114,8 @@ const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
       item4Href: "/bastsaljare",
       item5Label: "Om oss",
       item5Href: "/om-oss",
-      item6Label: "Kontakt",
-      item6Href: "/kontakt",
+      item6Label: "Kundservice",
+      item6Href: "/kundservice",
     },
     hero: {
       eyebrow: "Exklusivt urval av tidlösa pjäser",
@@ -122,7 +124,7 @@ const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
       primaryCtaLabel: "Utforska kollektionen",
       primaryCtaHref: "/products",
       secondaryCtaLabel: "Boka rådgivning",
-      secondaryCtaHref: "/kontakt",
+      secondaryCtaHref: "/kundservice",
       imageUrl: "/images/hero-luxury.jpg",
     },
     trustCards: {
@@ -519,13 +521,105 @@ const detailThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   },
 };
 
+function storefrontToHomeBlocks(themeKey: StorefrontThemeKey): ThemeBlocks {
+  const config = getStorefrontConfig(themeKey);
+  const navigation: Record<string, string> = {};
+  config.navItems.slice(0, 6).forEach((item, index) => {
+    const n = index + 1;
+    navigation[`item${n}Label`] = item.label;
+    navigation[`item${n}Href`] = item.href;
+  });
+
+  const categories: Record<string, string> = { sectionTitle: config.categoriesTitle };
+  config.categoryCards.slice(0, 6).forEach((card, index) => {
+    categories[`item${index + 1}Title`] = card.title;
+  });
+
+  const brands: Record<string, string> = { title: config.brandsTitle };
+  config.brandLogos.slice(0, 7).forEach((brand, index) => {
+    brands[`brand${index + 1}`] = brand;
+  });
+
+  const trustCards: Record<string, string> = {};
+  config.trustCards.slice(0, 4).forEach((card, index) => {
+    const n = index + 1;
+    trustCards[`card${n}Title`] = card.title;
+    trustCards[`card${n}Text`] = card.text;
+    trustCards[`card${n}Icon`] = card.icon;
+  });
+
+  const valueCards: Record<string, string> = {};
+  config.valueCards.slice(0, 3).forEach((card, index) => {
+    const n = index + 1;
+    valueCards[`card${n}Title`] = card.title;
+    valueCards[`card${n}Text`] = card.text;
+  });
+
+  return {
+    navigation,
+    hero: {
+      title: config.hero.title,
+      description: config.hero.description,
+    },
+    categories,
+    bestSellers: {
+      sectionTitle: config.bestSellersTitle,
+      viewAllLabel: "Visa alla",
+    },
+    brands,
+    trustCards,
+    valueCards,
+  };
+}
+
+const kundserviceThemeBlocks: Partial<Record<ThemeKey, ThemeBlocks>> = {
+  sport: {
+    hero: {
+      eyebrow: "Support",
+      title: "Vi har\ndin rygg.",
+      description:
+        "Frågor om order, leverans eller retur? Vårt team löser det snabbt — så du kan fokusera på träningen.",
+    },
+  },
+  fashion: {
+    hero: {
+      title: "Vi finns här för dig.",
+      description: "Frågor om order, storlek eller retur? Vi hjälper dig gärna.",
+    },
+  },
+  minimal: {
+    hero: {
+      title: "Vi finns här för dig.",
+      description: "Frågor om order, leverans eller retur? Vi hjälper dig gärna.",
+    },
+  },
+  electronics: {
+    hero: {
+      title: "Vi finns här för dig.",
+      description: "Frågor om order, leverans eller retur? Vi hjälper dig gärna.",
+    },
+  },
+  beauty: {
+    hero: {
+      title: "Hur kan vi hjälpa dig?",
+      description: "Hitta svar snabbt eller kontakta vårt team.",
+    },
+  },
+};
+
 export function applyThemePlaceholdersToDefaults(
   pageKey: string,
   themeKey: ThemeKey,
   defaults: CmsBlocksContent,
 ): CmsBlocksContent {
   if (pageKey === "home") {
-    return mergeBlocks(defaults, homeThemeBlocks[themeKey]);
+    return mergeBlocks(
+      defaults,
+      mergeBlocks(storefrontToHomeBlocks(themeKey), homeThemeBlocks[themeKey] ?? {}),
+    );
+  }
+  if (pageKey === "kundservice") {
+    return mergeBlocks(defaults, kundserviceThemeBlocks[themeKey] ?? {});
   }
   if (pageKey === "products") {
     return mergeBlocks(defaults, productsThemeBlocks[themeKey]);

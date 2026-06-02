@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 
@@ -153,9 +152,7 @@ function ArrowRightIcon() {
 }
 
 export default async function LeveransPage() {
-  const definition = getCmsPage("leverans");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("leverans", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("leverans");
   const shippingOptionsFromCms: ShippingOption[] = fallbackShippingOptions.map((fallback, index) => {
     const prefix = `option${index + 1}`;
     return {

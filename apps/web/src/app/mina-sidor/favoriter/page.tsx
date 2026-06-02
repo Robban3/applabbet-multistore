@@ -6,17 +6,14 @@ import { FavoriteToggle } from "@/components/favorite-toggle";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { formatMinorPrice } from "@/lib/format";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import type { Product } from "@/types/commerce";
 
 export default async function MinaFavoriterPage() {
-  const definition = getCmsPage("mina-sidor-favoriter");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("mina-sidor-favoriter", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor-favoriter");
 
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);

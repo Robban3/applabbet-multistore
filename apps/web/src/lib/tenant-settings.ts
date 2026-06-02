@@ -1,5 +1,6 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { readDevThemeOverride } from "@/lib/dev-theme-override";
+import { normalizeNavLink } from "@/lib/navigation";
 import type { StorefrontThemeKey } from "@/lib/themes/types";
 import type { Tenant } from "@/types/commerce";
 
@@ -111,7 +112,8 @@ export function normalizeNavigationMenu(input: unknown): NavigationMenuItem[] {
             ? Number(row.order)
             : (index + 1) * 10;
       const enabled = row.enabled === undefined ? true : Boolean(row.enabled);
-      return { label, href, slug, order, enabled };
+      const link = normalizeNavLink({ label, href });
+      return { label: link.label, href: link.href, slug, order, enabled };
     })
     .filter((item): item is NavigationMenuItem => Boolean(item))
     .sort((a, b) => a.order - b.order)

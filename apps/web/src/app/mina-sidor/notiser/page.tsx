@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
+import { getCmsBlockField, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -106,8 +107,14 @@ export default async function NotiserPage({ searchParams }: NotiserPageProps) {
   const orderUpdatesOptIn = profile?.order_updates_opt_in ?? true;
 
   const accountCtx = await loadAccountContext();
-  const pageTitle = "Nyhetsbrev & notiser";
-  const pageSubtitle = "Välj vilka mejl och uppdateringar du vill få från oss.";
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor-notiser");
+  const pageTitle = getCmsBlockField(cms.blocks, "content", "title", "Nyhetsbrev & notiser");
+  const pageSubtitle = getCmsBlockField(
+    cms.blocks,
+    "content",
+    "subtitle",
+    "Välj vilka mejl och uppdateringar du vill få från oss.",
+  );
 
   const toggleRow = (
     opts: {
@@ -152,15 +159,25 @@ export default async function NotiserPage({ searchParams }: NotiserPageProps) {
 
       <div className="space-y-3">
         {toggleRow({
-          title: "Nyhetsbrev",
-          description: "Få inspiration, erbjudanden och nyheter direkt i din inkorg.",
+          title: getCmsBlockField(cms.blocks, "content", "newsletterTitle", "Nyhetsbrev"),
+          description: getCmsBlockField(
+            cms.blocks,
+            "content",
+            "newsletterText",
+            "Få inspiration, erbjudanden och nyheter direkt i din inkorg.",
+          ),
           checked: newsletterOptIn,
           action: toggleNewsletterAction,
           label: newsletterOptIn ? "Stäng av nyhetsbrev" : "Aktivera nyhetsbrev",
         })}
         {toggleRow({
-          title: "Orderuppdateringar",
-          description: "Få viktiga uppdateringar om dina ordrar och leveranser.",
+          title: getCmsBlockField(cms.blocks, "content", "ordersTitle", "Orderuppdateringar"),
+          description: getCmsBlockField(
+            cms.blocks,
+            "content",
+            "ordersText",
+            "Få viktiga uppdateringar om dina ordrar och leveranser.",
+          ),
           checked: orderUpdatesOptIn,
           action: toggleOrderUpdatesAction,
           label: orderUpdatesOptIn ? "Stäng av orderuppdateringar" : "Aktivera orderuppdateringar",

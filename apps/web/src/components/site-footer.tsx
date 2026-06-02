@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
-import { getTenantSettings } from "@/lib/tenant-settings";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
+import { normalizeNavLink } from "@/lib/navigation";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 
 const footerGroups = [
@@ -55,9 +55,8 @@ export async function SiteFooter() {
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const settings = tenant ? await getTenantSettings(tenant) : null;
-  const definition = getCmsPage("footer");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("footer", { blocks: fallbackBlocks });
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const cms = await loadThemedCmsPageContent("footer", themeKey);
   const brandName = settings?.brand_name || tenant?.name || "APPLABBET";
   const normalizedBrandHandle = brandName.toLowerCase().replace(/[^a-z0-9]+/g, "");
   const companyName = settings?.company_name || `${brandName} AB`;
@@ -99,13 +98,14 @@ export async function SiteFooter() {
         ),
       }))
       .map((link) => {
-        const normalizedLabel = link.label.trim().toLowerCase();
-        const normalizedHref = link.href.trim().toLowerCase();
+        const normalized = normalizeNavLink(link);
+        const normalizedLabel = normalized.label.trim().toLowerCase();
+        const normalizedHref = normalized.href.trim().toLowerCase();
         // Legacy fix: older CMS values pointed GDPR to /integritetspolicy.
         if (normalizedLabel.includes("gdpr") && normalizedHref === "/integritetspolicy") {
-          return { ...link, href: "/gdpr" };
+          return { ...normalized, href: "/gdpr" };
         }
-        return link;
+        return normalized;
       })
       .filter((link) => link.label.trim()),
     }))

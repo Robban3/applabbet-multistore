@@ -394,6 +394,50 @@ export const CMS_PAGES: CmsPageDefinition[] = [
     ],
   },
   {
+    key: "mina-sidor-notiser",
+    title: "Mina sidor: Notiser",
+    route: "/mina-sidor/notiser",
+    blocks: [
+      {
+        key: "content",
+        title: "Innehåll",
+        fields: [
+          { key: "title", label: "Rubrik", type: "text", defaultValue: "Nyhetsbrev & notiser" },
+          {
+            key: "subtitle",
+            label: "Beskrivning",
+            type: "textarea",
+            defaultValue: "Välj vilka meddelanden du vill få från oss.",
+          },
+          {
+            key: "newsletterTitle",
+            label: "Nyhetsbrev - rubrik",
+            type: "text",
+            defaultValue: "Nyhetsbrev",
+          },
+          {
+            key: "newsletterText",
+            label: "Nyhetsbrev - text",
+            type: "textarea",
+            defaultValue: "Få erbjudanden, nyheter och inspiration direkt i din inkorg.",
+          },
+          {
+            key: "ordersTitle",
+            label: "Orderuppdateringar - rubrik",
+            type: "text",
+            defaultValue: "Orderuppdateringar",
+          },
+          {
+            key: "ordersText",
+            label: "Orderuppdateringar - text",
+            type: "textarea",
+            defaultValue: "Få meddelanden när din order skickas eller levereras.",
+          },
+        ],
+      },
+    ],
+  },
+  {
     key: "mina-sidor-poang",
     title: "Mina sidor: Loyalty Club",
     route: "/mina-sidor/poang",
@@ -577,6 +621,7 @@ export const CMS_PAGES: CmsPageDefinition[] = [
         key: "hero",
         title: "Hero",
         fields: [
+          { key: "eyebrow", label: "Överrubrik", type: "text", defaultValue: "" },
           { key: "title", label: "Rubrik", type: "text", defaultValue: "Vi finns här för dig." },
           { key: "description", label: "Beskrivning", type: "textarea", defaultValue: "Har du frågor om din beställning, leverans, returer eller våra produkter? Vårt kundserviceteam hjälper dig gärna." },
           { key: "chatButtonLabel", label: "Knapp - Chatta", type: "text", defaultValue: "Chatta med oss" },

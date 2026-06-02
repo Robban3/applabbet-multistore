@@ -5,8 +5,7 @@ import {
   ReturerFlowBreadcrumb,
   ReturerFlowBreadcrumbLink,
 } from "@/components/returer/returer-flow-account-layout";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ReturnStepThreePageProps = {
@@ -41,9 +40,7 @@ function ArrowRightIcon() {
 }
 
 export default async function ReturnStepThreePage({ searchParams }: ReturnStepThreePageProps) {
-  const definition = getCmsPage("returer-aterbetalningar");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("returer-aterbetalningar", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("returer-aterbetalningar");
   const params = await searchParams;
   const accountView = getParam(params.account) === "1";
   if (!accountView) {

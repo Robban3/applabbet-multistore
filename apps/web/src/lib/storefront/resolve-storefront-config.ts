@@ -29,7 +29,15 @@ export function getStorefrontConfig(themeKey?: string | null) {
 }
 
 // Hero-bild per tema (mock) — används som fallback när CMS saknar bild.
+const THEME_HERO_IMAGES: Partial<Record<string, string>> = {
+  minimal: '/images/heroes/minimal-hero.jpg',
+  sport: '/images/heroes/sport-hero.jpg',
+  electronics: '/images/heroes/electronics-hero.jpg',
+  fashion: '/images/heroes/fashion-hero.jpg',
+  luxury: '/images/heroes/luxury-hero.jpg',
+};
+
 export function getThemeHeroImage(themeKey?: string | null): string {
   const key = themeKey && CONFIGS[themeKey] ? themeKey : 'classic';
-  return `/images/heroes/${key}.svg`;
+  return THEME_HERO_IMAGES[key] ?? `/images/heroes/${key}.svg`;
 }

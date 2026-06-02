@@ -4,8 +4,7 @@ import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent } from "@/lib/mina-sidor-shell";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatMinorPrice } from "@/lib/format";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
@@ -114,9 +113,7 @@ export default async function MinaOrdersPage({ searchParams }: MinaOrdersPagePro
     tabParam === "pagaende" || tabParam === "levererade" || tabParam === "returnerade"
       ? tabParam
       : "alla";
-  const definition = getCmsPage("mina-sidor-ordrar");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("mina-sidor-ordrar", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor-ordrar");
 
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);

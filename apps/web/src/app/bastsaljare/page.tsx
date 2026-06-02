@@ -13,9 +13,7 @@ import { BeautyCatalogPage } from "@/components/storefront/beauty";
 import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
 import { ElectronicsPageHero } from "@/components/storefront/electronics";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
-import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { applyThemeScopeToCatalogQuery } from "@/lib/storefront/theme-catalog-scope";
@@ -29,7 +27,6 @@ type BastsaljarePageProps = {
 };
 
 export default async function BastsaljarePage({ searchParams }: BastsaljarePageProps) {
-  const definition = getCmsPage("bastsaljare");
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   if (!tenant) {
@@ -47,9 +44,7 @@ export default async function BastsaljarePage({ searchParams }: BastsaljarePageP
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
   const isLuxury = themeKey === "luxury";
-  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
-  const fallbackBlocks = applyThemePlaceholdersToDefaults("bastsaljare", themeKey, rawFallback);
-  const cms = await getPublishedPageContent("bastsaljare", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("bastsaljare");
   const isFashion = themeKey === "fashion";
   const isBeauty = themeKey === "beauty";
   const isElectronics = themeKey === "electronics";

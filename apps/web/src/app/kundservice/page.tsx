@@ -4,8 +4,7 @@ import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { MinimalHeader } from "@/components/storefront/minimal";
 import { BeautyHeader } from "@/components/storefront/beauty";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
@@ -65,15 +64,12 @@ function ContactCardIcon({ title }: { title: string }) {
   );
 }
 
-export default async function KundservicePage() {
-  const definition = getCmsPage("kundservice");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("kundservice", { blocks: fallbackBlocks });
-  const brandName = await getStoreBrandName();
+export default async function KundservicePage() {  const brandName = await getStoreBrandName();
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const cms = await loadThemedCmsPageContent("kundservice", themeKey);
   const isSport = themeKey === "sport";
   const fallbackContactCards = [
     {

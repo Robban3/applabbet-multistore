@@ -1,7 +1,10 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
+import { createDefaultBlocksContent, getCmsPage, type CmsBlocksContent } from "@/lib/cms/registry";
+import type { StorefrontThemeKey } from "@/lib/themes/types";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
-import type { CmsBlocksContent } from "@/lib/cms/registry";
+import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { cookies } from "next/headers";
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -74,6 +77,28 @@ export async function getPublishedPageContent<T extends Record<string, unknown>>
   }
 
   return fallback;
+}
+
+/** Laddar publicerat CMS-innehåll med tema-specifika standardvärden (samma som i admin-redigeraren). */
+export async function loadThemedCmsPageContent(
+  pageKey: string,
+  themeKey: StorefrontThemeKey = "classic",
+): Promise<{ blocks: CmsBlocksContent }> {
+  const definition = getCmsPage(pageKey);
+  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
+  const fallbackBlocks = applyThemePlaceholdersToDefaults(pageKey, themeKey, rawFallback);
+  return getPublishedPageContent(pageKey, { blocks: fallbackBlocks });
+}
+
+/** Laddar CMS för aktuell tenant utan att sidan behöver hämta themeKey själv. */
+export async function loadThemedCmsPageContentForCurrentTenant(
+  pageKey: string,
+): Promise<{ blocks: CmsBlocksContent }> {
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const settings = tenant ? await getTenantSettings(tenant) : null;
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  return loadThemedCmsPageContent(pageKey, themeKey);
 }
 
 export function getCmsBlockField(

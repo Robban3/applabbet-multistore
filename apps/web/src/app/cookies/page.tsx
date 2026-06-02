@@ -2,8 +2,7 @@ import Link from "next/link";
 import { CookieSettingsPanel } from "@/components/cookie-settings-panel";
 import { LegalHero } from "@/components/legal-hero";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 
 function CookieTypeIcon({ index }: { index: number }) {
   if (index === 0) {
@@ -42,9 +41,7 @@ function CookieTypeIcon({ index }: { index: number }) {
 }
 
 export default async function CookiesPage() {
-  const definition = getCmsPage("cookies");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("cookies", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("cookies");
 
   const cookieTypes = [
     {

@@ -5,8 +5,7 @@ import { StorefrontHeader } from "@/components/storefront-header";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
 import { SportAccountShell } from "@/components/storefront/sport/sport-account-shell";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { formatMinorPrice } from "@/lib/format";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -37,9 +36,7 @@ function ArrowRightIcon() {
 }
 
 export default async function MinaSidorPage() {
-  const definition = getCmsPage("mina-sidor");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("mina-sidor", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor");
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },

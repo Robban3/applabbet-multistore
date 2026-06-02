@@ -4,9 +4,7 @@ import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
 import { MinimalHeader } from "@/components/storefront/minimal";
 import { BeautyHeader } from "@/components/storefront/beauty";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
-import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
@@ -125,16 +123,13 @@ function BoltIcon() {
 }
 
 export default async function OmOssPage() {
-  const definition = getCmsPage("om-oss");
   const brandName = await getStoreBrandName();
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const themeKey = normalizeThemeKey(settings?.theme_key);
   const isLuxury = themeKey === "luxury";
-  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
-  const fallbackBlocks = applyThemePlaceholdersToDefaults("om-oss", themeKey, rawFallback);
-  const cms = await getPublishedPageContent("om-oss", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("om-oss");
   const stats = fallbackStats.map((item, index) => {
     const itemNumber = index + 1;
     return {

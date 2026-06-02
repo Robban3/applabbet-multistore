@@ -5,8 +5,7 @@ import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureStripeCustomerProfile, getStripeClient } from "@/lib/payments";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
@@ -88,9 +87,7 @@ export default async function MinaBetalningsmetoderPage({ searchParams }: PagePr
 
   const params = await searchParams;
   const errorParam = Array.isArray(params.error) ? params.error[0] : params.error;
-  const definition = getCmsPage("mina-sidor-betalningsmetoder");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("mina-sidor-betalningsmetoder", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor-betalningsmetoder");
 
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);

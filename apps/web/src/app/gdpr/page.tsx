@@ -1,7 +1,6 @@
 import { LegalHero } from "@/components/legal-hero";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getStoreBrandName } from "@/lib/store-brand";
 
 function SectionIcon({ index }: { index: number }) {
@@ -38,9 +37,7 @@ function SectionIcon({ index }: { index: number }) {
 }
 
 export default async function GdprPage() {
-  const definition = getCmsPage("gdpr");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("gdpr", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("gdpr");
   const brandName = await getStoreBrandName();
 
   const tocItems = Array.from({ length: 8 }, (_, index) => ({

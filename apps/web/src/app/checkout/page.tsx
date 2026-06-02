@@ -1,15 +1,12 @@
 import { KassaClient } from "@/components/kassa-client";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { getTenantSettings } from "@/lib/tenant-settings";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 
 export default async function CheckoutPage() {
-  const definition = getCmsPage("checkout");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("checkout", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("checkout");
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const brandName = await getStoreBrandName();

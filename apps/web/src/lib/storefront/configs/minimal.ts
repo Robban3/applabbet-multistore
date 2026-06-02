@@ -15,7 +15,7 @@ export const minimalThemeConfig: StorefrontThemeConfig = {
     { label: 'Nyheter', href: '/nyheter' },
     { label: 'Populärt', href: '/bastsaljare' },
     { label: 'Om oss', href: '/om-oss' },
-    { label: 'Support', href: '/kundservice' }
+    { label: 'Kundservice', href: '/kundservice' }
   ],
   // Matchar minimal-demo tenantens DB-kategorier
   categoryCards: [

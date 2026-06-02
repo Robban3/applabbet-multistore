@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { SportPageHero } from "@/components/storefront/sport/sport-page-hero";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorAccountPage, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
@@ -101,9 +100,7 @@ function getParam(value: string | string[] | undefined) {
 }
 
 export default async function ReturerAterbetalningarPage({ searchParams }: ReturerAterbetalningarPageProps) {
-  const definition = getCmsPage("returer-aterbetalningar");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("returer-aterbetalningar", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("returer-aterbetalningar");
   const params = await searchParams;
   const accountView = getParam(params.account) === "1";
   const faqItems = [1, 2, 3, 4, 5, 6]

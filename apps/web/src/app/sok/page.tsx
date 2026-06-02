@@ -9,8 +9,7 @@ import { getStoreBrandName } from "@/lib/store-brand";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { PriceRangeFilter } from "@/components/price-range-filter";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
 import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
 import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -75,10 +74,6 @@ function withQuery(
 }
 
 export default async function SokPage({ searchParams }: SokPageProps) {
-  const definition = getCmsPage("sok");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("sok", { blocks: fallbackBlocks });
-
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   if (!tenant) {
@@ -91,11 +86,12 @@ export default async function SokPage({ searchParams }: SokPageProps) {
     );
   }
 
+  const settings = await getTenantSettings(tenant);
+  const themeKey = normalizeThemeKey(settings?.theme_key);
+  const cms = await loadThemedCmsPageContent("sok", themeKey);
   const cmsSearchTerm = getCmsBlockField(cms.blocks, "search", "searchTerm", "träningsväska");
   const resultCountTemplate = getCmsBlockField(cms.blocks, "search", "resultCountLabel", "Vi hittade {count} resultat");
   const headingTemplate = getCmsBlockField(cms.blocks, "search", "headingTemplate", 'Sökresultat för "{term}"');
-  const settings = await getTenantSettings(tenant);
-  const themeKey = normalizeThemeKey(settings?.theme_key);
   const isSport = themeKey === "sport";
   const isFashion = themeKey === "fashion";
   const isBeauty = themeKey === "beauty";

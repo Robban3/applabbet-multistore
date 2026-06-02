@@ -1,7 +1,6 @@
 import { LegalHero } from "@/components/legal-hero";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getStoreBrandName } from "@/lib/store-brand";
 
 function SectionIcon({ index }: { index: number }) {
@@ -81,9 +80,7 @@ function SectionIcon({ index }: { index: number }) {
 }
 
 export default async function IntegritetspolicyPage() {
-  const definition = getCmsPage("integritetspolicy");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("integritetspolicy", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("integritetspolicy");
   const brandName = await getStoreBrandName();
 
   const tocItems = Array.from({ length: 9 }, (_, index) => ({

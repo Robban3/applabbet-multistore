@@ -4,8 +4,7 @@ import { AccountSidebar, buildAccountSidebarItems } from "@/components/account-s
 import { StorefrontHeader } from "@/components/storefront-header";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getTenantSettings } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
@@ -110,9 +109,7 @@ export default async function MinaPoangPage() {
     redirect("/mina-sidor");
   }
 
-  const definition = getCmsPage("mina-sidor-poang");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("mina-sidor-poang", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor-poang");
   const sidebarItems = buildAccountSidebarItems(true);
 
   const benefits: SimpleItem[] = [

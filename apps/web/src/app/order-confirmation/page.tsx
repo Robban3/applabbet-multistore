@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { CartCountBadge } from "@/components/cart-count-badge";
 import { formatMinorPrice } from "@/lib/format";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
@@ -118,9 +117,7 @@ function formatDateLabel(value: string | null): string {
 }
 
 export default async function OrderConfirmationPage({ searchParams }: OrderConfirmationPageProps) {
-  const definition = getCmsPage("order-confirmation");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("order-confirmation", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("order-confirmation");
 
   const { order_id } = await searchParams;
   const host = await getCurrentHost();

@@ -13,9 +13,7 @@ import { BeautyCatalogPage } from "@/components/storefront/beauty";
 import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-hero";
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
 import { ElectronicsPageHero } from "@/components/storefront/electronics";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
-import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { applyThemeScopeToCatalogQuery } from "@/lib/storefront/theme-catalog-scope";
@@ -29,7 +27,6 @@ type NyheterPageProps = {
 };
 
 export default async function NyheterPage({ searchParams }: NyheterPageProps) {
-  const definition = getCmsPage("nyheter");
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   if (!tenant) {
@@ -50,9 +47,7 @@ export default async function NyheterPage({ searchParams }: NyheterPageProps) {
   const supabase = createSupabaseAdminClient();
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
-  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
-  const fallbackBlocks = applyThemePlaceholdersToDefaults("nyheter", themeKey, rawFallback);
-  const cms = await getPublishedPageContent("nyheter", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("nyheter");
   const isLuxury = themeKey === "luxury";
   const isFashion = themeKey === "fashion";
   const isBeauty = themeKey === "beauty";

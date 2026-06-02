@@ -4,8 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import { LiveChatWidget } from "@/components/live-chat-widget";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
 import { SiteFooter } from "@/components/site-footer";
 import { DevThemeSwitcher } from "@/components/dev-theme-switcher";
 import { isElectronicsStorefront } from "@/lib/account-context";
@@ -66,10 +65,12 @@ export default async function RootLayout({
     actionCookies.delete("cms_preview_custom_page_id");
     redirect("/admin/pages");
   }
-
-  const definition = getCmsPage("live-chat");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const liveChatCms = await getPublishedPageContent("live-chat", { blocks: fallbackBlocks });
+  const host = await getCurrentHost();
+  const tenant = await resolveTenantByHost(host);
+  const tenantSettings = tenant ? await getTenantSettings(tenant) : null;
+  const themeKey = normalizeThemeKey(tenantSettings?.theme_key);
+  const liveChatCms = await loadThemedCmsPageContent("live-chat", themeKey);
+  const storeTheme = isElectronicsStorefront(host, themeKey) ? "electronics" : themeKey;
 
   const enabledValue = getCmsBlockField(liveChatCms.blocks, "settings", "enabled", "true");
   const triggerPhrasesValue = getCmsBlockField(
@@ -78,12 +79,6 @@ export default async function RootLayout({
     "triggerPhrases",
     "livechat, live chatt, starta chat, chatta med oss, till chatten, öppna chatten, öppna chatt, till live chatt",
   );
-
-  const host = await getCurrentHost();
-  const tenant = await resolveTenantByHost(host);
-  const tenantSettings = tenant ? await getTenantSettings(tenant) : null;
-  const themeKey = normalizeThemeKey(tenantSettings?.theme_key);
-  const storeTheme = isElectronicsStorefront(host, themeKey) ? "electronics" : themeKey;
 
   return (
     <html lang="sv" className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} h-full antialiased`}>

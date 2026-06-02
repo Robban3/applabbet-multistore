@@ -10,8 +10,7 @@ import { ElectronicsProductGallery } from "@/components/storefront/electronics";
 import { ProductDetailTabs } from "@/components/product-detail-tabs";
 import { ProductPurchaseControls } from "@/components/product-purchase-controls";
 import { formatMinorPrice } from "@/lib/format";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
 import { getFavoriteProductIdsForCurrentUser } from "@/lib/favorites";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -67,11 +66,7 @@ interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const definition = getCmsPage("product-detail");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("product-detail", { blocks: fallbackBlocks });
-
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
@@ -80,6 +75,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   if (!tenant) notFound();
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const cms = await loadThemedCmsPageContent("product-detail", themeKey);
   const isElectronics = themeKey === "electronics";
   const isLuxury = themeKey === "luxury";
   const isSport = themeKey === "sport";

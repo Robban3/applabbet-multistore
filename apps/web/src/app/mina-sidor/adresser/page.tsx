@@ -5,8 +5,7 @@ import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import type { CustomerAddress } from "@/types/commerce";
@@ -206,9 +205,7 @@ export default async function MinaAdresserPage({ searchParams }: MinaAdresserPag
   const context = await getAddressContext();
   if (!context) redirect("/konto/login?next=/mina-sidor/adresser");
 
-  const definition = getCmsPage("mina-sidor-adresser");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("mina-sidor-adresser", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor-adresser");
 
   const { data } = await context.supabase
     .from("customer_addresses")

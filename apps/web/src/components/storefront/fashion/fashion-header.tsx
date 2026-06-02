@@ -28,7 +28,7 @@ export function FashionHeader({
       {/* Utility-bar */}
       <div className="hidden sm:block">
         <div className="flex items-center justify-end gap-6 px-8 py-2 text-[11px] tracking-[0.05em] text-[#1A1A1A]/55 lg:px-12">
-          <Link href="/kundservice" className="hover:text-[#1A1A1A]">Customer service</Link>
+          <Link href="/kundservice" className="hover:text-[#1A1A1A]">Kundservice</Link>
           <Link href="/leverans" className="hover:text-[#1A1A1A]">Shipping</Link>
           <Link href={isLoggedIn ? "/mina-sidor" : "/konto/login"} className="hover:text-[#1A1A1A]">
             {isLoggedIn ? "My account" : "Sign in"}

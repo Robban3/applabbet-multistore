@@ -15,9 +15,7 @@ import { FashionPageHero } from "@/components/storefront/fashion/fashion-page-he
 import { MinimalPageHero } from "@/components/storefront/minimal/minimal-page-hero";
 import { BeautyCatalogPage } from "@/components/storefront/beauty";
 import { ElectronicsPageHero } from "@/components/storefront/electronics";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
-import { applyThemePlaceholdersToDefaults } from "@/lib/cms/theme-placeholders";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { getCatalogData, parseCatalogQuery } from "@/lib/catalog";
 import { getStorefrontConfig } from "@/lib/storefront/resolve-storefront-config";
 import { applyThemeScopeToCatalogQuery } from "@/lib/storefront/theme-catalog-scope";
@@ -146,7 +144,6 @@ function inferCategoryIconType(name: string): "headphones" | "speaker" | "soundb
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const definition = getCmsPage("products");
   const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const brandName = await getStoreBrandName();
@@ -167,9 +164,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const supabase = createSupabaseAdminClient();
   const settings = await getTenantSettings(tenant);
   const themeKey = normalizeThemeKey(settings?.theme_key);
-  const rawFallback = definition ? createDefaultBlocksContent(definition) : {};
-  const fallbackBlocks = applyThemePlaceholdersToDefaults("products", themeKey, rawFallback);
-  const cms = await getPublishedPageContent("products", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("products");
   const storefrontConfig = getStorefrontConfig(themeKey);
   const isLuxury = themeKey === "luxury";
   const isFashion = themeKey === "fashion";

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { loadReturerAccountContext, renderReturerAccountPage } from "@/lib/returer-account-flow";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
@@ -88,14 +87,11 @@ const fallbackFaqItems = [
   },
 ];
 
-export default async function SkapaReturPage({ searchParams }: CreateReturnPageProps) {
-  const definition = getCmsPage("returer-aterbetalningar");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("returer-aterbetalningar", { blocks: fallbackBlocks });
-  const host = await getCurrentHost();
+export default async function SkapaReturPage({ searchParams }: CreateReturnPageProps) {  const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const cms = await loadThemedCmsPageContent("returer-aterbetalningar", themeKey);
   const isFullPage = themeKey === "luxury" || themeKey === "sport";
   const params = await searchParams;
   const accountView = getParam(params.account) === "1";

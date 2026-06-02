@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { StorefrontHeader } from "@/components/storefront-header";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { loadReturerAccountContext, renderReturerAccountPage } from "@/lib/returer-account-flow";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -47,9 +46,7 @@ function formatKr(minor: number) {
 }
 
 export default async function SkapaReturRegistreraPage({ searchParams }: CreateReturnRegistrationPageProps) {
-  const definition = getCmsPage("returer-aterbetalningar");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("returer-aterbetalningar", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("returer-aterbetalningar");
   const params = await searchParams;
   const accountView = getParam(params.account) === "1";
   const selectedOrderId = getParam(params.orderId).trim();

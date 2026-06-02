@@ -4,21 +4,17 @@ import { SportCart } from "@/components/storefront/sport/sport-cart";
 import { FashionCart } from "@/components/storefront/fashion";
 import { MinimalCart } from "@/components/storefront/minimal";
 import { ElectronicsCart } from "@/components/storefront/electronics";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent } from "@/lib/cms/content";
 import { getStoreBrandName } from "@/lib/store-brand";
 import { getTenantSettings, normalizeThemeKey } from "@/lib/tenant-settings";
 import { getCurrentHost, resolveTenantByHost } from "@/lib/tenant";
 
-export default async function CartPage() {
-  const definition = getCmsPage("cart");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("cart", { blocks: fallbackBlocks });
-  const host = await getCurrentHost();
+export default async function CartPage() {  const host = await getCurrentHost();
   const tenant = await resolveTenantByHost(host);
   const settings = tenant ? await getTenantSettings(tenant) : null;
   const brandName = await getStoreBrandName();
   const themeKey = normalizeThemeKey(settings?.theme_key);
+  const cms = await loadThemedCmsPageContent("cart", themeKey);
 
   // ── Sport: Nike-stil cart ────────────────────────────────────
   if (themeKey === "sport") {

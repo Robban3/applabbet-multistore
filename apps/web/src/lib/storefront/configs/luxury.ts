@@ -15,7 +15,7 @@ export const luxuryThemeConfig: StorefrontThemeConfig = {
     { label: 'Nyheter', href: '/nyheter' },
     { label: 'Bästsäljare', href: '/bastsaljare' },
     { label: 'Om oss', href: '/om-oss' },
-    { label: 'Kontakt', href: '/kontakt' },
+    { label: 'Kundservice', href: '/kundservice' },
   ],
   categoryCards: [
     { title: 'Smycken', accent: 'from-[#1a0f0f]' },

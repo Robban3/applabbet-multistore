@@ -5,8 +5,7 @@ import { AccountSidebar } from "@/components/account-sidebar";
 import { StorefrontHeader } from "@/components/storefront-header";
 import { loadAccountContext } from "@/lib/account-context";
 import { MinaSidorTabShellContent, usesMinaSidorTabShell } from "@/lib/mina-sidor-shell";
-import { getCmsBlockField, getPublishedPageContent } from "@/lib/cms/content";
-import { createDefaultBlocksContent, getCmsPage } from "@/lib/cms/registry";
+import { getCmsBlockField, loadThemedCmsPageContent, loadThemedCmsPageContentForCurrentTenant } from "@/lib/cms/content";
 import { toPublicCustomerId } from "@/lib/customer-id";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -232,9 +231,7 @@ export default async function MinaUppgifterPage({ searchParams }: MinaUppgifterP
   const passwordError = getParam(params.password_error);
   const context = await getProfileContext();
   if (!context) redirect("/konto/login?next=/mina-sidor/profil");
-  const definition = getCmsPage("mina-sidor-profil");
-  const fallbackBlocks = definition ? createDefaultBlocksContent(definition) : {};
-  const cms = await getPublishedPageContent("mina-sidor-profil", { blocks: fallbackBlocks });
+  const cms = await loadThemedCmsPageContentForCurrentTenant("mina-sidor-profil");
 
   const { data } = await context.supabase
     .from("customer_profiles")
