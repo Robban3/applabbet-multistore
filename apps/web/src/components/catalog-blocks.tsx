@@ -564,7 +564,7 @@ export function CatalogResultsGrid({
                   : "border-white/20 bg-black/30"
             }`}
             inactiveClassName={isBeauty ? "text-[#8b5c6f]" : "text-white"}
-            activeClassName={isBeauty ? "text-[#c4486b]" : "text-rose-400"}
+            activeClassName={isBeauty ? "text-[#EC008C]" : isElectronics ? "text-[#2f7dff]" : "text-rose-400"}
           />
           <div className={`flex flex-1 flex-col ${isFashion || isBeauty || isElectronics || isSport ? "space-y-1 p-2.5" : "p-3"}`}>
             {isFashion || isBeauty || isElectronics || isSport ? (

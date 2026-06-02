@@ -38,6 +38,11 @@ export function FavoriteToggle({
       });
       if (!response.ok) {
         setFavorited(previous);
+        // Inte inloggad → skicka till login istället för att tyst revertera.
+        if (response.status === 401 && typeof window !== "undefined") {
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/konto/login?next=${next}`;
+        }
         return;
       }
       const data = (await response.json()) as { favorited?: boolean };

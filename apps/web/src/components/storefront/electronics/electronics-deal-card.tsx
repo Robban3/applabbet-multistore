@@ -43,7 +43,7 @@ export function ElectronicsDealCard({ product }: { product: ElectronicsDealProdu
           initialFavorited={product.favorited ?? false}
           className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm transition hover:bg-[#eef3fb]"
           inactiveClassName="text-[#0A2540]"
-          activeClassName="text-[#E8362D]"
+          activeClassName="text-[#2f7dff]"
         />
       ) : null}
       <Link href={href} className="relative block">
