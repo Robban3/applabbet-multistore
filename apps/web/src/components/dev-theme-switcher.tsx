@@ -64,7 +64,7 @@ export function DevThemeSwitcher({ currentTheme }: { currentTheme: string }) {
   const active = (mounted ? activeByHost : null) ?? activeByTheme ?? TARGETS.find((t) => t.key === "dev")!;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[200] flex flex-col items-end gap-2">
+    <div className="fixed bottom-4 left-4 z-[200] flex flex-col items-start gap-2">
       {open && (
         <div className="mb-1 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
           <div className="border-b border-slate-100 px-3 py-2">
