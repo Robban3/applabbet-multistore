@@ -179,7 +179,7 @@ const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
     hero: {
       eyebrow: "Enkelt. Rent. Funktionellt.",
       title: "Det viktigaste\nutan brus",
-      description: "Noggrant utvalda produkter i ett minimalistiskt uttryck med fokus pa kvalitet.",
+      description: "Noggrant utvalda produkter i ett minimalistiskt uttryck med fokus på kvalitet.",
       primaryCtaLabel: "Utforska",
       secondaryCtaLabel: "Se nyheter",
     },
@@ -193,21 +193,21 @@ const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
       item6Title: "Nyheter",
     },
     bestSellers: {
-      sectionTitle: "Populart just nu",
+      sectionTitle: "Populärt just nu",
     },
   },
   sport: {
     hero: {
       eyebrow: "Prestera. Varje dag.",
-      title: "Din traning.\nDin styrka.",
-      description: "Utrustning, klader och skor som hjalper dig att na dina mal - oavsett niva.",
+      title: "Din träning.\nDin styrka.",
+      description: "Utrustning, kläder och skor som hjälper dig att nå dina mål - oavsett nivå.",
       secondaryCtaLabel: "Utforska nyheter",
     },
     categories: {
       sectionTitle: "Kategorier",
-      item1Title: "Loparskor",
-      item2Title: "Traningsklader",
-      item3Title: "Traning",
+      item1Title: "Löparskor",
+      item2Title: "Träningskläder",
+      item3Title: "Träning",
       item4Title: "Lagsport",
       item5Title: "Outdoor",
       item6Title: "Accessoarer",
@@ -215,33 +215,33 @@ const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   },
   fashion: {
     hero: {
-      eyebrow: "Premium mode. Tidlos stil.",
-      title: "Kla dig med\nsjalvfortroende.",
+      eyebrow: "Premium mode. Tidlös stil.",
+      title: "Klä dig med\nsjälvförtroende.",
       description: "Noggrant utvalda plagg som kombinerar kvalitet, komfort och stil.",
       secondaryCtaLabel: "Utforska kollektioner",
     },
     categories: {
-      sectionTitle: "Upptack vara kollektioner",
+      sectionTitle: "Upptäck våra kollektioner",
       item1Title: "Herr",
       item2Title: "Dam",
-      item3Title: "Ytterklader",
-      item4Title: "Trojor",
+      item3Title: "Ytterkläder",
+      item4Title: "Tröjor",
       item5Title: "Byxor & Jeans",
       item6Title: "Accessoarer",
     },
   },
   beauty: {
     hero: {
-      eyebrow: "Skonhet. Sjalvkansla. Du.",
-      title: "Lyft din naturliga\nskonhet",
-      description: "Upptack hudvard, smink och dofter - noggrant utvalt for att framhava det basta i dig.",
+      eyebrow: "Skönhet. Självkänsla. Du.",
+      title: "Lyft din naturliga\nskönhet",
+      description: "Upptäck hudvård, smink och dofter - noggrant utvalt för att framhäva det bästa i dig.",
       secondaryCtaLabel: "Se nyheter",
     },
     categories: {
       sectionTitle: "Shoppa kategori",
-      item1Title: "Hudvard",
+      item1Title: "Hudvård",
       item2Title: "Smink",
-      item3Title: "Harvard",
+      item3Title: "Hårvård",
       item4Title: "Parfym",
       item5Title: "Kropp & Bad",
       item6Title: "Beauty Tools",
@@ -250,13 +250,13 @@ const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   electronics: {
     hero: {
       eyebrow: "Teknik. Kvalitet. Innovation.",
-      title: "Teknik for\nvarje dag",
-      description: "Upptack de senaste produkterna inom elektronik. Kvalitet, prestanda och design.",
+      title: "Teknik för\nvarje dag",
+      description: "Upptäck de senaste produkterna inom elektronik. Kvalitet, prestanda och design.",
       secondaryCtaLabel: "Se alla erbjudanden",
     },
     categories: {
       sectionTitle: "Shoppa kategori",
-      item1Title: "Datorer & tillbehor",
+      item1Title: "Datorer & tillbehör",
       item2Title: "Mobil & surfplattor",
       item3Title: "Ljud & bild",
       item4Title: "Spel & gaming",
@@ -269,11 +269,11 @@ const homeThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
 const productsThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   classic: {
     hero: {
-      title: "Ljud & Horlurar",
-      description: "Upptack var kollektion av horlurar, hogtalare och ljudprodukter.",
+      title: "Ljud & Hörlurar",
+      description: "Upptäck vår kollektion av hörlurar, högtalare och ljudprodukter.",
       trustLine1: "Premium kvalitet",
-      trustLine2: "Topprankade av vara kunder",
-      trustLine3: "2 ars garanti",
+      trustLine2: "Topprankade av våra kunder",
+      trustLine3: "2 års garanti",
     },
   },
   luxury: {
@@ -288,9 +288,9 @@ const productsThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   minimal: {
     hero: {
       title: "Noggrant utvalt",
-      description: "Ett kuraterat sortiment med fokus pa funktion, kvalitet och enkelhet.",
-      trustLine1: "Fri frakt over 499 kr",
-      trustLine2: "30 dagars oppet kop",
+      description: "Ett kuraterat sortiment med fokus på funktion, kvalitet och enkelhet.",
+      trustLine1: "Fri frakt över 499 kr",
+      trustLine2: "30 dagars öppet köp",
       trustLine3: "Snabb leverans 1-2 arbetsdagar",
     },
   },
@@ -306,21 +306,21 @@ const productsThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   fashion: {
     hero: {
       title: "Mode & accessoarer",
-      description: "Stilsakra plagg med premiumkansla for varje tillfalle.",
+      description: "Stilsäkra plagg med premiumkänsla för varje tillfälle.",
     },
   },
   beauty: {
     hero: {
-      title: "Hudvard & skonhet",
+      title: "Hudvård & skönhet",
       description: "Vardagsrutiner och professionella favoriter i ett handplockat sortiment.",
     },
   },
   electronics: {
     hero: {
-      title: "Datorer & tillbehor",
-      description: "Upptack datorer, skarmar, tangentbord, moss och mycket mer.",
-      trustLine1: "Fri frakt over 499 kr",
-      trustLine2: "30 dagars oppet kop",
+      title: "Datorer & tillbehör",
+      description: "Upptäck datorer, skärmar, tangentbord, möss och mycket mer.",
+      trustLine1: "Fri frakt över 499 kr",
+      trustLine2: "30 dagars öppet köp",
       trustLine3: "Snabb leverans 1-2 arbetsdagar",
     },
   },
@@ -334,10 +334,10 @@ const nyheterThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
       description: "De senaste tillskotten i vår kollektion — noggrant utvalda för det extraordinära.",
     },
   },
-  minimal: { hero: { title: "Nya favoriter", description: "Nyheter med fokus pa enkel design och kvalitet." } },
-  sport: { hero: { title: "Nya sportslapp", description: "Senaste inom lopning, traning och outdoor." } },
-  fashion: { hero: { title: "Nya kollektioner", description: "Sasongens senaste mode och accessoarer." } },
-  beauty: { hero: { title: "Beauty-nyheter", description: "Nya slapp inom hudvard, smink och harvard." } },
+  minimal: { hero: { title: "Nya favoriter", description: "Nyheter med fokus på enkel design och kvalitet." } },
+  sport: { hero: { title: "Nya sportssläpp", description: "Senaste inom löpning, träning och outdoor." } },
+  fashion: { hero: { title: "Nya kollektioner", description: "Säsongens senaste mode och accessoarer." } },
+  beauty: { hero: { title: "Beauty-nyheter", description: "Nya släpp inom hudvård, smink och hårvård." } },
   electronics: { hero: { title: "Tech-nyheter", description: "Det senaste inom datorer, mobil och smarta hem." } },
 };
 
@@ -490,16 +490,16 @@ const detailThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   },
   minimal: {
     productInfo: {
-      trustLine1: "Fri frakt vid kop over 499 kr",
-      trustLine2: "30 dagars oppet kop",
-      trustLine3: "Trygg support nar du behover den",
+      trustLine1: "Fri frakt vid köp över 499 kr",
+      trustLine2: "30 dagars öppet köp",
+      trustLine3: "Trygg support när du behöver den",
     },
   },
   sport: {
     productInfo: {
-      trustLine1: "Fri frakt vid kop over 499 kr",
-      trustLine2: "30 dagars oppet kop",
-      trustLine3: "Byggd for aktiv anvandning",
+      trustLine1: "Fri frakt vid köp över 499 kr",
+      trustLine2: "30 dagars öppet köp",
+      trustLine3: "Byggd för aktiv användning",
     },
   },
   fashion: {
@@ -514,9 +514,9 @@ const detailThemeBlocks: Record<ThemeKey, ThemeBlocks> = {
   },
   electronics: {
     productInfo: {
-      trustLine1: "Fri frakt vid kop over 499 kr",
-      trustLine2: "30 dagars oppet kop",
-      trustLine3: "2 ars garanti",
+      trustLine1: "Fri frakt vid köp över 499 kr",
+      trustLine2: "30 dagars öppet köp",
+      trustLine3: "2 års garanti",
     },
   },
 };
